@@ -1,0 +1,7 @@
+/course
+/tools
+*.cmp
+*.tst
+*.out
+*.output
+*.hack

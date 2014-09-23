@@ -1,0 +1,14 @@
+/**
+ * And gate: out = 1 if {a==1 and b==1}, 0 otherwise
+ * And gate: if {a==1 and b==1} then out = 1 else out = 0
+ */
+
+CHIP And {
+    IN a, b;
+    OUT out;
+
+    PARTS:
+    // Put your code here:
+    Nand(a=a, b=b, out=na);
+    Not(in=na, out=out);
+}

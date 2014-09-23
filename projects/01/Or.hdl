@@ -1,0 +1,29 @@
+/**
+ * Or gate: out = 1 if {a==1 or b==1}, 0 otherwise
+
+Nand(Nand(a, a), Nand(b, b))
+
+            +--------+
+      +-----+        |    T1
+A +---+     |  Nand  +----+
+      +-----+        |    |
+            +--------+    |     +--------+
+                          +-----+        |
+                                |  Nand  +----+ OUT
+            +--------+    +-----+        |
+      +-----+        |    |     +--------+
+B +---+     |  Nand  +----+
+      +-----+        |    T2
+            +--------+
+                           
+ */
+
+CHIP Or {
+    IN a, b;
+    OUT out;
+
+    PARTS:
+    Nand(a=a, b=a, out=t1);
+    Nand(a=b, b=b, out=t2);
+    Nand(a=t1, b=t2, out=out);
+}
