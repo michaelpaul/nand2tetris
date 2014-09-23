@@ -1,0 +1,33 @@
+/**
+ * Multiplexor. If sel==1 then out=b else out=a.
+ */
+// A, B, SEL
+// OUT = A + B + SEL
+// 100, 110, 011, 111
+// A!B!C + AB!C + !ABC + ABC
+// (A*!B*!C) + (A*B*!C) + (!A*B*C) + (A*B*C)
+CHIP Mux {
+    IN a, b, sel;
+    OUT out;
+
+    PARTS:
+    Not(in=a, out=na);
+    Not(in=b, out=nb);
+    Not(in=sel, out=nc);
+
+    And(a=a, b=nb, out=a1);
+    And(a=a1, b=nc, out=a2);
+
+    And(a=a, b=b, out=a3);
+    And(a=a3, b=nc, out=a4);
+
+    And(a=na, b=b, out=a5);
+    And(a=a5, b=sel, out=a6);
+
+    And(a=a, b=b, out=a7);
+    And(a=a7, b=sel, out=a8);
+
+    Or(a=a2, b=a4, out=t1);
+    Or(a=t1, b=a6, out=t2);
+    Or(a=t2, b=a8, out=out);
+}

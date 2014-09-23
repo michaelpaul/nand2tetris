@@ -1,0 +1,43 @@
+/**
+ * 4-way 16-bit multiplexor.
+ * out = a if sel==00
+ *       b if sel==01
+ *       c if sel==10
+ *       d if sel==11
+ */
+/*
+out = A*!S1*!S0 + B*!S1*S0 + C*S1*!S0 + D*S1*S0
+
+out = Mux16(false, A, !S1*!S0) +
+      Mux16(false, B, !S1*S0) +
+      Mux16(false, C, S1*!S0) +
+      Mux16(false, D, S1*S0)
+*/
+// binary value:  10101
+// array indexed: 43210
+
+CHIP Mux4Way16 {
+    IN a[16], b[16], c[16], d[16], sel[2];
+    OUT out[16];
+
+    PARTS:
+    Not(in=sel[0], out=ns0);
+    Not(in=sel[1], out=ns1);
+
+    // A
+    And(a=ns1, b=ns0, out=a1);
+    Mux16(a=false, b=a, sel=a1, out=t1);
+    // B
+    And(a=ns1, b=sel[0], out=a2);
+    Mux16(a=false, b=b, sel=a2, out=t2);
+    // C
+    And(a=sel[1], b=ns0, out=a3);
+    Mux16(a=false, b=c, sel=a3, out=t3);
+    // D
+    And(a=sel[1], b=sel[0], out=a4);
+    Mux16(a=false, b=d, sel=a4, out=t4);
+
+    Or16(a=t1, b=t2, out=w1);
+    Or16(a=w1, b=t3, out=w2);
+    Or16(a=w2, b=t4, out=out);
+}

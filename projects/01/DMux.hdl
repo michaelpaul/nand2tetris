@@ -1,0 +1,19 @@
+/**
+ * Demultiplexor.
+ * {a,b} = {in,0} if sel==0
+ *         {0,in} if sel==1
+ */
+// x = A!B
+// y = AB
+
+CHIP DMux {
+    IN in, sel;
+    OUT a, b;
+
+    PARTS:
+    /* x */
+    Not(in=sel, out=ns);
+    And(a=in, b=ns, out=a);
+    /* y */
+    And(a=in, b=sel, out=b);
+}
