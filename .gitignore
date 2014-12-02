@@ -1,7 +1,6 @@
+.DS_Store
 /course
 /tools
-*.cmp
-*.tst
 *.out
 *.output
 *.hack
