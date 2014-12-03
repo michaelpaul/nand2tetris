@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.rawgit.com/knsv/mermaid/master/dist/mermaid.full.min.js"></script>
+    <meta charset="utf-8">
+    <title>RAM8 Memory Chip</title>
+</head>
+<body>
+<h3>API</h3>
+<pre>
+CHIP RAM8 {
+    IN in[16], load, address[3];
+    OUT out[16];
+    CLOCKED in, load;
+}
+</pre>
+<h3>Design</h3>
+<div class="mermaid">
+graph TB;
+    L(Load);
+    I(Input);
+    DM[DMux8Way];
+
+    l1(l1);
+    l2(l2);
+    l3(l3);
+    l4(l4);
+    l5(l5);
+    l6(l6);
+    l7(l7);
+    l8(l8);
+
+    L-->|in|DM;
+    A-->|sel|DM;
+
+    DM-->l1;
+    DM-->l2;
+    DM-->l3;
+    DM-->l4;
+    DM-->l5;
+    DM-->l6;
+    DM-->l7;
+    DM-->l8;
+
+    l1-->r1;
+    l2-->r2;
+    l3-->r3;
+    l4-->r4;
+    l5-->r5;
+    l6-->r6;
+    l7-->r7;
+    l8-->r8;
+
+    I-->|in|r1[Register];
+    I-->|in|r2[Register];
+    I-->|in|r3[Register];
+    I-->|in|r4[Register];
+    I-->|in|r5[Register];
+    I-->|in|r6[Register];
+    I-->|in|r7[Register];
+    I-->|in|r8[Register];
+
+    A(Adress)-->|sel|M;
+
+    r1[Register]-->|a|M[Mux8Way16];
+    r2[Register]-->|b|M[Mux8Way16];
+    r3[Register]-->|c|M[Mux8Way16];
+    r4[Register]-->|d|M[Mux8Way16];
+    r5[Register]-->|e|M[Mux8Way16];
+    r6[Register]-->|f|M[Mux8Way16];
+    r7[Register]-->|g|M[Mux8Way16];
+    r8[Register]-->|h|M[Mux8Way16];
+
+    M-->|out|O(Output);
+
+    style I fill:#99FF66;
+    style L fill:#99FF66;
+    style A fill:#99FF66;
+    style O fill:#99FF66;
+</div>
+</body>
+</html>
+
