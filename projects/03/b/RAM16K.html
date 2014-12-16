@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.rawgit.com/knsv/mermaid/master/dist/mermaid.full.min.js"></script>
+    <meta charset="utf-8">
+    <title>Memory Chip - RAM16k</title>
+</head>
+<body>
+<h3>Interface</h3>
+<pre>
+CHIP RAM16k {
+    IN in[16], load, address[14];
+    OUT out[16];
+}
+</pre>
+<h3>Design</h3>
+<div class="mermaid">
+graph LR;
+    L(Load);
+    I(Input);
+    A(Address);
+    DM[DMux4Way];
+    la(Register Mask);
+    ha(RAM mask);
+
+    l1(l1);
+    l2(l2);
+    l3(l3);
+    l4(l4);
+
+    r1[RAM4K];
+    r2[RAM4K];
+    r3[RAM4K];
+    r4[RAM4K];
+
+    A-->|low 12 bits|la;
+    A-->|high 2 bits|ha;
+
+    L-->|in|DM;
+    ha-->|sel|DM;
+    ha-->|sel|M;
+
+    DM-->l1;
+    DM-->l2;
+    DM-->l3;
+    DM-->l4;
+
+    l1-->|load|r1;
+    l2-->|load|r2;
+    l3-->|load|r3;
+    l4-->|load|r4;
+
+    I-->|in|r1;
+    I-->|in|r2;
+    I-->|in|r3;
+    I-->|in|r4;
+
+    la-->|address|r1;
+    la-->|address|r2;
+    la-->|address|r3;
+    la-->|address|r4;
+
+    r1-->|a|M[Mux4Way16];
+    r2-->|b|M[Mux4Way16];
+    r3-->|c|M[Mux4Way16];
+    r4-->|d|M[Mux4Way16];
+
+    M-->|out|O(Output);
+
+    style I fill:#99FF66;
+    style L fill:#99FF66;
+    style A fill:#99FF66;
+    style O fill:#99FF66;
+</div>
+</body>
+</html>
+
