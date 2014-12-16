@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.rawgit.com/knsv/mermaid/master/dist/mermaid.full.min.js"></script>
+    <meta charset="utf-8">
+    <title>Memory Chip - RAM4k</title>
+</head>
+<body>
+<h3>Interface</h3>
+<pre>
+CHIP RAM4k {
+    IN in[16], load, address[12];
+    OUT out[16];
+}
+</pre>
+<h3>Design</h3>
+<div class="mermaid">
+graph LR;
+    L(Load);
+    I(Input);
+    A(Address);
+    DM[DMux8Way];
+    la(Register Mask);
+    ha(RAM mask);
+
+    l1(l1);
+    l2(l2);
+    l3(l3);
+    l4(l4);
+    l5(l5);
+    l6(l6);
+    l7(l7);
+    l8(l8);
+
+    r1[RAM512];
+    r2[RAM512];
+    r3[RAM512];
+    r4[RAM512];
+    r5[RAM512];
+    r6[RAM512];
+    r7[RAM512];
+    r8[RAM512];
+
+    A-->|low 9 bits|la;
+    A-->|high 3 bits|ha;
+
+    L-->|in|DM;
+    ha-->|sel|DM;
+    ha-->|sel|M;
+
+    DM-->l1;
+    DM-->l2;
+    DM-->l3;
+    DM-->l4;
+    DM-->l5;
+    DM-->l6;
+    DM-->l7;
+    DM-->l8;
+
+    l1-->|load|r1;
+    l2-->|load|r2;
+    l3-->|load|r3;
+    l4-->|load|r4;
+    l5-->|load|r5;
+    l6-->|load|r6;
+    l7-->|load|r7;
+    l8-->|load|r8;
+
+    I-->|in|r1;
+    I-->|in|r2;
+    I-->|in|r3;
+    I-->|in|r4;
+    I-->|in|r5;
+    I-->|in|r6;
+    I-->|in|r7;
+    I-->|in|r8;
+
+    la-->|address|r1;
+    la-->|address|r2;
+    la-->|address|r3;
+    la-->|address|r4;
+    la-->|address|r5;
+    la-->|address|r6;
+    la-->|address|r7;
+    la-->|address|r8;
+
+    r1-->|a|M[Mux8Way16];
+    r2-->|b|M[Mux8Way16];
+    r3-->|c|M[Mux8Way16];
+    r4-->|d|M[Mux8Way16];
+    r5-->|e|M[Mux8Way16];
+    r6-->|f|M[Mux8Way16];
+    r7-->|g|M[Mux8Way16];
+    r8-->|h|M[Mux8Way16];
+
+    M-->|out|O(Output);
+
+    style I fill:#99FF66;
+    style L fill:#99FF66;
+    style A fill:#99FF66;
+    style O fill:#99FF66;
+</div>
+</body>
+</html>
+
