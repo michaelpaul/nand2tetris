@@ -18,30 +18,29 @@ M=0
 M=0
 
 (LOOP)
-// {
-// if not condition, leave loop
-@R1
-D=M
-@i
-D=D-M
-@DONE
-D;JEQ
+    // if not condition, leave loop
+    @R1
+    D=M
+    @i
+    D=D-M
+    @DONE
+    D;JEQ
 
-// loop code
-@R0
-D=M
-@R2
-M=M+D
-@i
-M=M+1
-// loop code
+    // loop code
+    @R0
+    D=M
+    @R2
+    M=M+D
+    @i
+    M=M+1
+    // loop code
 
-@LOOP
-0;JMP
-// }
+    @LOOP
+    0;JMP
+
 (DONE)
 
 (END)
-@END
-0;JMP
+    @END
+    0;JMP
 
