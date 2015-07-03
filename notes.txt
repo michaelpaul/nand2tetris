@@ -1,0 +1,77 @@
+# Course/Book's software suite
+
+As ferramentas funcionam em modo interativo com gui (i), batch cli (b) ou ambos (ib).
+
+3 simuladores
+Simulators: HardwareSimulator (ib), CPUEmulator (ib), VMEmulator (ib)
+Na linha de comando recebem um script de teste (.tst) como input.
+
+2 tradutores (não achei o main desses caras no fonte da suite...)
+Translators: Assembler (ib), JackCompiler (b)
+Na linha de comando recebem um programa fonte (.asm, .jack) como input.
+
+1 util
+TextComparer (b)
+É um utilitário para testes comparando dois arquivos de texto.
+
+# Project structure
+
+- objective
+- resources: lectures, book, tutorial, appendix
+- tools: book software suite
+- contract: requisitos que devem ser atendidos
+- tips
+- testing: test scripts e testes para verificar se o contrato foi atendido
+
+##  Help
+
+# Simulators
+
+$ HardwareSimulator.sh -h
+Usage:
+    HardwareSimulator.sh             Starts the Hardware Simulator in
+                                     interactive mode.
+    HardwareSimulator.sh FILE.tst    Starts the Hardware Simulator and runs the
+                                     FILE.tst test script.  The success/failure
+                                     message is printed to the command console.
+
+$ CPUEmulator.sh -h
+Usage:
+    CPUEmulator.sh             Starts the CPU Emulator in interactive mode.
+    CPUEmulator.sh FILE.tst    Starts the CPU Emulator and runs the File.tst
+                               test script.  The success/failure message
+                               is printed to the command console.
+
+
+$ VMEmulator.sh -h
+Usage:
+    VMEmulator.sh             Starts the VM Emulator in interactive mode.
+    VMEmulator.sh FILE.tst    Starts the VM Emulator and runs the FILE.tst test
+                              script.  The success/failure message is
+                              printed to the command console.
+
+# Translators
+
+$ Assembler.sh -h
+Usage:
+    Assembler.sh               Starts the assembler in interactive mode.
+    Assembler.sh FILE[.asm]    Assembles FILE.asm to FILE.hack.
+
+
+$ JackCompiler.sh -h
+Usage:
+    JackCompiler.sh              Compiles all .jack files in the current
+                                 working directory.
+    JackCompiler.sh DIRECTORY    Compiles all .jack files in DIRECTORY.
+    JackCompiler.sh FILE.jack    Compiles FILE.jack to FILE.vm.
+
+# Util
+
+$ TextComparer.sh -h
+Usage:
+    TextComparer.sh FILE1 FILE2    Compares FILE1 and FILE2.  The success
+                                   message or the first miscompared line
+                                   is printed to the command console.
+
+Exemplo
+$ TextComparer ALU.cmp ALU.out
