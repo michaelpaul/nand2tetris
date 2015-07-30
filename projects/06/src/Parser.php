@@ -21,6 +21,9 @@ class Parser
 
     public function __construct($inputFile = null)
     {
+        if (!file_exists($inputFile)) {
+            die("arquivo não econtrado: " . $inputFile . "\n");
+        }
         $this->fp = fopen($inputFile, 'r');
     }
 
@@ -49,7 +52,11 @@ class Parser
         // ignore comments and empty lines
         do {
             $command = trim(fgets($this->fp));
-        } while (empty($command) || substr($command, 0, 2) == '//');
+        } while ($this->hasMoreCommands() && (empty($command) || substr($command, 0, 2) == '//'));
+
+        if (empty($command)) {
+            return;
+        }
 
         // parse type and symbol/label
         if ($command[0] == '@') {
