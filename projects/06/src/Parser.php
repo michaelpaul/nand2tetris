@@ -72,7 +72,11 @@ class Parser
         // parse c command
         $this->cmd_type = self::C_COMMAND;
         $chars = str_split($command);
-        foreach ($chars as $c) {
+        foreach ($chars as $i => $c) {
+            // inline comment
+            if (substr($command, $i, 2) == '//') {
+                break;
+            }
             // ignore whitespace
             if (ctype_space($c)) {
                 continue;
