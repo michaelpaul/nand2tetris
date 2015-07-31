@@ -27,4 +27,12 @@ class MainTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(19, $m->getACommandValue('-128'), 'Decimal negativo vira variável?');
         $this->assertEquals(20, $m->getACommandValue('$a_z.A_Z:0_9'), 'Caracteres permitidos');
     }
+
+    public function testOutputFilename()
+    {
+        $m = new Main;
+        $this->assertEquals('/sample.hack', $m->getOutputFilename('/sample.asm'));
+        $this->assertEquals('~/projects/nand2tetris/sample.hack', $m->getOutputFilename('~/projects/nand2tetris/sample.asm'));
+        $this->assertEquals('../../nand2tetris/sample.hack', $m->getOutputFilename('../../nand2tetris/sample.asm'));
+    }
 }

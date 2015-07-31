@@ -10,5 +10,7 @@
     A M D = D + M;JMP
     @i
     M=1
+    @HERE
+    0;JMP
     @255
     D=A

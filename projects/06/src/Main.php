@@ -22,8 +22,9 @@ class Main
             $p->advance();
             if ($p->commandType() == Parser::L_COMMAND) {
                 $this->st->addEntry($p->symbol(), $rom_address);
+            } else {
+                $rom_address++;
             }
-            $rom_address++;
         }
     }
 
@@ -46,6 +47,11 @@ class Main
         }
     }
 
+    public function getOutputFilename($inputFilename)
+    {
+        return preg_replace('/.asm$/', '.hack', $inputFilename);
+    }
+
     public function assemble($inputFile)
     {
         // first pass
@@ -55,24 +61,26 @@ class Main
         $code = new Code;
 
         // second pass
+        $out_fp = fopen($this->getOutputFilename($inputFile), 'w');
 
         while ($p->hasMoreCommands()) {
             $p->advance();
             switch ($p->commandType()) {
                 case Parser::A_COMMAND:
                     $a_val = $this->getACommandValue($p->symbol());
-                    printf("symbol? %s, val: %d \n", $p->symbol(), $a_val);
                     // emit a command
+                    fprintf($out_fp, "0%015b\n", $a_val);
                     break;
                 case Parser::C_COMMAND:
-                    printf("%s = %s ; %s \n",
-                        $code->dest($p->dest()),
-                        $code->comp($p->comp()),
-                        $code->jump($p->jump())
-                    );
+                    $c_cmd = $code->comp($p->comp()) .
+                        $code->dest($p->dest()) .
+                        $code->jump($p->jump());
                     // emit c command
+                    fprintf($out_fp, "111%s\n", $c_cmd);
                     break;
             }
         }
+
+        fclose($out_fp);
     }
 }
