@@ -74,6 +74,7 @@ class Parser
                 $this->arg1 = $cmd[1];
             case 1:
                 $this->cmd_type = $cmd[0];
+                $this->arg1 = $cmd[0];
             default:
                 return;
         }

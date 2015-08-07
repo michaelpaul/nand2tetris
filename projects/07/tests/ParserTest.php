@@ -29,7 +29,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($this->p->hasMoreCommands());
         $this->p->advance();
         $this->assertEquals(Parser::C_ARITHMETIC, $this->p->commandType());
-        $this->assertNull($this->p->arg1());
+        $this->assertEquals('add', $this->p->arg1());
         $this->assertNull($this->p->arg2());
     }
 }
