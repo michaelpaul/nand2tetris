@@ -8,9 +8,24 @@ class Main
      * @var CodeWriter
      */
     private $code;
+    private $outfile;
+
+    public function setOutputFilename($file)
+    {
+        $this->outfile = $file;
+    }
+
+    public function getOutputFilename()
+    {
+        if (!is_null($this->outfile)) {
+            return $this->outfile;
+        }
+        // @TODO definir arquivo de saída
+        return 'php://stdout';
+    }
 
     public function translate($inputFile) {
-        $this->code = new CodeWriter('php://stdout');
+        $this->code = new CodeWriter($this->getOutputFilename());
         if (is_file($inputFile)) {
             $this->translateFile($inputFile);
         } else if (is_dir($inputFile)) {

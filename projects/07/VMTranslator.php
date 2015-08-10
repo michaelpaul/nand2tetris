@@ -8,8 +8,14 @@ require_once __DIR__ . '/vendor/autoload.php';
 use VMTranslator\Main;
 
 if (empty($argv[1])) {
-    die("usage: $argv[0] [file.vm | dir] \n");
+    die("usage: $argv[0] [-o outputfile] [file.vm | dir] \n");
 }
 
+$options = getopt("o:");
+$inputFile = $argv[1];
 $main = new Main;
-$main->translate($argv[1]);
+if (isset($options['o'])) {
+    $main->setOutputFilename($options['o']);
+    $inputFile = $argv[3];
+}
+$main->translate($inputFile);
