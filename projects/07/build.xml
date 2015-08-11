@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="VMTranslator" default="test">
+    <!-- Test programs -->
+    <fileset dir="tests/functional/StackArithmetic" id="StackArithmetic">
+        <include name="SimpleAdd" />
+        <include name="StackTest" />
+    </fileset>
+    <fileset dir="tests/functional/MemoryAccess" id="MemoryAccess">
+        <include name="BasicTest" />
+        <include name="PointerTest" />
+        <include name="StaticTest" />
+    </fileset>
+    <!-- / Test programs -->
+
+    <target name="test" depends="unit,functional" />
+
+    <target name="unit">
+        <exec command="phpunit" checkreturn="true" passthru="true" />
+    </target>
+
+    <target name="functional">
+        <echo msg="Rodando testes funcionais" />
+        <foreach param="filename" absparam="absfilename" target="functional.run">
+          <fileset refid="StackArithmetic" />
+          <!-- <fileset refid="MemoryAccess" /> -->
+        </foreach>
+    </target>
+
+    <target name="functional.run">
+        <property name="program.prefix" value="${absfilename}/${filename}" />
+        <echo msg="Translate: ${program.prefix}.vm" />
+        <exec command="php VMTranslator.php ${program.prefix}.vm" checkreturn="true" passthru="true" />
+        <echo msg="Run: ${program.prefix}.tst" />
+        <exec command="CPUEmulator.sh ${program.prefix}.tst" />
+        <exec command="TextComparer.sh ${program.prefix}.cmp ${program.prefix}.out" passthru="true" />
+    </target>
+
+    <target name="clean">
+        <delete>
+            <fileset dir="tests/functional">
+                <include name="**/*.asm" />
+                <include name="**/*.out" />
+            </fileset>
+        </delete>
+    </target>
+</project>

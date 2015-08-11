@@ -20,18 +20,25 @@ class Main
         if (!is_null($this->outfile)) {
             return $this->outfile;
         }
-        // @TODO definir arquivo de saída
-        return 'php://stdout';
     }
 
-    public function translate($inputFile) {
-        $this->code = new CodeWriter($this->getOutputFilename());
-        if (is_file($inputFile)) {
-            $this->translateFile($inputFile);
+    public function translate($inputFile)
+    {
+        $outfile = $this->getOutputFilename();
+        $inputFiles = array($inputFile);
+
+        if (is_file($inputFile) && $outfile == null) {
+            $outfile = preg_replace('/.vm$/', '.asm', $inputFile);
         } else if (is_dir($inputFile)) {
-            foreach (glob($inputFile . DIRECTORY_SEPARATOR . "*.vm") as $filename) {
-                $this->translateFile($filename);
+            if ($outfile == null) {
+                $outfile = $inputFile . '.asm';
             }
+            $inputFiles = glob($inputFile . DIRECTORY_SEPARATOR . "*.vm");
+        }
+
+        $this->code = new CodeWriter($outfile);
+        foreach ($inputFiles as $filename) {
+            $this->translateFile($filename);
         }
         $this->code->close();
     }
