@@ -32,7 +32,7 @@
         <exec command="php VMTranslator.php ${program.prefix}.vm" checkreturn="true" passthru="true" />
         <echo msg="Run: ${program.prefix}.tst" />
         <exec command="CPUEmulator.sh ${program.prefix}.tst" />
-        <exec command="TextComparer.sh ${program.prefix}.cmp ${program.prefix}.out" passthru="true" />
+        <exec command="TextComparer.sh ${program.prefix}.cmp ${program.prefix}.out" passthru="true" checkreturn="true" />
     </target>
 
     <target name="clean">

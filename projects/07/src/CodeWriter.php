@@ -29,39 +29,32 @@ class CodeWriter
      */
     public function writeArithmetic($command)
     {
-        if ($command == 'add') {
-            $code = array(
-                // pop R5
-                '// @ add',
-                '@SP',
-                'A=M-1',
-                'D=M',
-                '@R5',
-                'M=D',
-                '@SP',
-                'M=M-1',
-                // pop R6
-                '@SP',
-                'A=M-1',
-                'D=M',
-                '@R6',
-                'M=D',
-                '@SP',
-                'M=M-1',
-                // D = R5+R6
-                '@R5',
-                'D=M',
-                '@R6',
-                'D=D+M',
-                // push D
-                '@SP',
-                'A=M',
-                'M=D',
-                // sp++
-                '@SP',
-                'M=M+1',
-            );
-            $this->writeCode($code);
+        switch ($command) {
+            case 'add':
+                $this->pop('R13');
+                $this->pop('R14');
+                $code = array(
+                    // D = R13+R14
+                    '@R13',
+                    'D=M',
+                    '@R14',
+                    'D=D+M',
+                );
+                $this->writeCode($code);
+                $this->pushD();
+                break;
+            case 'eq':
+                $this->pop('R13');
+                $this->pop('R14');
+                $this->writeCode(array(
+                    // @TODO compute result in D
+                    '@here',
+                    'D;JEQ',
+                    '(here)',
+                    'compute',
+                ));
+                $this->pushD();
+                break;
         }
     }
 
@@ -72,18 +65,12 @@ class CodeWriter
     public function writePushPop($command, $segment, $index)
     {
         if ($command == Parser::C_PUSH && $segment == 'constant' ) {
-            $code = array(
+            $this->writeCode(array(
                 '// @ push constant ' . $index,
                 '@' . $index,
                 'D=A',
-                '@SP',
-                'A=M',
-                'M=D',
-                // sp++
-                '@SP',
-                'M=M+1',
-            );
-            $this->writeCode($code);
+            ));
+            $this->pushD();
         }
     }
 
@@ -92,6 +79,44 @@ class CodeWriter
         if (count($code) > 0) {
             fwrite($this->fp, implode("\n", $code) . "\n");
         }
+    }
+
+    /**
+     * pop stack into $dest variable
+     */
+    protected function pop($dest)
+    {
+        $this->writeCode(array(
+            '@SP',
+            'A=M-1',
+            'D=M',
+            '@' . $dest,
+            'M=D',
+            '@SP',
+            'M=M-1',
+        ));
+    }
+
+    protected function spInc()
+    {
+        $this->writeCode(array(
+            // sp++
+            '@SP',
+            'M=M+1',
+        ));
+    }
+
+    /**
+     * Push D register to the top of the stack
+     */
+    protected function pushD()
+    {
+        $this->writeCode(array(
+            '@SP',
+            'A=M',
+            'M=D',
+        ));
+        $this->spInc();
     }
 
     /**
