@@ -22,7 +22,7 @@
         <echo msg="Rodando testes funcionais" />
         <foreach param="filename" absparam="absfilename" target="functional.run">
           <fileset refid="StackArithmetic" />
-          <!-- <fileset refid="MemoryAccess" /> -->
+          <fileset refid="MemoryAccess" />
         </foreach>
     </target>
 
