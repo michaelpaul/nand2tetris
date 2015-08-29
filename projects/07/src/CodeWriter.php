@@ -6,6 +6,7 @@ class CodeWriter
 {
     private $fp;
     private $filename;
+    private $label_counter = 0;
 
     /**
      * Opens the output file/stream and gets ready to write into it.
@@ -34,7 +35,6 @@ class CodeWriter
                 $this->pop('R13');
                 $this->pop('R14');
                 $code = array(
-                    // D = R13+R14
                     '@R13',
                     'D=M',
                     '@R14',
@@ -43,16 +43,76 @@ class CodeWriter
                 $this->writeCode($code);
                 $this->pushD();
                 break;
+            case 'sub':
+                $this->pop('R13');
+                $this->pop('R14');
+                $code = array(
+                    '@R13',
+                    'D=M',
+                    '@R14',
+                    'D=M-D',
+                );
+                $this->writeCode($code);
+                $this->pushD();
+                break;
+            case 'neg':
+                $this->pop('R13');
+                $code = array(
+                    '@R13',
+                    'D=-M',
+                );
+                $this->writeCode($code);
+                $this->pushD();
+                break;
             case 'eq':
                 $this->pop('R13');
                 $this->pop('R14');
-                $this->writeCode(array(
-                    // @TODO compute result in D
-                    '@here',
-                    'D;JEQ',
-                    '(here)',
-                    'compute',
-                ));
+                $this->eq('R13', 'R14');
+                $this->pushD();
+                break;
+            case 'gt':
+                $this->pop('R13');
+                $this->pop('R14');
+                $this->gt('R13', 'R14');
+                $this->pushD();
+                break;
+            case 'lt':
+                $this->pop('R13');
+                $this->pop('R14');
+                $this->lt('R13', 'R14');
+                $this->pushD();
+                break;
+            case 'not':
+                $this->pop('R13');
+                $code = array(
+                    '@R13',
+                    'D=!M',
+                );
+                $this->writeCode($code);
+                $this->pushD();
+                break;
+            case 'and':
+                $this->pop('R13');
+                $this->pop('R14');
+                $code = array(
+                    '@R13',
+                    'D=M',
+                    '@R14',
+                    'D=D&M',
+                );
+                $this->writeCode($code);
+                $this->pushD();
+                break;
+            case 'or':
+                $this->pop('R13');
+                $this->pop('R14');
+                $code = array(
+                    '@R13',
+                    'D=M',
+                    '@R14',
+                    'D=D|M',
+                );
+                $this->writeCode($code);
                 $this->pushD();
                 break;
         }
@@ -117,6 +177,57 @@ class CodeWriter
             'M=D',
         ));
         $this->spInc();
+    }
+
+
+    /**
+     * Teste lógico baseado na diferença entre $x, $y e 0
+     *
+     * @param string $op operador lógico
+     * @param string $x variavel/constante
+     * @param string $y variavel/constante
+     * @return array hack assembly
+     */
+    protected function test($op, $x, $y)
+    {
+        $true = '-1';
+        $false = '0';
+        $id = '_VMTEST' . $op . $this->label_counter;
+        $this->label_counter++;
+        $this->writeCode(array(
+            '// test ' . $op,
+            '@' . $x,
+            'D=M',
+            '@' . $y,
+            'D=D-M', // x - y
+            "@FALSE_$id",
+            'D;' . $op, // if ($x - $y $op 0) goto f;
+            '@r',
+            'M=' . $true, // $r = true;
+            "@END_$id",
+            '0;JMP', // goto end;
+            "(FALSE_$id)", // f:
+            '@r',
+            'M=' . $false, // $r = false;
+            "(END_$id)", // end:
+            '@r',
+            'D=M', // return $r;
+        ));
+    }
+
+    protected function eq($x, $y)
+    {
+        return $this->test('JNE', $x, $y);
+    }
+
+    protected function gt($x, $y)
+    {
+        return $this->test('JGE', $x, $y);
+    }
+
+    protected function lt($x, $y)
+    {
+        return $this->test('JLE', $x, $y);
     }
 
     /**

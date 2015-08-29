@@ -87,6 +87,14 @@ class Parser
     {
         $types = array(
             'add' => Parser::C_ARITHMETIC,
+            'sub' => Parser::C_ARITHMETIC,
+            'neg' => Parser::C_ARITHMETIC,
+            'eq' => Parser::C_ARITHMETIC,
+            'lt' => Parser::C_ARITHMETIC,
+            'gt' => Parser::C_ARITHMETIC,
+            'not' => Parser::C_ARITHMETIC,
+            'and' => Parser::C_ARITHMETIC,
+            'or' => Parser::C_ARITHMETIC,
             'push' => Parser::C_PUSH,
             'pop' => Parser::C_POP,
         );
