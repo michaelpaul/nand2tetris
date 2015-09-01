@@ -124,13 +124,73 @@ class CodeWriter
      */
     public function writePushPop($command, $segment, $index)
     {
-        if ($command == Parser::C_PUSH && $segment == 'constant' ) {
-            $this->writeCode(array(
-                '// @ push constant ' . $index,
-                '@' . $index,
-                'D=A',
-            ));
-            $this->pushD();
+        $base = array(
+            'local' => 'LCL',
+            'argument' => 'ARG',
+            'this' => 'THIS',
+            'that' => 'THAT',
+            'temp' => '5',
+        );
+        // Executes pop/push operations using the virtual memory segments
+        // constant, local, argument, this, that, and temp.
+        if ($command == Parser::C_PUSH) {
+            switch ($segment) {
+                case 'constant':
+                    $this->writeCode(array(
+                        '// @ push constant ' . $index,
+                        '@' . $index,
+                        'D=A',
+                    ));
+                    $this->pushD();
+                    break;
+                case 'local':
+                case 'argument':
+                case 'this':
+                case 'that':
+                case 'temp':
+                    $comp = $segment == 'temp' ? 'D+A' : 'D+M';
+                    $this->writeCode(array(
+                        // push local index
+                        '@' . $index,
+                        'D=A', // get index
+                        '@' . $base[$segment],
+                        'A=' . $comp, // A = index + segment base
+                        'D=M',   // D = M[A]
+                    ));
+                    $this->pushD();
+                    break;
+                default:
+                    throw new \Exception('CodeWriter: Push em um segmento desconhecido: ' . $segment);
+            }
+        } else if ($command == Parser::C_POP) {
+            switch ($segment) {
+                case 'local':
+                case 'argument':
+                case 'this':
+                case 'that':
+                case 'temp':
+                    $this->pop('R13');
+                    $comp = $segment == 'temp' ? 'D+A' : 'D+M';
+                    $this->writeCode(array(
+                        // r13: tos val, r14: segment address
+                        // m[r14] = m[r13]
+                        '@' . $index,
+                        'D=A', // get index
+                        '@' . $base[$segment],
+                        'A=' . $comp, // A = index + segment base
+                        'D=A',
+                        '@R14',
+                        'M=D',
+                        '@R13',
+                        'D=M',
+                        '@R14',
+                        'A=M',
+                        'M=D'
+                    ));
+                    break;
+                default:
+                    throw new \Exception('CodeWriter: Pop em um segmento desconhecido: ' . $segment);
+            }
         }
     }
 
@@ -178,7 +238,6 @@ class CodeWriter
         ));
         $this->spInc();
     }
-
 
     /**
      * Teste lógico baseado na diferença entre $x, $y e 0
