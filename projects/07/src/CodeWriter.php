@@ -2,6 +2,10 @@
 
 namespace VMTranslator;
 
+class CodeWriterException extends \Exception
+{
+}
+
 class CodeWriter
 {
     private $fp;
@@ -11,7 +15,7 @@ class CodeWriter
     /**
      * Opens the output file/stream and gets ready to write into it.
      */
-    function __construct($outputFile)
+    public function __construct($outputFile)
     {
         $this->fp = fopen($outputFile, 'w');
     }
@@ -119,8 +123,7 @@ class CodeWriter
     }
 
     /**
-     * Writes the assembly code that is the translation of the given command,
-     * where command is either C_PUSH or C_POP.
+     * Executes pop/push operations using the virtual memory segments
      */
     public function writePushPop($command, $segment, $index)
     {
@@ -131,10 +134,25 @@ class CodeWriter
             'that' => 'THAT',
             'temp' => '5',
         );
-        // Executes pop/push operations using the virtual memory segments
-        // constant, local, argument, this, that, and temp.
+
         if ($command == Parser::C_PUSH) {
             switch ($segment) {
+                case 'local':
+                case 'argument':
+                case 'this':
+                case 'that':
+                case 'temp':
+                    $comp = $segment == 'temp' ? 'D+A' : 'D+M';
+                    $this->writeCode(array(
+                        // push segment
+                        '@' . $index,
+                        'D=A', // D = index
+                        '@' . $base[$segment],
+                        'A=' . $comp, // A = index + segment base
+                        'D=M',   // D = M[A]
+                    ));
+                    $this->pushD();
+                    break;
                 case 'constant':
                     $this->writeCode(array(
                         '// @ push constant ' . $index,
@@ -143,26 +161,21 @@ class CodeWriter
                     ));
                     $this->pushD();
                     break;
-                case 'local':
-                case 'argument':
-                case 'this':
-                case 'that':
-                case 'temp':
-                    $comp = $segment == 'temp' ? 'D+A' : 'D+M';
+                case 'pointer':
+                    if ($index < 0 || $index > 1) {
+                        throw new CodeWriterException('Push em um ponteiro inválido');
+                    }
+                    $ptr = array('THIS', 'THAT');
                     $this->writeCode(array(
-                        // push local index
-                        '@' . $index,
-                        'D=A', // get index
-                        '@' . $base[$segment],
-                        'A=' . $comp, // A = index + segment base
-                        'D=M',   // D = M[A]
+                        '@' . $ptr[$index],
+                        'D=M'
                     ));
                     $this->pushD();
                     break;
                 default:
-                    throw new \Exception('CodeWriter: Push em um segmento desconhecido: ' . $segment);
+                    throw new CodeWriterException('Push em um segmento desconhecido: ' . $segment);
             }
-        } else if ($command == Parser::C_POP) {
+        } elseif ($command == Parser::C_POP) {
             switch ($segment) {
                 case 'local':
                 case 'argument':
@@ -172,24 +185,35 @@ class CodeWriter
                     $this->pop('R13');
                     $comp = $segment == 'temp' ? 'D+A' : 'D+M';
                     $this->writeCode(array(
-                        // r13: tos val, r14: segment address
-                        // m[r14] = m[r13]
+                        // R13: top of stack value, R14: segment address
                         '@' . $index,
-                        'D=A', // get index
+                        'D=A', // D = index
                         '@' . $base[$segment],
-                        'A=' . $comp, // A = index + segment base
-                        'D=A',
+                        'D=' . $comp, // A = index + segment base
                         '@R14',
-                        'M=D',
+                        'M=D', // R14 = segment address
                         '@R13',
-                        'D=M',
+                        'D=M', // D = R13
                         '@R14',
                         'A=M',
+                        'M=D' // M[R14] = D
+                    ));
+                    break;
+                case 'pointer':
+                    if ($index < 0 || $index > 1) {
+                        throw new CodeWriterException('Pop em um ponteiro inválido');
+                    }
+                    $ptr = array('THIS', 'THAT');
+                    $this->pop('R13');
+                    $this->writeCode(array(
+                        '@R13',
+                        'D=M',
+                        '@' . $ptr[$index],
                         'M=D'
                     ));
                     break;
                 default:
-                    throw new \Exception('CodeWriter: Pop em um segmento desconhecido: ' . $segment);
+                    throw new CodeWriterException('Pop em um segmento desconhecido: ' . $segment);
             }
         }
     }
