@@ -134,6 +134,7 @@ class CodeWriter
             'that' => 'THAT',
             'temp' => '5',
         );
+        $static_id = '__VMSTATIC_' . $index;
 
         if ($command == Parser::C_PUSH) {
             switch ($segment) {
@@ -168,6 +169,13 @@ class CodeWriter
                     $ptr = array('THIS', 'THAT');
                     $this->writeCode(array(
                         '@' . $ptr[$index],
+                        'D=M'
+                    ));
+                    $this->pushD();
+                    break;
+                case 'static':
+                    $this->writeCode(array(
+                        '@' . $static_id,
                         'D=M'
                     ));
                     $this->pushD();
@@ -209,6 +217,15 @@ class CodeWriter
                         '@R13',
                         'D=M',
                         '@' . $ptr[$index],
+                        'M=D'
+                    ));
+                    break;
+                case 'static':
+                    $this->pop('R13');
+                    $this->writeCode(array(
+                        '@R13',
+                        'D=M',
+                        '@' . $static_id,
                         'M=D'
                     ));
                     break;
@@ -318,8 +335,8 @@ class CodeWriter
      */
     public function close()
     {
-        if ($this->fp) {
-            // fclose($this->fp);
+        if (is_resource($this->fp)) {
+            fclose($this->fp);
         }
     }
 

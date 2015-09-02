@@ -3,3 +3,7 @@
 push constant 7 // inline comment
 push constant 8
 add
+sub
+eq
+lt
+gt
