@@ -2,6 +2,10 @@
 
 namespace VMTranslator;
 
+class ParserError extends \Exception
+{
+}
+
 /**
  * Class Parser
  */
@@ -55,12 +59,15 @@ class Parser
         $tokens = explode(' ', $this->cmd);
         $cmd = array();
 
-        foreach ($tokens as $key => $value) {
-            $v = strtolower(trim($value));
+        foreach ($tokens as $key => $v) {
             if ($v == '//') {
                 break;
             }
-            $cmd[] = $v;
+            // skip whitespace
+            if (ctype_space($v) || $v == '') {
+                continue;
+            }
+            $cmd[] = strtolower($v);
         }
 
         switch (count($cmd)) {
@@ -72,11 +79,13 @@ class Parser
             case 2:
                 $this->cmd_type = $cmd[0];
                 $this->arg1 = $cmd[1];
+                break;
             case 1:
                 $this->cmd_type = $cmd[0];
                 $this->arg1 = $cmd[0];
+                break;
             default:
-                return;
+                throw new ParserError("Erro de syntaxe");
         }
     }
 
@@ -101,6 +110,8 @@ class Parser
 
         if (array_key_exists($this->cmd_type, $types)) {
             return $types[$this->cmd_type];
+        } else {
+            throw new ParserError("Tipo do comando desconhecido: " . $this->cmd_type);
         }
     }
 

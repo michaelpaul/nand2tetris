@@ -11,6 +11,9 @@
         <include name="PointerTest" />
         <include name="StaticTest" />
     </fileset>
+    <fileset dir="tests/functional/ProgramFlow" id="ProgramFlow">
+        <include name="BasicLoop" />
+    </fileset>
     <!-- / Test programs -->
 
     <target name="test" depends="unit,functional" />
@@ -24,6 +27,15 @@
         <foreach param="filename" absparam="absfilename" target="functional.run">
           <fileset refid="StackArithmetic" />
           <fileset refid="MemoryAccess" />
+          <!-- <fileset refid="ProgramFlow" /> -->
+        </foreach>
+    </target>
+    
+    <!-- Testar apenas o capitulo 8 -->
+    <target name="c8" depends="unit">
+        <echo msg="Rodando testes funcionais" />
+        <foreach param="filename" absparam="absfilename" target="functional.run">
+          <fileset refid="ProgramFlow" />
         </foreach>
     </target>
 

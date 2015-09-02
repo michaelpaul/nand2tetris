@@ -235,6 +235,30 @@ class CodeWriter
         }
     }
 
+    /**
+     * Traduzir label
+     */
+    public function writeLabel($label)
+    {
+
+    }
+
+    /**
+     * Traduzir goto $label
+     */
+    public function writeGoto($label)
+    {
+
+    }
+
+    /**
+     * Traduzir if-goto $label
+     */
+    public function writeIf($label)
+    {
+
+    }
+
     protected function writeCode(array $code)
     {
         if (count($code) > 0) {
