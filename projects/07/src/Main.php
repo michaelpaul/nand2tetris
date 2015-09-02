@@ -58,6 +58,17 @@ class Main
                 case Parser::C_POP:
                     $this->code->writePushPop($p->commandType(), $p->arg1(), $p->arg2());
                     break;
+                case Parser::C_LABEL:
+                    $this->code->writeLabel($p->arg1());
+                    break;
+                case Parser::C_IF:
+                    $this->code->writeIf($p->arg1());
+                    break;
+                case Parser::C_GOTO:
+                    $this->code->writeGoto($p->arg1());
+                    break;
+                default:
+                    throw new \Exception("Não foi possível traduzir o tipo: " . $p->commandTypeLabel());
             }
         }
     }

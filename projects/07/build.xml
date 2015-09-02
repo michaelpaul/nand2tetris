@@ -13,6 +13,7 @@
     </fileset>
     <fileset dir="tests/functional/ProgramFlow" id="ProgramFlow">
         <include name="BasicLoop" />
+        <include name="FibonacciSeries" />
     </fileset>
     <!-- / Test programs -->
 
@@ -30,7 +31,7 @@
           <!-- <fileset refid="ProgramFlow" /> -->
         </foreach>
     </target>
-    
+
     <!-- Testar apenas o capitulo 8 -->
     <target name="c8" depends="unit">
         <echo msg="Rodando testes funcionais" />

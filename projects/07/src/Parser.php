@@ -106,6 +106,9 @@ class Parser
             'or' => Parser::C_ARITHMETIC,
             'push' => Parser::C_PUSH,
             'pop' => Parser::C_POP,
+            'label' => Parser::C_LABEL,
+            'if-goto' => Parser::C_IF,
+            'goto' => Parser::C_GOTO,
         );
 
         if (array_key_exists($this->cmd_type, $types)) {
@@ -113,6 +116,11 @@ class Parser
         } else {
             throw new ParserError("Tipo do comando desconhecido: " . $this->cmd_type);
         }
+    }
+
+    public function commandTypeLabel()
+    {
+        return $this->cmd_type;
     }
 
     /**

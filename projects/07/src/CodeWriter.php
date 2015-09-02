@@ -240,7 +240,10 @@ class CodeWriter
      */
     public function writeLabel($label)
     {
-
+        $label = strtoupper($label);
+        $this->writeCode(array(
+            "($label)"
+        ));
     }
 
     /**
@@ -248,7 +251,11 @@ class CodeWriter
      */
     public function writeGoto($label)
     {
-
+        $label = strtoupper($label);
+        $this->writeCode(array(
+            '@' . $label,
+            '0;JMP'
+        ));
     }
 
     /**
@@ -256,7 +263,14 @@ class CodeWriter
      */
     public function writeIf($label)
     {
-
+        $this->pop('R13');
+        $label = strtoupper($label);
+        $this->writeCode(array(
+            '@R13',
+            'D=M',
+            '@' . $label,
+            'D;JNE'
+        ));
     }
 
     protected function writeCode(array $code)
