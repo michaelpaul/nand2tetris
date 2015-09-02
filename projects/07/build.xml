@@ -15,6 +15,9 @@
         <include name="BasicLoop" />
         <include name="FibonacciSeries" />
     </fileset>
+    <fileset dir="tests/functional/FunctionCalls" id="FunctionCalls">
+        <include name="SimpleFunction" />
+    </fileset>
     <!-- / Test programs -->
 
     <target name="test" depends="unit,functional" />
@@ -37,6 +40,7 @@
         <echo msg="Rodando testes funcionais" />
         <foreach param="filename" absparam="absfilename" target="functional.run">
           <fileset refid="ProgramFlow" />
+          <fileset refid="FunctionCalls" />
         </foreach>
     </target>
 

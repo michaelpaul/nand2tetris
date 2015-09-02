@@ -109,6 +109,8 @@ class Parser
             'label' => Parser::C_LABEL,
             'if-goto' => Parser::C_IF,
             'goto' => Parser::C_GOTO,
+            'function' => Parser::C_FUNCTION,
+            'return' => Parser::C_RETURN,
         );
 
         if (array_key_exists($this->cmd_type, $types)) {

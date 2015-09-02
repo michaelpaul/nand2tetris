@@ -67,6 +67,12 @@ class Main
                 case Parser::C_GOTO:
                     $this->code->writeGoto($p->arg1());
                     break;
+                case Parser::C_FUNCTION:
+                    $this->code->writeFunction($p->arg1(), $p->arg2());
+                    break;
+                case Parser::C_RETURN:
+                    $this->code->writeReturn();
+                    break;
                 default:
                     throw new \Exception("Não foi possível traduzir o tipo: " . $p->commandTypeLabel());
             }

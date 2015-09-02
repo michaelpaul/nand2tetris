@@ -134,7 +134,8 @@ class CodeWriter
             'that' => 'THAT',
             'temp' => '5',
         );
-        $static_id = '__VMSTATIC_' . $index;
+        $static_id = str_replace(DIRECTORY_SEPARATOR, '_', $this->filename) .
+            '.' . $index;
 
         if ($command == Parser::C_PUSH) {
             switch ($segment) {
@@ -270,6 +271,79 @@ class CodeWriter
             'D=M',
             '@' . $label,
             'D;JNE'
+        ));
+    }
+
+    /**
+     * Traduzir declaração de função "function $functionName $numLocals"
+     */
+    public function writeFunction($functionName, $numLocals)
+    {
+        $this->writeCode(array(
+            "($functionName)"
+        ));
+        for ($i=0; $i < $numLocals; $i++) {
+            $this->writeCode(array(
+                '@' . $i,
+                'D=A', // D = index
+                '@LCL',
+                'A=D+M', // A = index + segment base
+                'M=0' // local[$i] = 0
+            ));
+        }
+    }
+
+    public function writeReturn()
+    {
+        $setBaseFromFrame = function ($index, $dest) {
+            $this->writeCode(array(
+                '@' . $index,
+                'D=A', // D = index
+                '@R5', // R5 := frame
+                'A=M-D', // A = index + segment base
+                'D=M', // D = *(frame - $index)
+                '@' . $dest,
+                'M=D',
+            ));
+        };
+
+        // R5-R12: temp vars
+        $this->writeCode(array(
+            '// @return',
+            '@LCL',
+            'D=M',
+            '@R5', // R5 = frame
+            'M=D', // frame = LCL
+            // *ARG = pop
+            '@SP',
+            'A=M-1',
+            'D=M',
+            '@ARG',
+            'A=M',
+            'M=D',
+            '@SP',
+            'M=M-1',
+            // restaurar @SP: @SP = ARG+1
+            '@ARG',
+            'A=M+1',
+            'D=A',
+            '@SP',
+            'M=D',
+        ));
+
+        // Restaurar ponteiros base do caller
+        // Relativo ao quadro atual: *(frame - N)
+        $setBaseFromFrame(1, 'THAT');
+        $setBaseFromFrame(2, 'THIS');
+        $setBaseFromFrame(3, 'ARG');
+        $setBaseFromFrame(4, 'LCL');
+        $setBaseFromFrame(5, 'R6'); // R6: retAddr
+
+        $this->writeCode(array(
+            // goto retAddr
+            '@R6',
+            'A=M',
+            '0;JMP'
         ));
     }
 
