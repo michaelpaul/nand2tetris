@@ -17,6 +17,7 @@
     </fileset>
     <fileset dir="tests/functional/FunctionCalls" id="FunctionCalls">
         <include name="SimpleFunction" />
+        <include name="NestedCall" />
     </fileset>
     <!-- / Test programs -->
 

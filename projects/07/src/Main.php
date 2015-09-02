@@ -73,6 +73,9 @@ class Main
                 case Parser::C_RETURN:
                     $this->code->writeReturn();
                     break;
+                case Parser::C_CALL:
+                    $this->code->writeCall($p->arg1(), $p->arg2());
+                    break;
                 default:
                     throw new \Exception("Não foi possível traduzir o tipo: " . $p->commandTypeLabel());
             }

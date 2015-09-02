@@ -347,6 +347,70 @@ class CodeWriter
         ));
     }
 
+    public function writeCall($functionName, $numArgs)
+    {
+        $retAddr = 'returnAddress' . rand();
+        $this->writeCode(array(
+            '@' . $retAddr,
+            'D=A', // a = retAddr
+        ));
+        $this->pushD(); // push returnAddress
+
+        $this->writeCode(array(
+            '@LCL',
+            'D=M',
+        ));
+        $this->pushD(); // push LCL
+
+        $this->writeCode(array(
+            '@ARG',
+            'D=M',
+        ));
+        $this->pushD(); // push ARG
+
+        $this->writeCode(array(
+            '@THIS',
+            'D=M',
+        ));
+        $this->pushD(); // push THIS
+
+        $this->writeCode(array(
+            '@THAT',
+            'D=M',
+        ));
+        $this->pushD(); // push THAT
+
+        // arg = SP - nArgs - 5
+        $this->writeCode(array(
+            '@' . $numArgs,
+            'D=A',
+            '@SP',
+            'D=M-D',
+            '@5',
+            'D=D-A',
+            '@ARG',
+            'M=D'
+        ));
+        // LCL = SP
+        $this->writeCode(array(
+            '@SP',
+            'D=M',
+            '@LCL',
+            'M=D',
+        ));
+
+        // goto g, finally the jump
+        $this->writeCode(array(
+            '// call jump',
+            '@' . $functionName,
+            '0;JMP',
+        ));
+
+        $this->writeCode(array(
+            "($retAddr)"
+        ));
+    }
+
     protected function writeCode(array $code)
     {
         if (count($code) > 0) {

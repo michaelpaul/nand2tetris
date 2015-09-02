@@ -111,6 +111,7 @@ class Parser
             'goto' => Parser::C_GOTO,
             'function' => Parser::C_FUNCTION,
             'return' => Parser::C_RETURN,
+            'call' => Parser::C_CALL,
         );
 
         if (array_key_exists($this->cmd_type, $types)) {
