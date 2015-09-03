@@ -9,6 +9,7 @@ class Main
      */
     private $code;
     private $outfile;
+    private $bootstrap = true;
 
     public function setOutputFilename($file)
     {
@@ -22,6 +23,11 @@ class Main
         }
     }
 
+    public function setBootstrap($bootstrap)
+    {
+        $this->bootstrap = $bootstrap;
+    }
+
     public function translate($inputFile)
     {
         $outfile = $this->getOutputFilename();
@@ -29,7 +35,7 @@ class Main
 
         if (is_file($inputFile) && $outfile == null) {
             $outfile = preg_replace('/.vm$/', '.asm', $inputFile);
-        } else if (is_dir($inputFile)) {
+        } elseif (is_dir($inputFile)) {
             if ($outfile == null) {
                 $outfile = rtrim($inputFile, DIRECTORY_SEPARATOR) .
                     DIRECTORY_SEPARATOR . basename($inputFile) . '.asm';
@@ -38,6 +44,10 @@ class Main
         }
 
         $this->code = new CodeWriter($outfile);
+        if ($this->bootstrap == true) {
+            $this->code->writeInit();
+        }
+        $this->code->setFunctionName('Sys.init');
         foreach ($inputFiles as $filename) {
             $this->translateFile($filename);
         }
@@ -69,6 +79,7 @@ class Main
                     $this->code->writeGoto($p->arg1());
                     break;
                 case Parser::C_FUNCTION:
+                    $this->code->setFunctionName($p->arg1());
                     $this->code->writeFunction($p->arg1(), $p->arg2());
                     break;
                 case Parser::C_RETURN:

@@ -67,7 +67,7 @@ class Parser
             if (ctype_space($v) || $v == '') {
                 continue;
             }
-            $cmd[] = strtolower($v);
+            $cmd[] = $v;
         }
 
         switch (count($cmd)) {

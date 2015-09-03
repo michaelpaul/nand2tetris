@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Phing buildfile -->
 <project name="VMTranslator" default="test">
+    <!--  a maioria dos testes não usa o bootstrap da VM -->
+    <property name="vm.args" value="--nobootstrap" />
+
     <!-- Test programs -->
+    <!-- Chapter 7 -->
     <fileset dir="tests/functional/StackArithmetic" id="StackArithmetic">
         <include name="SimpleAdd" />
         <include name="StackTest" />
@@ -11,48 +15,55 @@
         <include name="PointerTest" />
         <include name="StaticTest" />
     </fileset>
+    <!-- Chapter 8 -->
     <fileset dir="tests/functional/ProgramFlow" id="ProgramFlow">
         <include name="BasicLoop" />
         <include name="FibonacciSeries" />
     </fileset>
-    <fileset dir="tests/functional/FunctionCalls" id="FunctionCalls">
+    <fileset dir="tests/functional/FunctionCalls" id="FunctionCalls1">
         <include name="SimpleFunction" />
         <include name="NestedCall" />
-        <!-- <include name="FibonacciElement" /> -->
+    </fileset>
+    <fileset dir="tests/functional/FunctionCalls" id="FunctionCalls2">
+        <include name="FibonacciElement" />
+        <include name="StaticsTest" />
     </fileset>
     <!-- / Test programs -->
 
-    <target name="test" depends="unit,functional" />
+    <target name="test" depends="chapter7,chapter8" />
 
     <target name="unit">
         <exec command="phpunit" checkreturn="true" passthru="true" />
     </target>
 
-    <target name="functional">
-        <echo msg="Rodando testes funcionais" />
+    <target name="chapter7" depends="unit">
+        <echo msg="Rodando testes do capítulo 7" />
         <foreach param="filename" absparam="absfilename" target="functional.run">
           <fileset refid="StackArithmetic" />
           <fileset refid="MemoryAccess" />
-          <!-- <fileset refid="ProgramFlow" /> -->
         </foreach>
     </target>
 
-    <!-- Testar apenas o capitulo 8 -->
-    <target name="c8" depends="unit">
-        <echo msg="Rodando testes funcionais" />
+    <target name="chapter8" depends="unit">
+        <echo msg="Rodando testes do capítulo 8" />
         <foreach param="filename" absparam="absfilename" target="functional.run">
-          <fileset refid="ProgramFlow" />
-          <fileset refid="FunctionCalls" />
+            <fileset refid="ProgramFlow" />
+            <fileset refid="FunctionCalls1" />
+        </foreach>
+        <foreach param="filename" absparam="absfilename" target="functional.run">
+            <!-- remover opção "nobootstrap" nesses testes -->
+            <property name="vm.args" value="" />
+            <fileset refid="FunctionCalls2" />
         </foreach>
     </target>
 
     <target name="functional.run">
         <property name="program.prefix" value="${absfilename}/${filename}" />
         <property name="program.vm" value="${absfilename}" />
+        <!-- Se houver um arquivo ${program.prefix}.vm usar ele, se não usa o diretório -->
         <available file="${program.prefix}.vm" property="program.vm" value="${program.prefix}.vm" />
-        
         <echo msg="Translate: ${program.vm}" />
-        <exec command="php VMTranslator.php ${program.vm}" checkreturn="true" passthru="true" />
+        <exec command="php VMTranslator.php ${vm.args} ${program.vm}" checkreturn="true" passthru="true" />
         <echo msg="Run: ${program.prefix}.tst" />
         <exec command="CPUEmulator.sh ${program.prefix}.tst" />
         <exec command="TextComparer.sh ${program.prefix}.cmp ${program.prefix}.out" passthru="true" checkreturn="true" />

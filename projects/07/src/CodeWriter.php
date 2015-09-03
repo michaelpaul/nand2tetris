@@ -10,6 +10,7 @@ class CodeWriter
 {
     private $fp;
     private $filename;
+    private $functionName;
     private $label_counter = 0;
 
     /**
@@ -27,6 +28,28 @@ class CodeWriter
     {
         $this->filename = $filename;
         $this->writeCode(array('// @filename: ' . $filename));
+    }
+
+    public function setFunctionName($f)
+    {
+        $this->functionName = $f;
+    }
+
+    /**
+     * Gera o bootsrap da VM
+     */
+    public function writeInit()
+    {
+        $this->writeCode(array(
+            // inicializar SP em 0x0100
+            '@256',
+            'D=A',
+            '@SP',
+            'M=D',
+        ));
+        // chamar a função que deve chamar Main.main
+        // 'call Sys.init 0'
+        $this->writeCall('Sys.init', 0);
     }
 
     /**
@@ -134,8 +157,7 @@ class CodeWriter
             'that' => 'THAT',
             'temp' => '5',
         );
-        $static_id = str_replace(DIRECTORY_SEPARATOR, '_', $this->filename) .
-            '.' . $index;
+        $static_id = basename($this->filename) . '.' . $index;
 
         if ($command == Parser::C_PUSH) {
             switch ($segment) {
@@ -241,7 +263,7 @@ class CodeWriter
      */
     public function writeLabel($label)
     {
-        $label = strtoupper($label);
+        $label = $this->functionName . $label;
         $this->writeCode(array(
             "($label)"
         ));
@@ -252,7 +274,7 @@ class CodeWriter
      */
     public function writeGoto($label)
     {
-        $label = strtoupper($label);
+        $label = $this->functionName . $label;
         $this->writeCode(array(
             '@' . $label,
             '0;JMP'
@@ -265,7 +287,7 @@ class CodeWriter
     public function writeIf($label)
     {
         $this->pop('R13');
-        $label = strtoupper($label);
+        $label = $this->functionName . $label;
         $this->writeCode(array(
             '@R13',
             'D=M',
@@ -374,8 +396,8 @@ class CodeWriter
     public function writeCall($functionName, $numArgs)
     {
         // Label de retorno
-        // @TODO esse label deve ser global e unico
-        $retAddr = 'returnAddress' . rand();
+        $retAddr = '__returnAddress' . $this->label_counter;
+        $this->label_counter++;
 
         $this->writeCode(array(
             '// call begin',
