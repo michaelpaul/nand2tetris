@@ -280,6 +280,7 @@ class CodeWriter
     public function writeFunction($functionName, $numLocals)
     {
         $this->writeCode(array(
+            "// begin funcion",
             "($functionName)"
         ));
         for ($i=0; $i < $numLocals; $i++) {
@@ -293,27 +294,44 @@ class CodeWriter
         }
     }
 
+    /**
+     * Traduzir comando return
+     *
+     * Return restaura o ambiente do caller com os valores que ficam salvos em
+     * um quadro na pilha e faz o salto de volta para o ponto de retorno (RIP).
+     */
     public function writeReturn()
     {
-        $setBaseFromFrame = function ($index, $dest) {
+        // Registradores utilizados
+        // Return Instruction Pointer / return address
+        $rip_reg = 'R13';
+        // frame register
+        $frame_reg = 'R14';
+
+        $setBaseFromFrame = function ($index, $dest) use ($frame_reg) {
             $this->writeCode(array(
                 '@' . $index,
                 'D=A', // D = index
-                '@R5', // R5 := frame
-                'A=M-D', // A = index + segment base
-                'D=M', // D = *(frame - $index)
+                '@' . $frame_reg,
+                'A=M-D', // A = frame - index
+                'D=M', // D = *(A)
                 '@' . $dest,
-                'M=D',
+                'M=D', // save value to dest
             ));
         };
 
-        // R5-R12: temp vars
+        // salvar LCL em $frame_reg
         $this->writeCode(array(
-            '// @return',
             '@LCL',
             'D=M',
-            '@R5', // R5 = frame
-            'M=D', // frame = LCL
+            '@' . $frame_reg,
+            'M=D',
+        ));
+        // salvar retAddr em $rip_reg
+        $setBaseFromFrame(5, $rip_reg);
+
+        $this->writeCode(array(
+            // reposicionar valor de retorno para o que sera o topo da pilha do caller
             // *ARG = pop
             '@SP',
             'A=M-1',
@@ -323,7 +341,7 @@ class CodeWriter
             'M=D',
             '@SP',
             'M=M-1',
-            // restaurar @SP: @SP = ARG+1
+            // restaurar SP: SP = ARG+1
             '@ARG',
             'A=M+1',
             'D=A',
@@ -337,48 +355,63 @@ class CodeWriter
         $setBaseFromFrame(2, 'THIS');
         $setBaseFromFrame(3, 'ARG');
         $setBaseFromFrame(4, 'LCL');
-        $setBaseFromFrame(5, 'R6'); // R6: retAddr
 
         $this->writeCode(array(
             // goto retAddr
-            '@R6',
+            '@' . $rip_reg,
             'A=M',
             '0;JMP'
         ));
     }
 
+    /**
+     * Traduzir comando call
+     *
+     * Call salva o ambiente atual e o ponto de retorno (RIP) em um quadro na
+     * pilha e salta para a funcão chamada. Os argumentos já devem ter sido
+     * colocados na pilha antes desse comando.
+     */
     public function writeCall($functionName, $numArgs)
     {
+        // Label de retorno
+        // @TODO esse label deve ser global e unico
         $retAddr = 'returnAddress' . rand();
+
         $this->writeCode(array(
+            '// call begin',
             '@' . $retAddr,
-            'D=A', // a = retAddr
+            'D=A'
         ));
-        $this->pushD(); // push returnAddress
+        // push returnAddress
+        $this->pushD();
 
         $this->writeCode(array(
             '@LCL',
             'D=M',
         ));
-        $this->pushD(); // push LCL
+        // push LCL
+        $this->pushD();
 
         $this->writeCode(array(
             '@ARG',
             'D=M',
         ));
-        $this->pushD(); // push ARG
+        // push ARG
+        $this->pushD();
 
         $this->writeCode(array(
             '@THIS',
             'D=M',
         ));
-        $this->pushD(); // push THIS
+        // push THIS
+        $this->pushD();
 
         $this->writeCode(array(
             '@THAT',
             'D=M',
         ));
-        $this->pushD(); // push THAT
+        // push THAT
+        $this->pushD();
 
         // arg = SP - nArgs - 5
         $this->writeCode(array(
@@ -399,14 +432,14 @@ class CodeWriter
             'M=D',
         ));
 
-        // goto g, finally the jump
+        // Saltar para a função chamada
         $this->writeCode(array(
-            '// call jump',
             '@' . $functionName,
             '0;JMP',
         ));
 
         $this->writeCode(array(
+            '// call end',
             "($retAddr)"
         ));
     }

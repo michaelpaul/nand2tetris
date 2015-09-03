@@ -18,6 +18,7 @@
     <fileset dir="tests/functional/FunctionCalls" id="FunctionCalls">
         <include name="SimpleFunction" />
         <include name="NestedCall" />
+        <!-- <include name="FibonacciElement" /> -->
     </fileset>
     <!-- / Test programs -->
 
@@ -47,8 +48,11 @@
 
     <target name="functional.run">
         <property name="program.prefix" value="${absfilename}/${filename}" />
-        <echo msg="Translate: ${program.prefix}.vm" />
-        <exec command="php VMTranslator.php ${program.prefix}.vm" checkreturn="true" passthru="true" />
+        <property name="program.vm" value="${absfilename}" />
+        <available file="${program.prefix}.vm" property="program.vm" value="${program.prefix}.vm" />
+        
+        <echo msg="Translate: ${program.vm}" />
+        <exec command="php VMTranslator.php ${program.vm}" checkreturn="true" passthru="true" />
         <echo msg="Run: ${program.prefix}.tst" />
         <exec command="CPUEmulator.sh ${program.prefix}.tst" />
         <exec command="TextComparer.sh ${program.prefix}.cmp ${program.prefix}.out" passthru="true" checkreturn="true" />

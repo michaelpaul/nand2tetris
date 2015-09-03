@@ -31,7 +31,8 @@ class Main
             $outfile = preg_replace('/.vm$/', '.asm', $inputFile);
         } else if (is_dir($inputFile)) {
             if ($outfile == null) {
-                $outfile = $inputFile . '.asm';
+                $outfile = rtrim($inputFile, DIRECTORY_SEPARATOR) .
+                    DIRECTORY_SEPARATOR . basename($inputFile) . '.asm';
             }
             $inputFiles = glob($inputFile . DIRECTORY_SEPARATOR . "*.vm");
         }
