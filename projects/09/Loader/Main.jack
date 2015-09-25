@@ -1,0 +1,50 @@
+// hack screen text size: 64x23
+class Main
+{
+    function void printLoading(String msg) {
+        var int i, limit;
+        let i = 0;
+        let limit = 100;
+
+        do Output.printString(msg);
+
+        while (i < (limit + 1)) {
+            //do Output.moveCursor(0, 0);
+            //do Output.printString("   ");
+            do Output.printInt(i);
+            do Output.printString("%");
+            do Sys.wait(5);
+            if (i < 10) {
+                do Output.backSpace();
+                do Output.backSpace();
+            } else {
+                if (i < limit) {
+                    do Output.backSpace();
+                    do Output.backSpace();
+                    do Output.backSpace();
+                }
+            }
+            let i = i + 1;
+        }
+        return;
+    }
+
+    function void main()
+    {
+        var int n;
+        let n = 0;
+        while (n < 7) {
+            do Main.printLoading("> Loading assets: ");
+            do Output.println();
+            do Main.printLoading("> Loading modules: ");
+            do Output.println();
+            do Main.printLoading("> Building cache ");
+            do Output.println();
+            let n = n + 1;
+        }
+        do Output.printString("> System booted sucessfully");
+        do Output.println();
+        do Output.printString(">> Sucesso total e absoluto!");
+        return;
+    }
+}

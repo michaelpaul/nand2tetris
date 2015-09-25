@@ -1,0 +1,17 @@
+class TetrisGame
+{
+    // tabuleiro
+    field Board b;
+    // próxima peça
+    field Piece next;
+
+    constructor TetrisGame new()
+    {
+        return this;
+    }
+
+    // criar uma peça modelo N
+    // function Piece p1();
+    // function Piece p2();
+
+}

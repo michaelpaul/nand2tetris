@@ -1,0 +1,269 @@
+class Board
+{
+    // matrix do tabuleiro
+    field Array b;
+    // tamanho
+    field int rows, cols;
+    // peça atual
+    field Piece current;
+
+    constructor Board new(int mrows, int mcols)
+    {
+        var int n;
+        var Array col;
+        // enter the matrix
+        let n = 0;
+        let b = Array.new(mrows);
+        while (n < mrows) {
+            let col = Array.new(mcols);
+            let b[n] = col;
+            let n = n + 1;
+        }
+        let rows = mrows;
+        let cols = mcols;
+        return this;
+    }
+
+    // get cel
+    method int getCel(int i, int j)
+    {
+        var Array row;
+        var int val;
+        //if (i < 0 || i > rows) {
+        //    do Sys.error();
+        //}
+        let row = b[i];
+        let val = row[j];
+        return val;
+    }
+
+    // set cel
+    method void setCel(int i, int j, int val)
+    {
+        var Array row;
+        var int val;
+        let row = b[i];
+        let row[j] = val;
+        return;
+    }
+
+    method void addBlock(Block source_block)
+    {
+        do setCel(source_block.getRow(), source_block.getCol(), source_block);
+        return;
+    }
+
+    // mesa.canMove(source_block, direction)
+    method bool canMove(Block source_block, int direction)
+    {
+        var Block dest_block;
+        var int dest;
+        var int row, col;
+
+        let row = source_block.getRowDir(direction);
+        let col = source_block.getColDir(direction);
+
+        // validar indices
+        if (col < 0 | col > (cols - 1)) {
+            return false;
+        }
+        if (row < 0 | row > (rows - 1)) {
+            return false;
+        }
+
+        let dest = getCel(row, col);
+        if (dest = 0) {
+            return true;
+        }
+
+        let dest_block = dest;
+        if (~(source_block.getPiece() = dest_block.getPiece())) {
+            return false;
+        }
+        return true;
+    }
+
+    method void move(Block block, int direction)
+    {
+        var int row, col;
+
+        if (~ canMove(block, direction)) {
+            return;
+        }
+
+        let row = block.getRowDir(direction);
+        let col = block.getColDir(direction);
+
+        // esvaziar celula
+        do setCel(block.getRow(), block.getCol(), 0);
+        // mover
+        // do setCel(row, col, block);
+        do block.setRow(row);
+        do block.setCol(col);
+        return;
+    }
+
+    // foreach block from piece
+    //   if (!mesa.canMove(block, direction))
+    //      return;
+    // mover todas as partes
+    // foreach block from piece
+    //   mesa.move(block, direction)
+    method void movePiece(Piece piece, int direction)
+    {
+        // check every piece
+        do piece.rewind();
+        while (piece.valid()) {
+            if (~ canMove(piece.current(), direction)) {
+                return;
+            }
+            do piece.next();
+        }
+        // calcular o destino de todos os blocos
+        do piece.rewind();
+        while (piece.valid()) {
+            do move(piece.current(), direction);
+            do piece.next();
+        }
+        // realizar o movimento
+        do piece.rewind();
+        while (piece.valid()) {
+            do addBlock(piece.current());
+            do piece.next();
+        }
+        return;
+    }
+
+    // adicionar uma peça no topo do tabuleiro
+    method void addPiece(Piece piece)
+    {
+        do piece.rewind();
+        while (piece.valid()) {
+            do addBlock(piece.current());
+            do piece.next();
+        }
+        // store piece
+        let current = piece;
+        return;
+    }
+
+    method void rotate(Piece piece)
+    {
+        var int xorigin, yorigin;
+        var Block origin;
+
+        let origin = piece.getBlock(0);
+        let xorigin = origin.getRow();
+        let yorigin = origin.getCol();
+
+        do piece.rewind();
+        while (piece.valid()) {
+            do rotateBlock(piece.current(), xorigin, yorigin);
+            do piece.next();
+        }
+        // realizar o movimento
+        do piece.rewind();
+        while (piece.valid()) {
+            do addBlock(piece.current());
+            do piece.next();
+        }
+        return;
+    }
+
+    /**
+    http://tetris.wikia.com/wiki/SRS - recomendado
+    http://tetris.wikia.com/wiki/Nintendo_Rotation_System - primeira versão, mais simples
+
+    http://www.euclideanspace.com/maths/geometry/affine/aroundPoint/matrix2d/
+    http://www.idomaths.com/linear_transformation.php
+    */
+    method void rotateBlock(Block block, int xorigin, int yorigin)
+    {
+        var int xin, yin, xout, yout;
+        var Array rm; // rotation matrix
+
+        // 90, to right
+        let rm = Array.new(4);
+        let rm[0] = 0; let rm[1] = -1;
+        let rm[2] = 1; let rm[3] = 0;
+
+        let xin = block.getRow();
+        let yin = block.getCol();
+
+        // xout = r00* xin + r01* yin + x - r00*x - r01*y
+        let xout = (rm[0] * xin) + (rm[1] * yin) +
+            (xorigin - (rm[0] * xorigin) - (rm[1] * yorigin));
+
+        // yout = r10* xin + r11* yin + y - r10*x - r11*y
+        let yout = (rm[2] * xin) + (rm[3] * yin) +
+            (yorigin - (rm[2] * xorigin) - (rm[3] * yorigin));
+
+        // esvaziar celula
+        do setCel(block.getRow(), block.getCol(), 0);
+        // mover
+        //do setCel(xout, yout, block);
+        do block.setRow(xout);
+        do block.setCol(yout);
+
+        do Memory.deAlloc(rm);
+        return;
+    }
+
+    method void print()
+    {
+        var int i, j, val;
+
+        do Output.printString("Board ");
+        do Output.printInt(rows);
+        do Output.printString("x");
+        do Output.printInt(cols);
+        do Output.println();
+
+        let i = rows - 1;
+        while (i > 0 | (i = 0)) {
+            let j = 0;
+            while (j < cols) {
+                let val = b[i];
+                let val = val[j];
+                do Output.printInt(val);
+                do Output.printString(" ");
+                let j = j + 1;
+            }
+            do Output.println();
+            let i = i - 1;
+        }
+        return;
+    }
+
+    method void draw()
+    {
+        var int i, j, val;
+        var Block block, blank;
+
+        let i = 0;
+        while (i < rows) {
+            let j = 0;
+            while (j < cols) {
+                let val = b[i];
+                let val = val[j];
+
+                if (val > 0) {
+                    let block = val;
+                    // output
+                    do block.draw(rows, cols);
+                } else {
+                    let blank = Block.new(10);
+                    do blank.setBoardPos(i, j);
+                    do blank.drawBlank(rows, cols);
+                    //do setCel(i, j, blank);
+                    do Memory.deAlloc(blank);
+                }
+
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+        return;
+    }
+
+}

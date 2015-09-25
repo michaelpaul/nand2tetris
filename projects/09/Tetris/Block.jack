@@ -1,0 +1,126 @@
+class Block
+{
+    field int width, height;
+    field boolean origin;
+    // posição na matriz
+    field int row, col;
+
+    // piece
+    field int piece;
+
+    field int padding;
+
+    constructor Block new(int size)
+    {
+        let width = size;
+        let height = size;
+        let padding = 2;
+        let origin = false;
+        return this;
+    }
+
+    method void setOrigin()
+    {
+        let origin = true;
+        return;
+    }
+
+    method void setPiece(int p)
+    {
+        let piece = p;
+        return;
+    }
+
+    method int getPiece()
+    {
+        return piece;
+    }
+
+    method void setRow(int r)
+    {
+        let row = r;
+        return;
+    }
+
+    method void setCol(int r)
+    {
+        let col = r;
+        return;
+    }
+
+    method void setBoardPos(int prow, int pcol)
+    {
+        let row = prow;
+        let col = pcol;
+        return;
+    }
+
+    method int getRow()
+    {
+        return row;
+    }
+
+    method int getCol()
+    {
+        return col;
+    }
+
+    method int getRowDir(int direction)
+    {
+        // 1 = up, col, row - 1
+        // 2 = down, col, row + 1
+        if (direction = 1) {
+            return row + 1;
+        }
+        if (direction = 2) {
+            return row - 1;
+        }
+        return row;
+    }
+
+    method int getColDir(int direction)
+    {
+        // 3 = left, col - 1, row
+        // 4 = right, col + 1, row
+        if (direction = 3) {
+            return col - 1;
+        }
+        if (direction = 4) {
+            return col + 1;
+        }
+        return col;
+    }
+
+    // Board size: int rows, int cols
+    method void draw(int rows, int cols)
+    {
+        var int x, y;
+        let x = col * width;
+        let y = ((rows - 1) * height) - (row * height);
+        do Screen.drawRectangle(x, y, x + width, y + height);
+        // riscar origin, debug...
+        if (origin) {
+            do Screen.setColor(false);
+            do Screen.drawLine(x, y, x + width, y + height);
+            do Screen.setColor(true);
+        }
+        return;
+    }
+
+    // Board size: int rows, int cols
+    method void drawBlank(int rows, int cols)
+    {
+        var int x, y;
+        let x = col * width;
+        let y = ((rows - 1) * height) - (row * height);
+        // black
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x, y, x + width, y + height);
+        // white
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x + 1, y + 1, (x - 1) + width, (y - 1) + height);
+        // restore color to black
+        do Screen.setColor(true);
+        return;
+    }
+}

@@ -1,0 +1,59 @@
+class Main
+{
+    // Spin Test
+    function void main()
+    {
+        var Board mesa;
+        var Piece orangeL, purpleT;
+        //let mesa = Board.new(20, 10);
+        let mesa = Board.new(6, 8);
+
+        // primeira
+        let orangeL = Piece.orangeL();
+        do mesa.addPiece(orangeL);
+
+        do mesa.movePiece(orangeL, 4);
+        do mesa.movePiece(orangeL, 4);
+        do mesa.movePiece(orangeL, 1);
+        do mesa.movePiece(orangeL, 1);
+
+        let purpleT = Piece.purpleT();
+        do mesa.addPiece(purpleT);
+
+        do mesa.movePiece(purpleT, 4);
+        do mesa.movePiece(purpleT, 4);
+        do mesa.movePiece(purpleT, 4);
+
+        do mesa.draw();
+
+        do Sys.wait(2000);
+
+        while (true) {
+            do mesa.rotate(orangeL);
+            do mesa.rotate(purpleT);
+            do mesa.draw();
+            do Sys.wait(1500);
+        }
+
+        return;
+    }
+
+    //function void main()
+    //{
+    //    // init game
+    //    // set current piece
+    //    // main game loop
+    //    while (true) { // not gameOver
+    //        // if not next
+    //        //  next = random piece
+    //        // if not current piece
+    //        //  current = next
+    //        // get input
+    //        //  rotate piece
+    //        // move current piece
+    //        // draw board
+    //    }
+    //
+    //    return;
+    //}
+}

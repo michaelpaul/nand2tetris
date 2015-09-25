@@ -1,0 +1,145 @@
+class Piece
+{
+    // partes dessa peça
+    field Array blocks;
+    field int size;
+    field int index;
+
+    constructor Piece new()
+    {
+        let blocks = Array.new(4); // max 4 blocos
+        let size = 0;
+        do rewind();
+        return this;
+    }
+
+    // adicionar bloco a esta peça
+    method void addBlock(Block s)
+    {
+        let blocks[size] = s;
+        let size = size + 1;
+        return;
+    }
+
+    method Block getBlock(int index)
+    {
+        return blocks[index];
+    }
+
+    /** {{{ iterator */
+    method void rewind()
+    {
+        let index = 0;
+        return;
+    }
+
+    method boolean valid()
+    {
+        return index < size;
+    }
+
+    method void next()
+    {
+        let index = index + 1;
+        return;
+    }
+
+    method int key()
+    {
+        return index;
+    }
+
+    method Block current()
+    {
+        return blocks[index];
+    }
+    /** }}} */
+
+    /**
+    PieceBuilder Map
+    M: matriz da peça
+    +-----------+
+    |0,0|0,1|0,2|
+    +-----------+
+    |1,0|1,1|1,2|
+    +-----------+
+    |2,0|2,1|2,2|
+    +-----------+
+
+    +-----------+
+    |2,0|2,1|2,2|
+    +-----------+
+    |1,0|1,1|1,2|
+    +-----------+
+    |0,0|0,1|0,2|
+    +-----------+
+    */
+
+    function Piece orangeL()
+    {
+        var Piece p;
+        var Block block;
+        let p = Piece.new();
+
+        // origin
+        let block = Block.new(10);
+        do block.setPiece(1);
+        do block.setOrigin();
+        do block.setBoardPos(1, 1);
+        do p.addBlock(block);
+
+        let block = Block.new(10);
+        do block.setPiece(1);
+        do block.setBoardPos(2, 1);
+        do p.addBlock(block);
+
+        let block = Block.new(10);
+        do block.setPiece(1);
+        do block.setBoardPos(0, 1);
+        do p.addBlock(block);
+
+        let block = Block.new(10);
+        do block.setPiece(1);
+        do block.setBoardPos(0, 2);
+        do p.addBlock(block);
+
+        return p;
+    }
+
+    function Piece purpleT()
+    {
+        var Piece p;
+        var Block block;
+        let p = Piece.new();
+
+        // origin
+        let block = Block.new(10);
+        do block.setPiece(2);
+        do block.setOrigin();
+        do block.setBoardPos(1, 1);
+        do p.addBlock(block);
+
+        let block = Block.new(10);
+        do block.setPiece(2);
+        do block.setBoardPos(1, 0);
+        do p.addBlock(block);
+
+        let block = Block.new(10);
+        do block.setPiece(2);
+        do block.setBoardPos(1, 2);
+        do p.addBlock(block);
+
+        let block = Block.new(10);
+        do block.setPiece(2);
+        do block.setBoardPos(2, 1);
+        do p.addBlock(block);
+
+        return p;
+    }
+
+    /** @deprecated */
+    method Array getBlocks()
+    {
+        return blocks;
+    }
+}
