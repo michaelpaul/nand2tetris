@@ -26,6 +26,123 @@ class Piece
         return blocks[index];
     }
 
+    method Piece copy()
+    {
+        var Piece copy;
+        var Block source_block, dest_block;
+        let copy = Piece.new();
+        do rewind();
+        while (valid()) {
+            let source_block = current();
+            let dest_block = Block.new(10);
+            do dest_block.setBoardPos(source_block.getRow(), source_block.getCol());
+            do copy.addBlock(dest_block);
+            do next();
+        }
+        let dest_block = copy.getBlock(0);
+        do dest_block.setOrigin();
+        return copy;
+    }
+
+    method void dispose()
+    {
+        var Block block;
+
+        do rewind();
+        while (valid()) {
+            let block = current();
+            do Memory.deAlloc(block);
+            do next();
+        }
+
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void move(int direction)
+    {
+        var Block block;
+        var int row, col;
+
+        do rewind();
+        while (valid()) {
+            let block = current();
+            let row = block.getRowDir(direction);
+            let col = block.getColDir(direction);
+            do block.setRow(row);
+            do block.setCol(col);
+            do next();
+        }
+
+        return;
+    }
+
+    method void rotate()
+    {
+        var int xorigin, yorigin;
+        var Block origin;
+
+        let origin = getBlock(0);
+        let xorigin = origin.getRow();
+        let yorigin = origin.getCol();
+
+        do rewind();
+        while (valid()) {
+            do rotateBlock(current(), xorigin, yorigin);
+            do next();
+        }
+
+        return;
+    }
+
+    /**
+    http://tetris.wikia.com/wiki/SRS - recomendado
+    http://tetris.wikia.com/wiki/Nintendo_Rotation_System - primeira versão, mais simples
+
+    http://www.euclideanspace.com/maths/geometry/affine/aroundPoint/matrix2d/
+    http://www.idomaths.com/linear_transformation.php
+    */
+    method void rotateBlock(Block block, int xorigin, int yorigin)
+    {
+        var int xin, yin, xout, yout;
+        var Array rm; // rotation matrix
+
+        // 90, to right
+        let rm = Array.new(4);
+        let rm[0] = 0; let rm[1] = -1;
+        let rm[2] = 1; let rm[3] = 0;
+
+        let xin = block.getRow();
+        let yin = block.getCol();
+
+        // xout = r00* xin + r01* yin + x - r00*x - r01*y
+        let xout = (rm[0] * xin) + (rm[1] * yin) +
+            (xorigin - (rm[0] * xorigin) - (rm[1] * yorigin));
+
+        // yout = r10* xin + r11* yin + y - r10*x - r11*y
+        let yout = (rm[2] * xin) + (rm[3] * yin) +
+            (yorigin - (rm[2] * xorigin) - (rm[3] * yorigin));
+
+        do block.setRow(xout);
+        do block.setCol(yout);
+        // @TODO make this matrix static
+        do Memory.deAlloc(rm);
+        return;
+    }
+
+    method void updateBlocks(Piece source)
+    {
+        var Block source_block, dest_block;
+        do source.rewind();
+        while (source.valid()) {
+            let source_block = source.current();
+            let dest_block = getBlock(source.key());
+            do dest_block.setBoardPos(source_block.getRow(), source_block.getCol());
+            do source.next();
+        }
+        return;
+    }
+
     /** {{{ iterator */
     method void rewind()
     {
@@ -83,23 +200,19 @@ class Piece
 
         // origin
         let block = Block.new(10);
-        do block.setPiece(1);
         do block.setOrigin();
         do block.setBoardPos(1, 1);
         do p.addBlock(block);
 
         let block = Block.new(10);
-        do block.setPiece(1);
         do block.setBoardPos(2, 1);
         do p.addBlock(block);
 
         let block = Block.new(10);
-        do block.setPiece(1);
         do block.setBoardPos(0, 1);
         do p.addBlock(block);
 
         let block = Block.new(10);
-        do block.setPiece(1);
         do block.setBoardPos(0, 2);
         do p.addBlock(block);
 
@@ -114,32 +227,22 @@ class Piece
 
         // origin
         let block = Block.new(10);
-        do block.setPiece(2);
         do block.setOrigin();
         do block.setBoardPos(1, 1);
         do p.addBlock(block);
 
         let block = Block.new(10);
-        do block.setPiece(2);
         do block.setBoardPos(1, 0);
         do p.addBlock(block);
 
         let block = Block.new(10);
-        do block.setPiece(2);
         do block.setBoardPos(1, 2);
         do p.addBlock(block);
 
         let block = Block.new(10);
-        do block.setPiece(2);
         do block.setBoardPos(2, 1);
         do p.addBlock(block);
 
         return p;
-    }
-
-    /** @deprecated */
-    method Array getBlocks()
-    {
-        return blocks;
     }
 }

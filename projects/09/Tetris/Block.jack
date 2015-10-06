@@ -4,10 +4,6 @@ class Block
     field boolean origin;
     // posição na matriz
     field int row, col;
-
-    // piece
-    field int piece;
-
     field int padding;
 
     constructor Block new(int size)
@@ -23,17 +19,6 @@ class Block
     {
         let origin = true;
         return;
-    }
-
-    method void setPiece(int p)
-    {
-        let piece = p;
-        return;
-    }
-
-    method int getPiece()
-    {
-        return piece;
     }
 
     method void setRow(int r)
