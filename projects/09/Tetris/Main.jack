@@ -27,14 +27,13 @@ class Main
         do mesa.move(orangeL2, 4);
 
         do mesa.draw();
-
         do Sys.wait(1000);
 
         while (true) {
-            do mesa.rotate(orangeL);
-            do mesa.rotate(orangeL2);
+            do mesa.rotateRight(orangeL);
+            do mesa.rotateLeft(orangeL2);
             do mesa.draw();
-            do Sys.wait(500);
+            do Sys.wait(1000);
         }
 
         return;

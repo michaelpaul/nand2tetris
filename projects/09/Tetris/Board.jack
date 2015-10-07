@@ -116,11 +116,23 @@ class Board
         return;
     }
 
-    method void rotate(Piece piece)
+    method void rotateLeft(Piece piece)
+    {
+        do rotate(piece, 3);
+        return;
+    }
+
+    method void rotateRight(Piece piece)
+    {
+        do rotate(piece, 4);
+        return;
+    }
+
+    method void rotate(Piece piece, int dir)
     {
         var Piece copy;
         let copy = piece.copy();
-        do copy.rotate();
+        do copy.rotate(dir);
         do moveTo(piece, copy);
         do copy.dispose();
         return;

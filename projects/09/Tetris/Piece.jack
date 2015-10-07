@@ -46,15 +46,12 @@ class Piece
 
     method void dispose()
     {
-        var Block block;
-
         do rewind();
         while (valid()) {
-            let block = current();
-            do Memory.deAlloc(block);
+            do Memory.deAlloc(current());
             do next();
         }
-
+        do Memory.deAlloc(blocks);
         do Memory.deAlloc(this);
         return;
     }
@@ -77,7 +74,7 @@ class Piece
         return;
     }
 
-    method void rotate()
+    method void rotate(int dir)
     {
         var int xorigin, yorigin;
         var Block origin;
@@ -88,7 +85,7 @@ class Piece
 
         do rewind();
         while (valid()) {
-            do rotateBlock(current(), xorigin, yorigin);
+            do rotateBlock(current(), dir, xorigin, yorigin);
             do next();
         }
 
@@ -102,31 +99,42 @@ class Piece
     http://www.euclideanspace.com/maths/geometry/affine/aroundPoint/matrix2d/
     http://www.idomaths.com/linear_transformation.php
     */
-    method void rotateBlock(Block block, int xorigin, int yorigin)
+    method void rotateBlock(Block block, int dir, int xorigin, int yorigin)
     {
         var int xin, yin, xout, yout;
-        var Array rm; // rotation matrix
-
-        // 90, to right
-        let rm = Array.new(4);
-        let rm[0] = 0; let rm[1] = -1;
-        let rm[2] = 1; let rm[3] = 0;
+        // Rotation matrix positions
+        var int r00, r01, r10, r11;
+        // +-----+
+        // |00|01|
+        // +-----+
+        // |10|11|
+        // +-----+
+        let r00 = 0;
+        let r11 = 0;
+        // left
+        if (dir = 3) {
+            let r01 = 1;
+            let r10 = -1;
+        }
+        // right
+        if (dir = 4) {
+            let r01 = -1;
+            let r10 = 1;
+        }
 
         let xin = block.getRow();
         let yin = block.getCol();
 
         // xout = r00* xin + r01* yin + x - r00*x - r01*y
-        let xout = (rm[0] * xin) + (rm[1] * yin) +
-            (xorigin - (rm[0] * xorigin) - (rm[1] * yorigin));
+        let xout = (r00 * xin) + (r01 * yin) +
+            (xorigin - (r00 * xorigin) - (r01 * yorigin));
 
         // yout = r10* xin + r11* yin + y - r10*x - r11*y
-        let yout = (rm[2] * xin) + (rm[3] * yin) +
-            (yorigin - (rm[2] * xorigin) - (rm[3] * yorigin));
+        let yout = (r10 * xin) + (r11 * yin) +
+            (yorigin - (r10 * xorigin) - (r11 * yorigin));
 
         do block.setRow(xout);
         do block.setCol(yout);
-        // @TODO make this matrix static
-        do Memory.deAlloc(rm);
         return;
     }
 
