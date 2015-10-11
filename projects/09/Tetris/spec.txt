@@ -15,7 +15,6 @@ https://en.wikipedia.org/wiki/Coordinate_system
 
 # TODO
 
-- desenhar o tabuleiro completo (com 2 linhas ocultas) no centro da tela;
 - aplicar o padding entre os blocos;
 - sistema de criação de peças (PieceBuilder);
 - criar as 7 peças do jogo;

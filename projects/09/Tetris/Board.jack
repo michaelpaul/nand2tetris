@@ -2,25 +2,35 @@ class Board
 {
     // matrix do tabuleiro
     field Array b;
-    // tamanho
-    field int rows, cols;
+    // tamanho da matrix
+    field int rows, cols, visible_rows;
+    // posição do ponto origem da mesa no canto inferior esquerdo
+    field int bx, by;
+    // board width/height
+    field int bw, bh;
     // peça atual
     field Piece current;
 
-    constructor Board new(int mrows, int mcols)
+    constructor Board new(int max_rows, int max_cols)
     {
         var int n;
-        var Array col;
+
+        let rows = max_rows;
+        let cols = max_cols;
+        let visible_rows = rows - 2;
+        let bx = 200;
+        let by = 200;
+        let bw = cols * 10;
+        let bh = visible_rows * 10;
+
         // enter the matrix
         let n = 0;
-        let b = Array.new(mrows);
-        while (n < mrows) {
-            let col = Array.new(mcols);
-            let b[n] = col;
+        let b = Array.new(rows);
+        while (n < rows) {
+            let b[n] = Array.new(cols);
             let n = n + 1;
         }
-        let rows = mrows;
-        let cols = mcols;
+
         return this;
     }
 
@@ -179,30 +189,36 @@ class Board
         return;
     }
 
+    method void drawBackground()
+    {
+        // black
+        do Screen.setColor(true);
+        do Screen.drawRectangle(bx, by - bh, bx + bw, by);
+        // white
+        do Screen.setColor(false);
+        do Screen.drawRectangle(bx + 1, by - bh + 1, bx + bw - 1, by - 1);
+        // restore color to black
+        do Screen.setColor(true);
+        return;
+    }
+
     method void draw()
     {
         var int i, j, val;
-        var Block block, blank;
+        var Block block;
 
+        do drawBackground();
+
+        // Draw visible blocks
         let i = 0;
-        while (i < rows) {
+        while (i < visible_rows) {
             let j = 0;
             while (j < cols) {
-                let val = b[i];
-                let val = val[j];
-
+                let val = getCel(i, j);
                 if (val > 0) {
                     let block = val;
-                    // output
-                    do block.draw(rows, cols);
-                } else {
-                    let blank = Block.new(10);
-                    do blank.setBoardPos(i, j);
-                    do blank.drawBlank(rows, cols);
-                    //do setCel(i, j, blank);
-                    do Memory.deAlloc(blank);
+                    do block.draw(bx, by);
                 }
-
                 let j = j + 1;
             }
             let i = i + 1;

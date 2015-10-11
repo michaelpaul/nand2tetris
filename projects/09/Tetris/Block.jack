@@ -76,12 +76,12 @@ class Block
         return col;
     }
 
-    // Board size: int rows, int cols
-    method void draw(int rows, int cols)
+    // Board origin: int bx, int by
+    method void draw(int bx, int by)
     {
         var int x, y;
-        let x = col * width;
-        let y = ((rows - 1) * height) - (row * height);
+        let x = bx + (col * width);
+        let y = by - (row * height) - height;
         do Screen.drawRectangle(x, y, x + width, y + height);
         // riscar origin, debug...
         if (origin) {
@@ -89,23 +89,6 @@ class Block
             do Screen.drawLine(x, y, x + width, y + height);
             do Screen.setColor(true);
         }
-        return;
-    }
-
-    // Board size: int rows, int cols
-    method void drawBlank(int rows, int cols)
-    {
-        var int x, y;
-        let x = col * width;
-        let y = ((rows - 1) * height) - (row * height);
-        // black
-        do Screen.setColor(true);
-        do Screen.drawRectangle(x, y, x + width, y + height);
-        // white
-        do Screen.setColor(false);
-        do Screen.drawRectangle(x + 1, y + 1, (x - 1) + width, (y - 1) + height);
-        // restore color to black
-        do Screen.setColor(true);
         return;
     }
 }

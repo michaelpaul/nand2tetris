@@ -5,8 +5,8 @@ class Main
     {
         var Board mesa;
         var Piece orangeL, orangeL2;
-        //let mesa = Board.new(20, 10);
-        let mesa = Board.new(6, 8);
+        var int turn;
+        let mesa = Board.new(20, 10);
 
         let orangeL = Piece.orangeL();
         do mesa.addPiece(orangeL);
@@ -28,8 +28,12 @@ class Main
 
         do mesa.draw();
         do Sys.wait(1000);
-
+        let turn = 0;
         while (true) {
+            do Output.moveCursor(22, 0);
+            do Output.printString("Turn: ");
+            do Output.printInt(turn);
+            let turn = turn + 1;
             do mesa.rotateRight(orangeL);
             do mesa.rotateLeft(orangeL2);
             do mesa.draw();
