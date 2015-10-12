@@ -6,7 +6,8 @@ class Main
         var Board mesa;
         var Piece orangeL, orangeL2;
         var int turn;
-        let mesa = Board.new(20, 10);
+        // let mesa = Board.new(22, 10);
+        let mesa = Board.new(5, 5);
 
         let orangeL = Piece.orangeL();
         do mesa.addPiece(orangeL);

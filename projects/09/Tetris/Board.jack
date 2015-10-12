@@ -18,10 +18,10 @@ class Board
         let rows = max_rows;
         let cols = max_cols;
         let visible_rows = rows - 2;
-        let bx = 200;
-        let by = 200;
-        let bw = cols * 10;
-        let bh = visible_rows * 10;
+        let bx = 190;
+        let by = 250;
+        let bw = cols * Block.getSize() + Block.getMargin();
+        let bh = visible_rows * Block.getSize() + Block.getMargin();
 
         // enter the matrix
         let n = 0;
@@ -217,7 +217,7 @@ class Board
                 let val = getCel(i, j);
                 if (val > 0) {
                     let block = val;
-                    do block.draw(bx, by);
+                    do block.draw(bx + Block.getMargin(), by);
                 }
                 let j = j + 1;
             }

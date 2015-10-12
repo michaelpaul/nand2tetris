@@ -34,7 +34,7 @@ class Piece
         do rewind();
         while (valid()) {
             let source_block = current();
-            let dest_block = Block.new(10);
+            let dest_block = Block.new();
             do dest_block.setBoardPos(source_block.getRow(), source_block.getCol());
             do copy.addBlock(dest_block);
             do next();
@@ -207,20 +207,20 @@ class Piece
         let p = Piece.new();
 
         // origin
-        let block = Block.new(10);
+        let block = Block.new();
         do block.setOrigin();
         do block.setBoardPos(1, 1);
         do p.addBlock(block);
 
-        let block = Block.new(10);
+        let block = Block.new();
         do block.setBoardPos(2, 1);
         do p.addBlock(block);
 
-        let block = Block.new(10);
+        let block = Block.new();
         do block.setBoardPos(0, 1);
         do p.addBlock(block);
 
-        let block = Block.new(10);
+        let block = Block.new();
         do block.setBoardPos(0, 2);
         do p.addBlock(block);
 
@@ -234,20 +234,20 @@ class Piece
         let p = Piece.new();
 
         // origin
-        let block = Block.new(10);
+        let block = Block.new();
         do block.setOrigin();
         do block.setBoardPos(1, 1);
         do p.addBlock(block);
 
-        let block = Block.new(10);
+        let block = Block.new();
         do block.setBoardPos(1, 0);
         do p.addBlock(block);
 
-        let block = Block.new(10);
+        let block = Block.new();
         do block.setBoardPos(1, 2);
         do p.addBlock(block);
 
-        let block = Block.new(10);
+        let block = Block.new();
         do block.setBoardPos(2, 1);
         do p.addBlock(block);
 

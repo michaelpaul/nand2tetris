@@ -4,15 +4,25 @@ class Block
     field boolean origin;
     // posição na matriz
     field int row, col;
-    field int padding;
 
-    constructor Block new(int size)
+    constructor Block new()
     {
+        var int size;
+        let size = Block.getSize();
         let width = size;
         let height = size;
-        let padding = 2;
         let origin = false;
         return this;
+    }
+
+    function int getSize()
+    {
+        return 25;
+    }
+
+    function int getMargin()
+    {
+        return 3;
     }
 
     method void setOrigin()
@@ -82,11 +92,11 @@ class Block
         var int x, y;
         let x = bx + (col * width);
         let y = by - (row * height) - height;
-        do Screen.drawRectangle(x, y, x + width, y + height);
+        do Screen.drawRectangle(x, y, x + width - Block.getMargin(), y + height - Block.getMargin());
         // riscar origin, debug...
         if (origin) {
             do Screen.setColor(false);
-            do Screen.drawLine(x, y, x + width, y + height);
+            do Screen.drawLine(x, y, x + width - Block.getMargin(), y + height - Block.getMargin());
             do Screen.setColor(true);
         }
         return;
