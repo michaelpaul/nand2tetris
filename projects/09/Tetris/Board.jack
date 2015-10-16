@@ -97,11 +97,12 @@ class Board
             let row = b.getRow();
             let col = b.getCol();
 
-            // validar indices
-            if (col < 0 | col > (cols - 1)) {
+            // left/right walls
+            if (col < 0 | (col > (cols - 1))) {
                 return true;
             }
-            if (row < 0 | row > (rows - 1)) {
+            // bottom/top walls
+            if (row < 0 | (row > (visible_rows - 1))) {
                 return true;
             }
 
@@ -141,6 +142,10 @@ class Board
     method void rotate(Piece piece, int dir)
     {
         var Piece copy;
+        // quadrado não tem rotação
+        if (~piece.canRotate()) {
+            return;
+        }
         let copy = piece.copy();
         do copy.rotate(dir);
         do moveTo(piece, copy);

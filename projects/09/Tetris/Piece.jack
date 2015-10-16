@@ -4,11 +4,13 @@ class Piece
     field Array blocks;
     field int size;
     field int index;
+    field boolean canRotate;
 
     constructor Piece new()
     {
         let blocks = Array.new(4); // max 4 blocos
         let size = 0;
+        let canRotate = true;
         do rewind();
         return this;
     }
@@ -19,6 +21,23 @@ class Piece
         let blocks[size] = s;
         let size = size + 1;
         return;
+    }
+
+    method Block add(int row, int col)
+    {
+        var Block b;
+        let b = Block.new();
+        do b.setBoardPos(row, col);
+        do addBlock(b);
+        return b;
+    }
+
+    method Block addOrigin(int row, int col)
+    {
+        var Block origin;
+        let origin = add(row, col);
+        do origin.setOrigin();
+        return origin;
     }
 
     method Block getBlock(int index)
@@ -71,6 +90,15 @@ class Piece
             do next();
         }
 
+        return;
+    }
+
+    method boolean canRotate() {
+        return canRotate;
+    }
+
+    method void disableRotation() {
+        let canRotate = false;
         return;
     }
 
@@ -181,16 +209,7 @@ class Piece
     /** }}} */
 
     /**
-    PieceBuilder Map
-    M: matriz da peça
-    +-----------+
-    |0,0|0,1|0,2|
-    +-----------+
-    |1,0|1,1|1,2|
-    +-----------+
-    |2,0|2,1|2,2|
-    +-----------+
-
+    Board Map from origin
     +-----------+
     |2,0|2,1|2,2|
     +-----------+
@@ -200,57 +219,37 @@ class Piece
     +-----------+
     */
 
+    function Piece square()
+    {
+        var Piece s;
+        let s = Piece.new();
+        do s.addOrigin(0, 0);
+        do s.add(1, 0);
+        do s.add(1, 1);
+        do s.add(0, 1);
+        do s.disableRotation();
+        return s;
+    }
+
     function Piece orangeL()
     {
-        var Piece p;
-        var Block block;
-        let p = Piece.new();
-
-        // origin
-        let block = Block.new();
-        do block.setOrigin();
-        do block.setBoardPos(1, 1);
-        do p.addBlock(block);
-
-        let block = Block.new();
-        do block.setBoardPos(2, 1);
-        do p.addBlock(block);
-
-        let block = Block.new();
-        do block.setBoardPos(0, 1);
-        do p.addBlock(block);
-
-        let block = Block.new();
-        do block.setBoardPos(0, 2);
-        do p.addBlock(block);
-
-        return p;
+        var Piece s;
+        let s = Piece.new();
+        do s.addOrigin(1, 1);
+        do s.add(2, 1);
+        do s.add(0, 1);
+        do s.add(0, 2);
+        return s;
     }
 
     function Piece purpleT()
     {
-        var Piece p;
-        var Block block;
-        let p = Piece.new();
-
-        // origin
-        let block = Block.new();
-        do block.setOrigin();
-        do block.setBoardPos(1, 1);
-        do p.addBlock(block);
-
-        let block = Block.new();
-        do block.setBoardPos(1, 0);
-        do p.addBlock(block);
-
-        let block = Block.new();
-        do block.setBoardPos(1, 2);
-        do p.addBlock(block);
-
-        let block = Block.new();
-        do block.setBoardPos(2, 1);
-        do p.addBlock(block);
-
-        return p;
+        var Piece s;
+        let s = Piece.new();
+        do s.addOrigin(1, 1);
+        do s.add(1, 0);
+        do s.add(1, 2);
+        do s.add(2, 1);
+        return s;
     }
 }

@@ -7,25 +7,33 @@ class Main
         var Piece orangeL, orangeL2;
         var int turn;
         // let mesa = Board.new(22, 10);
-        let mesa = Board.new(5, 5);
+        let mesa = Board.new(5, 10);
 
-        let orangeL = Piece.orangeL();
+        let orangeL = Piece.square();
         do mesa.addPiece(orangeL);
         do mesa.move(orangeL, 4);
         do mesa.move(orangeL, 4);
         do mesa.move(orangeL, 4);
-        do mesa.move(orangeL, 4);
+        do mesa.move(orangeL, 1);
+        do mesa.move(orangeL, 1);
         do mesa.move(orangeL, 4);
         do mesa.move(orangeL, 4);
         do mesa.move(orangeL, 4);
 
-        let orangeL2 = Piece.orangeL();
+        let orangeL2 = Piece.purpleT();
         do mesa.addPiece(orangeL2);
         do mesa.move(orangeL2, 4);
         do mesa.move(orangeL2, 4);
-        do mesa.move(orangeL2, 4);
-        do mesa.move(orangeL2, 4);
-        do mesa.move(orangeL2, 4);
+        do mesa.move(orangeL2, 2);
+        do mesa.move(orangeL2, 1);
+        do mesa.rotateLeft(orangeL2);
+        do mesa.rotateLeft(orangeL2);
+        do mesa.move(orangeL2, 1);
+        do mesa.move(orangeL2, 2);
+
+        //do mesa.move(orangeL2, 4);
+        //do mesa.move(orangeL2, 4);
+        //do mesa.move(orangeL2, 4);
 
         do mesa.draw();
         do Sys.wait(1000);
