@@ -212,11 +212,66 @@ class Piece
     |0,0|0,1|0,2|
     +-----------+
     */
+    method void cyanI()
+    {
+        do addOrigin(l1, middle);
+        do add(l1, middle - 1);
+        do add(l1, middle + 1);
+        do add(l1, middle + 2);
+        return;
+    }
+
     method void blueJ()
     {
         do addOrigin(l1, middle);
         do add(l1, middle - 1);
         do add(l1, middle + 1);
+        do add(l2, middle + 1);
+        return;
+    }
+
+    method void orangeL()
+    {
+        do addOrigin(l1, middle);
+        do add(l1, middle - 1);
+        do add(l1, middle + 1);
+        do add(l2, middle - 1);
+        return;
+    }
+
+    method void square()
+    {
+        do addOrigin(l1, middle);
+        do add(l1, middle + 1);
+        do add(l2, middle);
+        do add(l2, middle + 1);
+        do disableRotation();
+        return;
+    }
+
+    method void greenS()
+    {
+        do addOrigin(l1, middle);
+        do add(l1, middle + 1);
+        do add(l2, middle);
+        do add(l2, middle - 1);
+        return;
+    }
+
+    method void purpleT()
+    {
+        do addOrigin(l1, middle);
+        do add(l1, middle - 1);
+        do add(l1, middle + 1);
+        do add(l2, middle);
+        return;
+    }
+
+    method void redZ()
+    {
+        do addOrigin(l1, middle);
+        do add(l1, middle - 1);
+        do add(l2, middle);
         do add(l2, middle + 1);
         return;
     }

@@ -6,18 +6,14 @@ class Main
         var Piece piece;
         // let mesa = Board.new(22, 10);
         let mesa = Board.new(10, 10);
-        let piece = mesa.spawnPiece(1);
-        do mesa.move(piece, 2);
-        //do mesa.move(piece, 2);
-
-        let piece = mesa.spawnPiece(1);
+        let piece = mesa.spawnPiece(7);
         do mesa.move(piece, 2);
         do mesa.move(piece, 2);
 
         while (true) {
-            do mesa.rotateRight(piece);
             do mesa.draw();
             do Sys.wait(1000);
+            do mesa.rotateRight(piece);
         }
 
         return;

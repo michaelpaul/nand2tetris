@@ -15,5 +15,4 @@ https://en.wikipedia.org/wiki/Coordinate_system
 
 # TODO
 
-- criar as 7 peças do jogo;
 - iniciar interações do usuário e uma partida de 7 peças fixas em ordem;

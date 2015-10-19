@@ -58,7 +58,27 @@ class Board
     method Piece spawnPiece(int code) {
         var Piece piece;
         let piece = Piece.new(rows, cols);
-        do piece.blueJ();
+        if (code = 1) {
+            do piece.cyanI();
+        }
+        if (code = 2) {
+            do piece.blueJ();
+        }
+        if (code = 3) {
+            do piece.orangeL();
+        }
+        if (code = 4) {
+            do piece.square();
+        }
+        if (code = 5) {
+            do piece.greenS();
+        }
+        if (code = 6) {
+            do piece.purpleT();
+        }
+        if (code = 7) {
+            do piece.redZ();
+        }
         do addPiece(piece);
         do move(piece, 2);
         do move(piece, 2);
