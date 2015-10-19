@@ -1,10 +1,10 @@
 class Board
 {
-    // matrix do tabuleiro
+    // matriz do tabuleiro
     field Array b;
-    // tamanho da matrix
+    // tamanho da matriz
     field int rows, cols, visible_rows;
-    // posição do ponto origem da mesa no canto inferior esquerdo
+    // posição do ponto origem no canto inferior esquerdo
     field int bx, by;
     // board width/height
     field int bw, bh;
@@ -34,7 +34,6 @@ class Board
         return this;
     }
 
-    // get cel
     method int getCel(int i, int j)
     {
         var Array row;
@@ -47,7 +46,6 @@ class Board
         return val;
     }
 
-    // set cel
     method void setCel(int i, int j, int val)
     {
         var Array row;
@@ -55,6 +53,16 @@ class Board
         let row = b[i];
         let row[j] = val;
         return;
+    }
+
+    method Piece spawnPiece(int code) {
+        var Piece piece;
+        let piece = Piece.new(rows, cols);
+        do piece.blueJ();
+        do addPiece(piece);
+        do move(piece, 2);
+        do move(piece, 2);
+        return piece;
     }
 
     // adicionar uma peça no topo do tabuleiro
@@ -102,7 +110,7 @@ class Board
                 return true;
             }
             // bottom/top walls
-            if (row < 0 | (row > (visible_rows - 1))) {
+            if (row < 0 | (row > (rows - 1))) {
                 return true;
             }
 
@@ -120,7 +128,7 @@ class Board
     method void move(Piece piece, int dir)
     {
         var Piece copy;
-        let copy = piece.copy();
+        let copy = piece.copy(rows, cols);
         do copy.move(dir);
         do moveTo(piece, copy);
         do copy.dispose();
@@ -146,7 +154,7 @@ class Board
         if (~piece.canRotate()) {
             return;
         }
-        let copy = piece.copy();
+        let copy = piece.copy(rows, cols);
         do copy.rotate(dir);
         do moveTo(piece, copy);
         do copy.dispose();
@@ -222,7 +230,7 @@ class Board
                 let val = getCel(i, j);
                 if (val > 0) {
                     let block = val;
-                    do block.draw(bx + Block.getMargin(), by);
+                    do block.draw(bx, by);
                 }
                 let j = j + 1;
             }

@@ -31,18 +31,6 @@ class Block
         return;
     }
 
-    method void setRow(int r)
-    {
-        let row = r;
-        return;
-    }
-
-    method void setCol(int r)
-    {
-        let col = r;
-        return;
-    }
-
     method void setBoardPos(int prow, int pcol)
     {
         let row = prow;
@@ -90,7 +78,7 @@ class Block
     method void draw(int bx, int by)
     {
         var int x, y;
-        let x = bx + (col * width);
+        let x = bx + Block.getMargin() + (col * width);
         let y = by - (row * height) - height;
         do Screen.drawRectangle(x, y, x + width - Block.getMargin(), y + height - Block.getMargin());
         // riscar origin, debug...
@@ -99,6 +87,11 @@ class Block
             do Screen.drawLine(x, y, x + width - Block.getMargin(), y + height - Block.getMargin());
             do Screen.setColor(true);
         }
+        return;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
         return;
     }
 }

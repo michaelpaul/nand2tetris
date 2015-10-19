@@ -5,13 +5,20 @@ class Piece
     field int size;
     field int index;
     field boolean canRotate;
+    // posições ocultas no topo da mesa para construção de peças
+    field int l1, l2, middle;
 
-    constructor Piece new()
+    constructor Piece new(int board_rows, int board_cols)
     {
         let blocks = Array.new(4); // max 4 blocos
         let size = 0;
         let canRotate = true;
         do rewind();
+
+        let l1 = board_rows - 1;
+        let l2 = board_rows - 2;
+        let middle = (board_cols / 2) - 1;
+
         return this;
     }
 
@@ -45,11 +52,11 @@ class Piece
         return blocks[index];
     }
 
-    method Piece copy()
+    method Piece copy(int board_rows, int board_cols)
     {
         var Piece copy;
         var Block source_block, dest_block;
-        let copy = Piece.new();
+        let copy = Piece.new(board_rows, board_cols);
         do rewind();
         while (valid()) {
             let source_block = current();
@@ -63,18 +70,6 @@ class Piece
         return copy;
     }
 
-    method void dispose()
-    {
-        do rewind();
-        while (valid()) {
-            do Memory.deAlloc(current());
-            do next();
-        }
-        do Memory.deAlloc(blocks);
-        do Memory.deAlloc(this);
-        return;
-    }
-
     method void move(int direction)
     {
         var Block block;
@@ -85,8 +80,7 @@ class Piece
             let block = current();
             let row = block.getRowDir(direction);
             let col = block.getColDir(direction);
-            do block.setRow(row);
-            do block.setCol(col);
+            do block.setBoardPos(row, col);
             do next();
         }
 
@@ -161,8 +155,7 @@ class Piece
         let yout = (r10 * xin) + (r11 * yin) +
             (yorigin - (r10 * xorigin) - (r11 * yorigin));
 
-        do block.setRow(xout);
-        do block.setCol(yout);
+        do block.setBoardPos(xout, yout);
         return;
     }
 
@@ -179,7 +172,7 @@ class Piece
         return;
     }
 
-    /** {{{ iterator */
+    /** {{{ Iterator interface */
     method void rewind()
     {
         let index = 0;
@@ -208,6 +201,7 @@ class Piece
     }
     /** }}} */
 
+    /** {{{ Piece builder/transformer */
     /**
     Board Map from origin
     +-----------+
@@ -218,38 +212,27 @@ class Piece
     |0,0|0,1|0,2|
     +-----------+
     */
-
-    function Piece square()
+    method void blueJ()
     {
-        var Piece s;
-        let s = Piece.new();
-        do s.addOrigin(0, 0);
-        do s.add(1, 0);
-        do s.add(1, 1);
-        do s.add(0, 1);
-        do s.disableRotation();
-        return s;
+        do addOrigin(l1, middle);
+        do add(l1, middle - 1);
+        do add(l1, middle + 1);
+        do add(l2, middle + 1);
+        return;
     }
+    /** }}} */
 
-    function Piece orangeL()
+    method void dispose()
     {
-        var Piece s;
-        let s = Piece.new();
-        do s.addOrigin(1, 1);
-        do s.add(2, 1);
-        do s.add(0, 1);
-        do s.add(0, 2);
-        return s;
-    }
-
-    function Piece purpleT()
-    {
-        var Piece s;
-        let s = Piece.new();
-        do s.addOrigin(1, 1);
-        do s.add(1, 0);
-        do s.add(1, 2);
-        do s.add(2, 1);
-        return s;
+        var Block b;
+        do rewind();
+        while (valid()) {
+            let b = current();
+            do b.dispose();
+            do next();
+        }
+        do blocks.dispose();
+        do Memory.deAlloc(this);
+        return;
     }
 }

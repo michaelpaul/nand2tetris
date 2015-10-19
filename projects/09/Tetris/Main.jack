@@ -1,50 +1,21 @@
 class Main
 {
-    // Spin test
     function void main()
     {
         var Board mesa;
-        var Piece orangeL, orangeL2;
-        var int turn;
+        var Piece piece;
         // let mesa = Board.new(22, 10);
-        let mesa = Board.new(5, 10);
+        let mesa = Board.new(10, 10);
+        let piece = mesa.spawnPiece(1);
+        do mesa.move(piece, 2);
+        //do mesa.move(piece, 2);
 
-        let orangeL = Piece.square();
-        do mesa.addPiece(orangeL);
-        do mesa.move(orangeL, 4);
-        do mesa.move(orangeL, 4);
-        do mesa.move(orangeL, 4);
-        do mesa.move(orangeL, 1);
-        do mesa.move(orangeL, 1);
-        do mesa.move(orangeL, 4);
-        do mesa.move(orangeL, 4);
-        do mesa.move(orangeL, 4);
+        let piece = mesa.spawnPiece(1);
+        do mesa.move(piece, 2);
+        do mesa.move(piece, 2);
 
-        let orangeL2 = Piece.purpleT();
-        do mesa.addPiece(orangeL2);
-        do mesa.move(orangeL2, 4);
-        do mesa.move(orangeL2, 4);
-        do mesa.move(orangeL2, 2);
-        do mesa.move(orangeL2, 1);
-        do mesa.rotateLeft(orangeL2);
-        do mesa.rotateLeft(orangeL2);
-        do mesa.move(orangeL2, 1);
-        do mesa.move(orangeL2, 2);
-
-        //do mesa.move(orangeL2, 4);
-        //do mesa.move(orangeL2, 4);
-        //do mesa.move(orangeL2, 4);
-
-        do mesa.draw();
-        do Sys.wait(1000);
-        let turn = 0;
         while (true) {
-            do Output.moveCursor(22, 0);
-            do Output.printString("Turn: ");
-            do Output.printInt(turn);
-            let turn = turn + 1;
-            do mesa.rotateRight(orangeL);
-            do mesa.rotateLeft(orangeL2);
+            do mesa.rotateRight(piece);
             do mesa.draw();
             do Sys.wait(1000);
         }
