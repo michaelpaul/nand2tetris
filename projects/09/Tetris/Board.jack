@@ -145,14 +145,15 @@ class Board
         return false;
     }
 
-    method void move(Piece piece, int dir)
+    method boolean move(Piece piece, int dir)
     {
         var Piece copy;
+        var boolean moved;
         let copy = piece.copy(rows, cols);
         do copy.move(dir);
-        do moveTo(piece, copy);
+        let moved = moveTo(piece, copy);
         do copy.dispose();
-        return;
+        return moved;
     }
 
     method void rotateLeft(Piece piece)
@@ -181,18 +182,18 @@ class Board
         return;
     }
 
-    method void moveTo(Piece piece, Piece copy)
+    method boolean moveTo(Piece piece, Piece copy)
     {
         do removePiece(piece);
 
         if (detectCollision(copy)) {
             do addPiece(piece);
-            return;
+            return false;
         }
 
         do piece.updateBlocks(copy);
         do addPiece(piece);
-        return;
+        return true;
     }
 
     /** {{{ Output */

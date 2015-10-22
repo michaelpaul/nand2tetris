@@ -15,4 +15,5 @@ https://en.wikipedia.org/wiki/Coordinate_system
 
 # TODO
 
-- iniciar interações do usuário e uma partida de 7 peças fixas em ordem;
+- limpar linhas / marcar pontos;
+- verificar game over.

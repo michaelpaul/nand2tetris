@@ -2,18 +2,65 @@ class Main
 {
     function void main()
     {
+        var int turn;
         var Board mesa;
         var Piece piece;
+        var char key;
+        var boolean moved;
+
         // let mesa = Board.new(22, 10);
         let mesa = Board.new(10, 10);
         let piece = mesa.spawnPiece(7);
-        do mesa.move(piece, 2);
-        do mesa.move(piece, 2);
+        let key = 0;
+        do mesa.draw();
+
+        // Official keymap
+        // z: rotate left
+        // c: hold
+        // esc: pause
+        // space: hard drop
+        // left/right movement
+        // up: rotate right
+        // down: soft drop
 
         while (true) {
+            let turn = 0;
+            while (turn < 10) {
+                let key = Keyboard.keyPressed();
+                let moved = false;
+
+                if (key = 130) { // left
+                    let moved = mesa.move(piece, 3);
+                }
+                if (key = 132) { // right
+                    let moved = mesa.move(piece, 4);
+                }
+                if (key = 131) { // up
+                    do mesa.rotateRight(piece);
+                    let moved = true;
+                }
+                if (key = 133) { // down
+                    let moved = mesa.move(piece, 2);
+                }
+                let turn = turn + 1;
+
+                if (~(key = 0)) {
+                    if (moved) {
+                        do mesa.draw();
+                    }
+                }
+
+                do Sys.wait(100);
+            }
+
+            // auto drop
+            if (~ mesa.move(piece, 2)) {
+                // piece locked, spawn new
+                let piece = mesa.spawnPiece(3);
+            }
+
             do mesa.draw();
-            do Sys.wait(1000);
-            do mesa.rotateRight(piece);
+            let key = 0;
         }
 
         return;
