@@ -78,9 +78,7 @@ class Piece
         do rewind();
         while (valid()) {
             let block = current();
-            let row = block.getRowDir(direction);
-            let col = block.getColDir(direction);
-            do block.setBoardPos(row, col);
+            do block.move(direction);
             do next();
         }
 

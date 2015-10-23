@@ -15,5 +15,8 @@ https://en.wikipedia.org/wiki/Coordinate_system
 
 # TODO
 
-- limpar linhas / marcar pontos;
-- verificar game over.
+- respawn aleatório;
+- mostrar próxima peça.
+- mostrar pontuação;
+- mostrar mensagem de game over.
+- game.dispose();

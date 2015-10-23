@@ -74,6 +74,14 @@ class Block
         return col;
     }
 
+    method void move(int direction)
+    {
+        var int row, col;
+        let row = getRowDir(direction);
+        let col = getColDir(direction);
+        do setBoardPos(row, col);
+        return;
+    }
     // Board origin: int bx, int by
     method void draw(int bx, int by)
     {

@@ -196,6 +196,78 @@ class Board
         return true;
     }
 
+    method void clearRows()
+    {
+        var int i, j, line;
+        var Block block;
+        let i = 0;
+        while (i < visible_rows) {
+            let line = 0;
+            let j = 0;
+            while (j < cols) {
+                if (getCel(i, j) > 0) {
+                    let line = line + 1;
+                }
+                let j = j + 1;
+            }
+            // empty row
+            if (line = j) {
+                let j = 0;
+                while (j < cols) {
+                    let block = getCel(i, j);
+                    do block.dispose();
+                    do setCel(i, j, 0);
+                    let j = j + 1;
+                }
+                // descer todos os blocos acima dessa linha
+                do moveBlocksDown(i);
+                let i = i - 1;
+            }
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    method void moveBlocksDown(int start_row)
+    {
+        var int i, j, val;
+        var Block block;
+        let i = start_row;
+        while (i < visible_rows) {
+            let j = 0;
+            while (j < cols) {
+                let val = getCel(i, j);
+                if (val > 0) {
+                    let block = val;
+                    do setCel(block.getRow(), block.getCol(), 0);
+                    do block.move(2);
+                    do setCel(block.getRow(), block.getCol(), block);
+                }
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+        return;
+    }
+
+    method boolean hasHiddenBlocks()
+    {
+        var int i, j;
+        let i = visible_rows;
+        while (i < rows) {
+            let j = 0;
+            while (j < cols) {
+                if (getCel(i, j) > 0) {
+                    return true;
+                }
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+        return false;
+    }
+
     /** {{{ Output */
     method void print()
     {
