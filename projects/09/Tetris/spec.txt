@@ -15,7 +15,6 @@ https://en.wikipedia.org/wiki/Coordinate_system
 
 # TODO
 
-- respawn aleatório;
 - mostrar próxima peça.
 - mostrar pontuação;
 - mostrar mensagem de game over.

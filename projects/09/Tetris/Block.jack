@@ -17,12 +17,12 @@ class Block
 
     function int getSize()
     {
-        return 25;
+        return 15;
     }
 
     function int getMargin()
     {
-        return 3;
+        return 2;
     }
 
     method void setOrigin()
@@ -90,11 +90,11 @@ class Block
         let y = by - (row * height) - height;
         do Screen.drawRectangle(x, y, x + width - Block.getMargin(), y + height - Block.getMargin());
         // riscar origin, debug...
-        if (origin) {
-            do Screen.setColor(false);
-            do Screen.drawLine(x, y, x + width - Block.getMargin(), y + height - Block.getMargin());
-            do Screen.setColor(true);
-        }
+        //if (origin) {
+        //    do Screen.setColor(false);
+        //    do Screen.drawLine(x, y, x + width - Block.getMargin(), y + height - Block.getMargin());
+        //    do Screen.setColor(true);
+        //}
         return;
     }
 

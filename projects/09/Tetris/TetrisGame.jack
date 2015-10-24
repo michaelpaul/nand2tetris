@@ -5,22 +5,36 @@ class TetrisGame
     field Board mesa;
     // próxima peça
     field Piece next;
+    field int last_piece;
+    static int seed;
 
     constructor TetrisGame new()
     {
-        // let mesa = Board.new(22, 10);
-        let mesa = Board.new(10, 10);
+        let mesa = Board.new(18, 10);
         let game_over = false;
+        let last_piece = 1;
         return this;
+    }
+
+    function void seed(int s)
+    {
+        let seed = seed + s;
+        return;
+    }
+
+    method int nextPiece()
+    {
+        let last_piece = last_piece + seed;
+        return last_piece & 7;
     }
 
     method void run() {
         var int turn;
-        var Piece piece;
         var char key;
         var boolean moved, repeat;
+        var Piece piece;
 
-        let piece = mesa.spawnPiece(4);
+        let piece = mesa.spawnPiece(nextPiece());
         let key = 0;
         do mesa.draw();
 
@@ -58,17 +72,20 @@ class TetrisGame
                 }
 
                 if (~(key = 0) & (moved)) {
+                    do TetrisGame.seed(key);
+                    do TetrisGame.seed(turn);
                     do mesa.draw();
                 }
                 let turn = turn + 1;
-                do Sys.wait(100);
+                do Sys.wait(80);
             }
 
             // auto drop
             if (~ mesa.move(piece, 2)) {
                 // piece locked, spawn new
                 do mesa.clearRows();
-                let piece = mesa.spawnPiece(4);
+                do TetrisGame.seed(key * piece);
+                let piece = mesa.spawnPiece(nextPiece());
                 if (mesa.hasHiddenBlocks()) {
                     let game_over = true;
                 }

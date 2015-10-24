@@ -18,7 +18,7 @@ class Board
         let rows = max_rows;
         let cols = max_cols;
         let visible_rows = rows - 2;
-        let bx = 190;
+        let bx = 180;
         let by = 250;
         let bw = cols * Block.getSize() + Block.getMargin();
         let bh = visible_rows * Block.getSize() + Block.getMargin();
@@ -58,25 +58,25 @@ class Board
     method Piece spawnPiece(int code) {
         var Piece piece;
         let piece = Piece.new(rows, cols);
-        if (code = 1) {
+        if (code = 0) {
             do piece.cyanI();
         }
-        if (code = 2) {
+        if (code = 1) {
             do piece.blueJ();
         }
-        if (code = 3) {
+        if (code = 2) {
             do piece.orangeL();
         }
-        if (code = 4) {
+        if (code = 3) {
             do piece.square();
         }
-        if (code = 5) {
+        if (code = 4) {
             do piece.greenS();
         }
-        if (code = 6) {
+        if ((code = 5) | (code = 7)) {
             do piece.purpleT();
         }
-        if (code = 7) {
+        if (code = 6) {
             do piece.redZ();
         }
         do addPiece(piece);
