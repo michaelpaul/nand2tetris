@@ -18,8 +18,6 @@ class Board
         let rows = max_rows;
         let cols = max_cols;
         let visible_rows = rows - 2;
-        let bx = 180;
-        let by = 250;
         let bw = cols * Block.getSize() + Block.getMargin();
         let bh = visible_rows * Block.getSize() + Block.getMargin();
 
@@ -34,6 +32,12 @@ class Board
         return this;
     }
 
+    method void setPos(int x, int y)
+    {
+        let bx = x;
+        let by = y;
+        return;
+    }
     method int getCel(int i, int j)
     {
         var Array row;

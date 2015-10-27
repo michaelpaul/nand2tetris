@@ -2,17 +2,28 @@ class TetrisGame
 {
     field boolean game_over;
     // tabuleiro
-    field Board mesa;
-    // próxima peça
+    field Board board;
+    field Board preview;
+    field Piece current;
     field Piece next;
     field int last_piece;
     static int seed;
 
     constructor TetrisGame new()
     {
-        let mesa = Board.new(18, 10);
+        let board = Board.new(18, 10);
+        do board.setPos(180, 250);
+        let preview = Board.new(6, 6);
+        do preview.setPos(350, 80);
         let game_over = false;
         let last_piece = 1;
+        // starting pieces
+        do TetrisGame.seed(155);
+        let current = board.spawnPiece(nextPiece());
+        let next = preview.spawnPiece(nextPiece());
+        do preview.move(next, 2);
+        do board.draw();
+        do preview.draw();
         return this;
     }
 
@@ -28,71 +39,108 @@ class TetrisGame
         return last_piece & 7;
     }
 
+    // swap current for next
+    method void swapPieces()
+    {
+        do preview.removePiece(next);
+        let current = board.spawnPiece(last_piece & 7);
+        // next random piece
+        let next = preview.spawnPiece(nextPiece());
+        do preview.move(next, 2);
+        return;
+    }
+
+    method void hardDrop() {
+        while (board.move(current, 2)) {
+            // pass
+        }
+        return;
+    }
+
+    // esc: pause, 140
+    method void pause() {
+        var char key;
+        var boolean paused;
+        let paused = true;
+        let key = 0;
+        do Sys.wait(250);
+        while (paused) {
+            let key = Keyboard.keyPressed();
+            if (key = 140) {
+                let paused = false;
+            }
+            do Sys.wait(80);
+        }
+        return;
+    }
+
     method void run() {
         var int turn;
         var char key;
         var boolean moved, repeat;
-        var Piece piece;
-
-        let piece = mesa.spawnPiece(nextPiece());
-        let key = 0;
-        do mesa.draw();
-
-        // Official keymap
-        // z: rotate left
-        // c: hold
-        // esc: pause
-        // space: hard drop
-        // left/right movement
-        // up: rotate right
-        // down: soft drop
 
         while (~(game_over)) {
             let turn = 0;
             while (turn < 10) {
                 let moved = false;
                 let repeat = false;
+
                 if  (key = Keyboard.keyPressed()) {
                     let repeat = true;
                 }
                 let key = Keyboard.keyPressed();
 
+                if ((key = 140) & (~repeat)) { // esc
+                    do pause();
+                }
                 if (key = 130) { // left
-                    let moved = mesa.move(piece, 3);
+                    let moved = board.move(current, 3);
                 }
                 if (key = 132) { // right
-                    let moved = mesa.move(piece, 4);
+                    let moved = board.move(current, 4);
                 }
                 if ((key = 131) & (~repeat)) { // up
-                    do mesa.rotateRight(piece);
+                    do board.rotateRight(current);
                     let moved = true;
                 }
                 if (key = 133) { // down
-                    let moved = mesa.move(piece, 2);
+                    let moved = board.move(current, 2);
+                }
+                if ((key = 90) & (~repeat)) { // z
+                    do board.rotateLeft(current);
+                    let moved = true;
+                }
+                if ((key = 32) & (~repeat)) { // space
+                    let turn = 10;
+                    do hardDrop();
                 }
 
                 if (~(key = 0) & (moved)) {
                     do TetrisGame.seed(key);
                     do TetrisGame.seed(turn);
-                    do mesa.draw();
+                    do board.draw();
                 }
                 let turn = turn + 1;
                 do Sys.wait(80);
             }
 
             // auto drop
-            if (~ mesa.move(piece, 2)) {
-                // piece locked, spawn new
-                do mesa.clearRows();
-                do TetrisGame.seed(key * piece);
-                let piece = mesa.spawnPiece(nextPiece());
-                if (mesa.hasHiddenBlocks()) {
+            if (~ board.move(current, 2)) {
+                // piece locked
+                do board.clearRows();
+                do TetrisGame.seed(key);
+                do TetrisGame.seed(current);
+                do swapPieces();
+
+                if (board.hasHiddenBlocks()) {
                     let game_over = true;
                 }
             }
 
-            do mesa.draw();
+            do preview.draw();
+            do board.draw();
         }
+
         return;
     }
 
@@ -101,9 +149,5 @@ class TetrisGame
         do Memory.deAlloc(this);
         return;
     }
-
-    // criar uma peça modelo N
-    // function Piece p1();
-    // function Piece p2();
 
 }

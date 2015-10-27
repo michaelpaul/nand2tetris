@@ -8,23 +8,4 @@ class Main
         do game.dispose();
         return;
     }
-
-    //function void main()
-    //{
-    //    // init game
-    //    // set current piece
-    //    // main game loop
-    //    while (true) { // not gameOver
-    //        // if not next
-    //        //  next = random piece
-    //        // if not current piece
-    //        //  current = next
-    //        // get input
-    //        //  rotate piece
-    //        // move current piece
-    //        // draw board
-    //    }
-    //
-    //    return;
-    //}
 }

@@ -15,7 +15,6 @@ https://en.wikipedia.org/wiki/Coordinate_system
 
 # TODO
 
-- mostrar próxima peça.
 - mostrar pontuação;
 - mostrar mensagem de game over.
 - game.dispose();
