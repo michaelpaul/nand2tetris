@@ -200,11 +200,12 @@ class Board
         return true;
     }
 
-    method void clearRows()
+    method int clearRows()
     {
-        var int i, j, line;
+        var int i, j, line, points;
         var Block block;
         let i = 0;
+        let points = 0;
         while (i < visible_rows) {
             let line = 0;
             let j = 0;
@@ -217,6 +218,7 @@ class Board
             // empty row
             if (line = j) {
                 let j = 0;
+                let points = points + 1;
                 while (j < cols) {
                     let block = getCel(i, j);
                     do block.dispose();
@@ -230,7 +232,7 @@ class Board
             let i = i + 1;
         }
 
-        return;
+        return points;
     }
 
     method void moveBlocksDown(int start_row)
@@ -304,6 +306,11 @@ class Board
         // black
         do Screen.setColor(true);
         do Screen.drawRectangle(bx, by - bh, bx + bw, by);
+        return;
+    }
+
+    method void erase()
+    {
         // white
         do Screen.setColor(false);
         do Screen.drawRectangle(bx + 1, by - bh + 1, bx + bw - 1, by - 1);
@@ -317,7 +324,7 @@ class Board
         var int i, j, val;
         var Block block;
 
-        do drawBackground();
+        do erase();
 
         // Draw visible blocks
         let i = 0;

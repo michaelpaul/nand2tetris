@@ -6,6 +6,8 @@ class TetrisGame
     field Board preview;
     field Piece current;
     field Piece next;
+    field int score;
+    field string score_title;
     field int last_piece;
     static int seed;
 
@@ -17,13 +19,17 @@ class TetrisGame
         do preview.setPos(350, 80);
         let game_over = false;
         let last_piece = 1;
+        let score = 0; // max score 32767
+        let score_title = "Score";
         // starting pieces
         do TetrisGame.seed(155);
         let current = board.spawnPiece(nextPiece());
         let next = preview.spawnPiece(nextPiece());
         do preview.move(next, 2);
-        do board.draw();
-        do preview.draw();
+        // render
+        do board.drawBackground();
+        do preview.drawBackground();
+        do render();
         return this;
     }
 
@@ -37,6 +43,38 @@ class TetrisGame
     {
         let last_piece = last_piece + seed;
         return last_piece & 7;
+    }
+
+    method void updateScore()
+    {
+        var int scored, lines;
+        let lines = board.clearRows();
+        let scored = lines * 10;
+        if ((lines = 2) | (lines = 3)) {
+            let scored = scored + 10;
+        }
+        if (lines > 3) {
+            let scored = scored + 40;
+        }
+        let score = score + scored;
+        return;
+    }
+
+    method void drawScore()
+    {
+        do Output.moveCursor(2, 15);
+        do Output.printString(score_title);
+        do Output.moveCursor(4, 15);
+        do Output.printInt(score);
+        return;
+    }
+
+    method void render()
+    {
+        do board.draw();
+        do preview.draw();
+        do drawScore();
+        return;
     }
 
     // swap current for next
@@ -127,7 +165,7 @@ class TetrisGame
             // auto drop
             if (~ board.move(current, 2)) {
                 // piece locked
-                do board.clearRows();
+                do updateScore();
                 do TetrisGame.seed(key);
                 do TetrisGame.seed(current);
                 do swapPieces();
@@ -137,8 +175,7 @@ class TetrisGame
                 }
             }
 
-            do preview.draw();
-            do board.draw();
+            do render();
         }
 
         return;
