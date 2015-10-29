@@ -89,12 +89,6 @@ class Block
         let x = bx + Block.getMargin() + (col * width);
         let y = by - (row * height) - height;
         do Screen.drawRectangle(x, y, x + width - Block.getMargin(), y + height - Block.getMargin());
-        // riscar origin, debug...
-        //if (origin) {
-        //    do Screen.setColor(false);
-        //    do Screen.drawLine(x, y, x + width - Block.getMargin(), y + height - Block.getMargin());
-        //    do Screen.setColor(true);
-        //}
         return;
     }
 

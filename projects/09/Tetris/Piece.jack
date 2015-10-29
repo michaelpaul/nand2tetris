@@ -85,11 +85,13 @@ class Piece
         return;
     }
 
-    method boolean canRotate() {
+    method boolean canRotate()
+    {
         return canRotate;
     }
 
-    method void disableRotation() {
+    method void disableRotation()
+    {
         let canRotate = false;
         return;
     }
@@ -113,9 +115,6 @@ class Piece
     }
 
     /**
-    http://tetris.wikia.com/wiki/SRS - recomendado
-    http://tetris.wikia.com/wiki/Nintendo_Rotation_System - primeira versão, mais simples
-
     http://www.euclideanspace.com/maths/geometry/affine/aroundPoint/matrix2d/
     http://www.idomaths.com/linear_transformation.php
     */

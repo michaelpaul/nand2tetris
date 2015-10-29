@@ -88,15 +88,16 @@ class TetrisGame
         return;
     }
 
-    method void hardDrop() {
+    method void hardDrop()
+    {
         while (board.move(current, 2)) {
             // pass
         }
         return;
     }
 
-    // esc: pause, 140
-    method void pause() {
+    method void pause()
+    {
         var char key;
         var boolean paused;
         let paused = true;
@@ -112,14 +113,15 @@ class TetrisGame
         return;
     }
 
-    method void run() {
+    method void run()
+    {
         var int turn;
         var char key;
         var boolean moved, repeat;
 
         while (~(game_over)) {
             let turn = 0;
-            while (turn < 10) {
+            while (turn < 8) {
                 let moved = false;
                 let repeat = false;
 
@@ -159,7 +161,7 @@ class TetrisGame
                     do board.draw();
                 }
                 let turn = turn + 1;
-                do Sys.wait(80);
+                do Sys.wait(100);
             }
 
             // auto drop
