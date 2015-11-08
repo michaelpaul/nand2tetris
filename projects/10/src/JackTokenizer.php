@@ -5,7 +5,8 @@ namespace JackCompiler;
 class JackTokenizer
 {
     private $fp;
-    private $token;
+    private $next = null;
+    private $current = null;
 
     // token types
     const KEYWORD = 1;
@@ -13,6 +14,14 @@ class JackTokenizer
     const IDENTIFIER = 3;
     const INT_CONST = 4;
     const STRING_CONST = 5;
+
+    private $keywords = array(
+        'class', 'method', 'function', 'constructor', 'int', 'boolean',
+        'char', 'void', 'var', 'static', 'field', 'let', 'do', 'if', 'else',
+        'while', 'return', 'true', 'false', 'null', 'this'
+    );
+
+    private $symbols = array('(', ')', '{', '}', '<', '=', ';');
 
     /**
      * Opens the input file and gets ready to tokenize it
@@ -35,7 +44,12 @@ class JackTokenizer
      */
     public function hasMoreTokens()
     {
-        # code...
+        $token = $this->tokenize();
+        if ($token !== false) {
+            $this->next = $token;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -44,7 +58,44 @@ class JackTokenizer
      */
     public function advance()
     {
-        # code...
+        $this->current = $this->next;
+    }
+
+    private function tokenize()
+    {
+        $buffer = '';
+
+        while (false !== ($c = fgetc($this->fp))) {
+            // ignore whitespace
+            if (ctype_space($c) || ctype_cntrl($c)) {
+                continue;
+            }
+            // symbol
+            if (in_array($c, $this->symbols)) {
+                return $c;
+            }
+
+            $buffer = $c;
+            // string
+            if ($c == '"') {
+                do {
+                    $c = fgetc($this->fp);
+                    $buffer .= $c;
+                } while ($c != '"');
+                return $buffer;
+            }
+            // word
+            while (false !== ($c = fgetc($this->fp))) {
+                // check end of word
+                if (preg_match('/\W/', $c)) {
+                    break;
+                }
+                $buffer .= $c;
+            }
+            return $buffer;
+        }
+
+        return false;
     }
 
     /**
@@ -52,7 +103,18 @@ class JackTokenizer
      */
     public function tokenType()
     {
-        # code...
+        if (in_array($this->current, $this->keywords)) {
+            return self::KEYWORD;
+        } else if (in_array($this->current, $this->symbols)) {
+            return self::SYMBOL;
+        } else if (preg_match('/^[^\d]+\w+$/', $this->current)) {
+            return self::IDENTIFIER;
+        } else if (preg_match('/^\d+$/', $this->current)) {
+            return self::INT_CONST;
+        } else if (preg_match('/^"/', $this->current) &&
+            preg_match('/"$/', $this->current)) {
+            return self::STRING_CONST;
+        }
     }
 
     /**
