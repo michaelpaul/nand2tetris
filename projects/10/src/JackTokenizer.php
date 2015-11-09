@@ -88,6 +88,8 @@ class JackTokenizer
             while (false !== ($c = fgetc($this->fp))) {
                 // check end of word
                 if (preg_match('/\W/', $c)) {
+                    // unread this char, it may be a valid token
+                    fseek($this->fp, -1, SEEK_CUR);
                     break;
                 }
                 $buffer .= $c;
@@ -122,11 +124,10 @@ class JackTokenizer
      */
     public function keyword()
     {
-        // jack keywords
-        //  'class', 'method', 'function' 'constructor' 'int' 'boolean'
-        // 'char' 'void' 'var' 'static' 'field' 'let' 'do' 'if' 'else'
-        // 'while' 'return' 'true' 'false' 'null' 'this'
-        # code...
+        if (self::KEYWORD != $this->tokenType()) {
+            return;
+        }
+        return $this->current;
     }
 
     /**
@@ -134,7 +135,10 @@ class JackTokenizer
      */
     public function symbol()
     {
-        # code...
+        if (self::SYMBOL != $this->tokenType()) {
+            return;
+        }
+        return $this->current;
     }
 
     /**
@@ -142,7 +146,10 @@ class JackTokenizer
      */
     public function identifier()
     {
-        # code...
+        if (self::IDENTIFIER != $this->tokenType()) {
+            return;
+        }
+        return $this->current;
     }
 
     /**
@@ -150,7 +157,10 @@ class JackTokenizer
      */
     public function intVal()
     {
-        # code...
+        if (self::INT_CONST != $this->tokenType()) {
+            return;
+        }
+        return intval($this->current);
     }
 
     /**

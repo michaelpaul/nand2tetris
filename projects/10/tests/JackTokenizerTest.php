@@ -80,4 +80,97 @@ class JackTokenizerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(JackTokenizer::STRING_CONST, $jt->tokenType());
     }
 
+    public function testKeyword()
+    {
+        fwrite($this->fp, "class x return size > function");
+        rewind($this->fp);
+        $jt = new JackTokenizer($this->fp);
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals('class', $jt->keyword());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals('return', $jt->keyword());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals('function', $jt->keyword());
+    }
+
+    public function testSymbol()
+    {
+        fwrite($this->fp, "(x)");
+        rewind($this->fp);
+        $jt = new JackTokenizer($this->fp);
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals('(', $jt->symbol());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertNull($jt->symbol());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals(')', $jt->symbol());
+    }
+
+    public function testIdentifier()
+    {
+        fwrite($this->fp, "let size = 10 ;");
+        rewind($this->fp);
+        $jt = new JackTokenizer($this->fp);
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertNull($jt->identifier());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals('size', $jt->identifier());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertNull($jt->identifier());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertNull($jt->identifier());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertNull($jt->identifier());
+    }
+
+    public function testIntVal()
+    {
+        fwrite($this->fp, "0 1 256 0777 x");
+        rewind($this->fp);
+        $jt = new JackTokenizer($this->fp);
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertSame(0, $jt->intVal());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertSame(1, $jt->intVal());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertSame(256, $jt->intVal());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertSame(777, $jt->intVal());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertNull($jt->intVal());
+    }
 }
