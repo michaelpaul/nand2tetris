@@ -4,10 +4,6 @@ namespace JackCompiler;
 
 class JackTokenizer
 {
-    private $fp;
-    private $next = null;
-    private $current = null;
-
     // token types
     const KEYWORD = 1;
     const SYMBOL = 2;
@@ -15,12 +11,14 @@ class JackTokenizer
     const INT_CONST = 4;
     const STRING_CONST = 5;
 
+    private $fp;
+    private $next = null;
+    private $current = null;
     private $keywords = array(
         'class', 'method', 'function', 'constructor', 'int', 'boolean',
         'char', 'void', 'var', 'static', 'field', 'let', 'do', 'if', 'else',
         'while', 'return', 'true', 'false', 'null', 'this'
     );
-
     private $symbols = array('(', ')', '{', '}', '<', '=', ';');
 
     /**
@@ -168,6 +166,9 @@ class JackTokenizer
      */
     public function stringVal()
     {
-        # code...
+        if (self::STRING_CONST != $this->tokenType()) {
+            return;
+        }
+        return substr($this->current, 1, -1);
     }
 }

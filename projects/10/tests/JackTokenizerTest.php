@@ -173,4 +173,21 @@ class JackTokenizerTest extends PHPUnit_Framework_TestCase
         $jt->advance();
         $this->assertNull($jt->intVal());
     }
+
+    public function testStringVal()
+    {
+        fwrite($this->fp, "\"hello\" \"world\"");
+        rewind($this->fp);
+        // echo stream_get_contents($this->fp);
+        $jt = new JackTokenizer($this->fp);
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals(JackTokenizer::STRING_CONST, $jt->tokenType());
+        $this->assertSame("hello", $jt->stringVal());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals(JackTokenizer::STRING_CONST, $jt->tokenType());
+        $this->assertSame("world", $jt->stringVal());
+    }
 }
