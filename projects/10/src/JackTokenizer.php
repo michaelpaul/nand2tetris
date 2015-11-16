@@ -19,7 +19,10 @@ class JackTokenizer
         'char', 'void', 'var', 'static', 'field', 'let', 'do', 'if', 'else',
         'while', 'return', 'true', 'false', 'null', 'this'
     );
-    private $symbols = array('(', ')', '{', '}', '<', '=', ';');
+    private $symbols = array(
+        '{', '}', '(', ')', '[', ']', '.',
+        ',', ';', '+', '-', '*', '/', '&',
+        '|', '<', '>', '=', '~');
 
     /**
      * Opens the input file and gets ready to tokenize it
@@ -68,6 +71,17 @@ class JackTokenizer
             if (ctype_space($c) || ctype_cntrl($c)) {
                 continue;
             }
+
+            // comment
+            if ($c == '/') {
+                $nextc = fgetc($this->fp);
+                if ('/' == $nextc) {
+                    $this->skipComment();
+                    continue;
+                }
+                fseek($this->fp, -1, SEEK_CUR);
+            }
+
             // symbol
             if (in_array($c, $this->symbols)) {
                 return $c;
@@ -98,6 +112,15 @@ class JackTokenizer
         return false;
     }
 
+    protected function skipComment()
+    {
+        while (false !== ($cc = fgetc($this->fp))) {
+            if ($cc == "\n" || $cc == "\r") {
+                break;
+            }
+        }
+    }
+
     /**
      * @return int type of the current token
      */
@@ -107,7 +130,7 @@ class JackTokenizer
             return self::KEYWORD;
         } else if (in_array($this->current, $this->symbols)) {
             return self::SYMBOL;
-        } else if (preg_match('/^[^\d]+\w+$/', $this->current)) {
+        } else if (preg_match('/^[a-z]\w*$/i', $this->current)) {
             return self::IDENTIFIER;
         } else if (preg_match('/^\d+$/', $this->current)) {
             return self::INT_CONST;

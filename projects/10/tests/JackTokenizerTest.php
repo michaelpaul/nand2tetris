@@ -124,28 +124,24 @@ class JackTokenizerTest extends PHPUnit_Framework_TestCase
 
     public function testIdentifier()
     {
-        fwrite($this->fp, "let size = 10 ;");
+        fwrite($this->fp, "x Xy XyZ 10x");
         rewind($this->fp);
         $jt = new JackTokenizer($this->fp);
         $this->assertTrue($jt->hasMoreTokens());
         $jt->advance();
-        $this->assertNull($jt->identifier());
+        $this->assertEquals('x', $jt->identifier());
 
         $this->assertTrue($jt->hasMoreTokens());
         $jt->advance();
-        $this->assertEquals('size', $jt->identifier());
+        $this->assertEquals('Xy', $jt->identifier());
 
         $this->assertTrue($jt->hasMoreTokens());
         $jt->advance();
-        $this->assertNull($jt->identifier());
+        $this->assertEquals('XyZ', $jt->identifier());
 
         $this->assertTrue($jt->hasMoreTokens());
         $jt->advance();
-        $this->assertNull($jt->identifier());
-
-        $this->assertTrue($jt->hasMoreTokens());
-        $jt->advance();
-        $this->assertNull($jt->identifier());
+        $this->assertNull($jt->tokenType());
     }
 
     public function testIntVal()
@@ -178,7 +174,6 @@ class JackTokenizerTest extends PHPUnit_Framework_TestCase
     {
         fwrite($this->fp, "\"hello\" \"world\"");
         rewind($this->fp);
-        // echo stream_get_contents($this->fp);
         $jt = new JackTokenizer($this->fp);
         $this->assertTrue($jt->hasMoreTokens());
         $jt->advance();
@@ -189,5 +184,31 @@ class JackTokenizerTest extends PHPUnit_Framework_TestCase
         $jt->advance();
         $this->assertEquals(JackTokenizer::STRING_CONST, $jt->tokenType());
         $this->assertSame("world", $jt->stringVal());
+    }
+
+    public function testSingleLineComment()
+    {
+        fwrite($this->fp, "class // let class = function \n x / y");
+        rewind($this->fp);
+        $jt = new JackTokenizer($this->fp);
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals(JackTokenizer::KEYWORD, $jt->tokenType());
+        $this->assertSame("class", $jt->keyword());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals(JackTokenizer::IDENTIFIER, $jt->tokenType());
+        $this->assertSame("x", $jt->identifier());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals(JackTokenizer::SYMBOL, $jt->tokenType());
+        $this->assertSame("/", $jt->symbol());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals(JackTokenizer::IDENTIFIER, $jt->tokenType());
+        $this->assertSame("y", $jt->identifier());
     }
 }
