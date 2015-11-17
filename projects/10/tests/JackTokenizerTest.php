@@ -211,4 +211,30 @@ class JackTokenizerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(JackTokenizer::IDENTIFIER, $jt->tokenType());
         $this->assertSame("y", $jt->identifier());
     }
+
+    public function testMultiLineComment()
+    {
+        fwrite($this->fp, "return /** \n API Comment \n\r */ ab+cd");
+        rewind($this->fp);
+        $jt = new JackTokenizer($this->fp);
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals(JackTokenizer::KEYWORD, $jt->tokenType());
+        $this->assertSame("return", $jt->keyword());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals(JackTokenizer::IDENTIFIER, $jt->tokenType());
+        $this->assertSame("ab", $jt->identifier());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals(JackTokenizer::SYMBOL, $jt->tokenType());
+        $this->assertSame("+", $jt->symbol());
+
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertEquals(JackTokenizer::IDENTIFIER, $jt->tokenType());
+        $this->assertSame("cd", $jt->identifier());
+    }
 }

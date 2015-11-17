@@ -22,7 +22,8 @@ class JackTokenizer
     private $symbols = array(
         '{', '}', '(', ')', '[', ']', '.',
         ',', ';', '+', '-', '*', '/', '&',
-        '|', '<', '>', '=', '~');
+        '|', '<', '>', '=', '~'
+    );
 
     /**
      * Opens the input file and gets ready to tokenize it
@@ -78,6 +79,9 @@ class JackTokenizer
                 if ('/' == $nextc) {
                     $this->skipComment();
                     continue;
+                } else if ('*' == $nextc) {
+                    $this->skipMultiLineComment();
+                    continue;
                 }
                 fseek($this->fp, -1, SEEK_CUR);
             }
@@ -117,6 +121,18 @@ class JackTokenizer
         while (false !== ($cc = fgetc($this->fp))) {
             if ($cc == "\n" || $cc == "\r") {
                 break;
+            }
+        }
+    }
+
+    protected function skipMultiLineComment()
+    {
+        while (false !== ($cc = fgetc($this->fp))) {
+            if ($cc == '*') {
+                if ('/' == fgetc($this->fp)) {
+                    break;
+                }
+                fseek($this->fp, -1, SEEK_CUR);
             }
         }
     }
