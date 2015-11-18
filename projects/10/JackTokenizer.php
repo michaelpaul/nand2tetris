@@ -3,9 +3,13 @@
 require 'vendor/autoload.php';
 
 use JackCompiler\JackTokenizer;
+
+if (empty($argv[1])) {
+    die('usage: ' . $argv[0] . ' source.jack [output.xml]');
+}
+
 $jt = new JackTokenizer($argv[1]);
-$output = $argv[2];
-// $output = 'php://stdout';
+$output = !empty($argv[2]) ? $argv[2] : 'php://stdout';
 
 $doc = new DOMDocument();
 $doc->formatOutput = true;
@@ -22,7 +26,7 @@ while($jt->hasMoreTokens()) {
             break;
         case JackTokenizer::SYMBOL:
             $tokenType = 'symbol';
-            $tokenVal = $jt->symbol();
+            $tokenVal = htmlspecialchars($jt->symbol(), ENT_XML1);
             break;
         case JackTokenizer::IDENTIFIER:
             $tokenType = 'identifier';
@@ -30,16 +34,16 @@ while($jt->hasMoreTokens()) {
             break;
         case JackTokenizer::INT_CONST:
             $tokenType = 'integerConstant';
-            $tokenVal = $jt->stringVal();
+            $tokenVal = $jt->intVal();
             break;
         case JackTokenizer::STRING_CONST:
-            $tokenType = 'string';
+            $tokenType = 'stringConstant';
             $tokenVal = $jt->stringVal();
             break;
+        default:
+            throw new Exception('Tipo desconhecido de token');    
     }
-    if (!is_null($tokenType) && !is_null($tokenVal)) {
-        $tokens->appendChild($doc->createElement($tokenType, $tokenVal));
-    }
+    $tokens->appendChild($doc->createElement($tokenType, $tokenVal));
 }
 
 $doc->save($output);

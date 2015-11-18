@@ -11,10 +11,19 @@ class RoboFile extends \Robo\Tasks
 
     public function tests()
     {
-        $path = "tests/programs/Square";
-        $files = array('Main', 'Square', 'SquareGame');
+        $this->stopOnFail(true);
+        $this->taskPHPUnit('phpunit')
+            ->run();
+
+        $path = 'tests/programs';
+        $files = array(
+            'Square/Main', 
+            'Square/SquareGame',
+            'Square/Square', 
+            'ArrayTest/Main',
+        );
         foreach ($files as $file) {
-            $output = "/tmp/{$file}T.xml";
+            $output = '/tmp/' . str_replace('/', '.', $file) . 'T.xml';
             $this->_exec("php JackTokenizer.php {$path}/{$file}.jack $output");
             $this->_exec("TextComparer.sh {$path}/{$file}T.xml $output");
         }
