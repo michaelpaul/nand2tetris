@@ -156,6 +156,19 @@ class JackTokenizer
         }
     }
 
+    public function typeLabel($type = null)
+    {
+        $type = $type ? $type : $this->tokenType();
+        $labels = array(
+            self::KEYWORD => 'keyword',
+            self::SYMBOL => 'symbol',
+            self::IDENTIFIER => 'identifier',
+            self::INT_CONST => 'integerConstant',
+            self::STRING_CONST => 'stringConstant',
+        );
+        return $labels[$type];
+    }
+
     /**
      * @return string the keyword which is the current token
      */
