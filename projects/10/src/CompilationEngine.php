@@ -21,10 +21,10 @@ class CompilationEngine
      * @var DOMElement $ctx contexto atual da compilação
      */
     protected $ctx;
-    
+
     /**
      * @param $input file/stream source.jack
-     * @param $output stream resultado da compilação 
+     * @param $output stream resultado da compilação
      */
     public function __construct($input, $output)
     {
@@ -57,8 +57,8 @@ class CompilationEngine
         $this->tokenizer->advance();
     }
 
-    /** {{{ Rule parsers */
-    
+    /** {{{ Grammar productions */
+
     // 'class' className '{' classVarDec* subroutineDec* '}'
     public function compileClass()
     {
@@ -88,13 +88,13 @@ class CompilationEngine
         }
 
         $this->advance();
-        
+
         if ($this->tokenizer->symbol() !== '}') {
             return; // @error
         }
         $this->addSymbol();
     }
-    
+
     // ('static' | 'field') type varName (',' varName)* ';'
     public function compileClassVarDec()
     {
@@ -104,10 +104,10 @@ class CompilationEngine
         $this->advance();
 
         $this->compileType();
-        
+
         $this->compileVarName();
         $this->advance();
-        
+
         while ($this->tokenizer->symbol() == ',') {
             $this->addSymbol();
             $this->advance();
@@ -135,21 +135,21 @@ class CompilationEngine
         }
         $this->advance();
     }
-    
+
     // ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
     public function compileSubroutine()
     {
         $this->ctx = $this->ctx->appendChild($this->doc->createElement('subroutineDec'));
         $this->addKeyword();
         $this->advance();
-        
+
         if ($this->tokenizer->keyword() == 'void') {
             $this->addKeyword();
             $this->advance();
         } else {
             $this->compileType();
         }
-        
+
         $this->compileSubroutineName();
         $this->advance();
 
@@ -168,18 +168,21 @@ class CompilationEngine
         $this->addSymbol();
         $this->advance();
         $this->compileSubroutineBody();
-        $this->ctx = $this->root;
+        $this->ctx = $this->ctx->parentNode;
     }
 
     // ((type varName) (',' type varName)*)?
     public function compileParameterList()
     {
+        $this->ctx = $this->ctx->appendChild($this->doc->createElement('parameterList'));
+
         // sem parametros
-        if ($this->tokenizer->symbol() == ')') {
+        if ($this->tokenizer->keyword() == null && $this->tokenizer->identifier() == null) {
+            // $this->ctx->appendChild($this->doc->createTextNode(''));
+            $this->ctx = $this->ctx->parentNode;
             return true;
         }
 
-        $this->ctx = $this->ctx->appendChild($this->doc->createElement('parameterList'));
         $this->compileType();
         $this->compileVarName();
         $this->advance();
@@ -204,7 +207,10 @@ class CompilationEngine
         if ($this->tokenizer->symbol() != '{') {
             return; // @error
         }
+
+        $this->addSymbol();
         $this->advance();
+
         while ($this->tokenizer->keyword() == 'var') {
             $this->compileVarDec();
         }
@@ -216,6 +222,7 @@ class CompilationEngine
         if ($this->tokenizer->symbol() != '}') {
             return; // @error
         }
+        $this->addSymbol();
     }
 
     // 'var' type varName (',' varName)* ';'
@@ -259,17 +266,17 @@ class CompilationEngine
     {
         # code...
     }
-    
+
     public function compileExpression()
     {
         # code...
     }
-    
+
     public function compileTerm()
     {
         # code...
     }
-    
+
     public function compileExpressionList()
     {
         # code...
@@ -294,9 +301,9 @@ class CompilationEngine
         $this->checkType(JackTokenizer::IDENTIFIER);
         $this->addIdentifier();
     }
-    
+
     /** {{{ Helpers */
-    
+
     protected function addKeyword()
     {
         $this->ctx->appendChild($this->doc->createElement('keyword',
