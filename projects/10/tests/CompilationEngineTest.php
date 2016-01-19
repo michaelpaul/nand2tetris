@@ -185,4 +185,44 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
         ');
         $this->assertEquals($expected->firstChild, $this->parser->getCtx());
     }
+    
+    public function testSingleVarDec()
+    {
+        $this->writeTestProgram('var int score;');
+
+        $this->parser->advance();
+        $this->parser->compileVarDec();
+
+        $expected = $this->loadXML('
+            <varDec>
+              <keyword>var</keyword>
+              <keyword>int</keyword>
+              <identifier>score</identifier>
+              <symbol>;</symbol>
+            </varDec>
+        ');
+        $this->assertEquals($expected->firstChild, $this->parser->getCtx());    
+    }
+    
+    public function testMultiVarDec()
+    {
+        $this->writeTestProgram('var List tasks, jobs, workers;');
+
+        $this->parser->advance();
+        $this->parser->compileVarDec();
+
+        $expected = $this->loadXML('
+            <varDec>
+              <keyword>var</keyword>
+              <identifier>List</identifier>
+              <identifier>tasks</identifier>
+              <symbol>,</symbol>
+              <identifier>jobs</identifier>
+              <symbol>,</symbol>
+              <identifier>workers</identifier>
+              <symbol>;</symbol>
+            </varDec>
+        ');
+        $this->assertEquals($expected->firstChild, $this->parser->getCtx());    
+    }
 }

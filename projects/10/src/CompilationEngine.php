@@ -56,30 +56,75 @@ class CompilationEngine
         }
         $this->tokenizer->advance();
     }
+    
+    protected function addKeyword()
+    {
+        $this->ctx->appendChild($this->doc->createElement('keyword',
+            $this->tokenizer->keyword()));
+    }
 
+    protected function addIdentifier()
+    {
+        $this->ctx->appendChild($this->doc->createElement('identifier',
+            $this->tokenizer->identifier()));
+    }
+
+    protected function addSymbol()
+    {
+        $this->ctx->appendChild($this->doc->createElement('symbol',
+            $this->tokenizer->symbol()));
+    }
+
+    protected function checkType($type)
+    {
+        if ($this->tokenizer->tokenType() != $type) {
+            $msg = 'Esperava "%s", encontrei "%s"';
+            throw new Exception(sprintf($msg,
+                $this->tokenizer->typeLabel($type),
+                $this->tokenizer->typeLabel()));
+        }
+    }
+
+    /** {{{ Lexical elements */
+    // The Jack language includes five types of terminal elements (tokens) 
+    
+    protected function compileTerminalKeyword($val)
+    {
+        $this->checkType(JackTokenizer::KEYWORD);
+        $found = $this->tokenizer->keyword();
+        if ($found != $val) {
+            throw new Exception("Esperava keyword \"$val\" encontrei \"$found\"");
+        }
+        $this->addKeyword();
+        $this->advance();
+    }
+
+    protected function compileTerminalSymbol($val)
+    {
+        $this->checkType(JackTokenizer::SYMBOL);
+        $found = $this->tokenizer->symbol();
+        if ($found != $val) {
+            throw new Exception("Esperava simbolo \"$val\" encontrei \"$found\"");
+        }
+        $this->addSymbol();
+        $this->advance();
+    }
+
+    /** }}} */
+    
     /** {{{ Grammar productions */
 
     // 'class' className '{' classVarDec* subroutineDec* '}'
     public function compileClass()
     {
         $this->advance();
-        $this->checkType(JackTokenizer::KEYWORD);
-        if ($this->tokenizer->keyword() != 'class') {
-            return; // @error
-        }
         $this->root = $this->doc->appendChild($this->doc->createElement('class'));
         $this->ctx = $this->root;
-
-        $this->addKeyword();
-        $this->advance();
-        $this->checkType(JackTokenizer::IDENTIFIER);
-        $this->addIdentifier();
-        $this->advance();
-        $this->checkType(JackTokenizer::SYMBOL);
-        $this->addSymbol();
-
-        $this->advance();
-
+        
+        $this->compileTerminalKeyword('class');
+        $this->compileClassName();
+        $this->compileTerminalSymbol('{');
+        
         while (in_array($this->tokenizer->keyword(), array('static', 'field'))) {
             $this->compileClassVarDec();
         }
@@ -88,11 +133,7 @@ class CompilationEngine
         }
 
         $this->advance();
-
-        if ($this->tokenizer->symbol() !== '}') {
-            return; // @error
-        }
-        $this->addSymbol();
+        $this->compileTerminalSymbol('}');
     }
 
     // ('static' | 'field') type varName (',' varName)* ';'
@@ -104,15 +145,12 @@ class CompilationEngine
         $this->advance();
 
         $this->compileType();
-
         $this->compileVarName();
-        $this->advance();
-
+        
         while ($this->tokenizer->symbol() == ',') {
             $this->addSymbol();
             $this->advance();
             $this->compileVarName();
-            $this->advance();
         }
 
         if ($this->tokenizer->symbol() != ';') {
@@ -128,12 +166,10 @@ class CompilationEngine
     protected function compileType()
     {
         if (in_array($this->tokenizer->keyword(), array('int', 'char', 'boolean'))) {
-            $this->addKeyword();
+            $this->compileTerminalKeyword($this->tokenizer->keyword());
         } else {
-            $this->checkType(JackTokenizer::IDENTIFIER);
-            $this->addIdentifier();
+            $this->compileClassName();
         }
-        $this->advance();
     }
 
     // ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
@@ -185,15 +221,13 @@ class CompilationEngine
 
         $this->compileType();
         $this->compileVarName();
-        $this->advance();
-
+        
         while ($this->tokenizer->symbol() == ',') {
             $this->addSymbol();
             $this->advance();
 
             $this->compileType();
             $this->compileVarName();
-            $this->advance();
         }
 
         $this->ctx = $this->ctx->parentNode;
@@ -228,9 +262,39 @@ class CompilationEngine
     // 'var' type varName (',' varName)* ';'
     public function compileVarDec()
     {
-        # code...
+        $this->ctx = $this->ctx->appendChild($this->doc->createElement('varDec'));
+        $this->compileTerminalKeyword('var');
+        $this->compileType();
+        $this->compileVarName();
+        while ($this->tokenizer->symbol() == ',') {
+            $this->compileTerminalSymbol(',');
+            $this->compileVarName();
+        }
+        $this->compileTerminalSymbol(';');
+        $this->ctx = $this->ctx->parentNode;
     }
-
+    
+    // identifier
+    protected function compileClassName()
+    {
+        $this->checkType(JackTokenizer::IDENTIFIER);
+        $this->addIdentifier();
+        $this->advance();
+    }
+    // identifier
+    protected function compileSubroutineName()
+    {
+        $this->checkType(JackTokenizer::IDENTIFIER);
+        $this->addIdentifier();
+    }
+    // identifier
+    protected function compileVarName()
+    {
+        $this->checkType(JackTokenizer::IDENTIFIER);
+        $this->addIdentifier();
+        $this->advance();
+    }
+    
     // statement*
     public function compileStatements()
     {
@@ -280,56 +344,6 @@ class CompilationEngine
     public function compileExpressionList()
     {
         # code...
-    }
-    /** }}} */
-
-    // identifier
-    protected function compileClassName()
-    {
-        $this->checkType(JackTokenizer::IDENTIFIER);
-        $this->addIdentifier();
-    }
-    // identifier
-    protected function compileSubroutineName()
-    {
-        $this->checkType(JackTokenizer::IDENTIFIER);
-        $this->addIdentifier();
-    }
-    // identifier
-    protected function compileVarName()
-    {
-        $this->checkType(JackTokenizer::IDENTIFIER);
-        $this->addIdentifier();
-    }
-
-    /** {{{ Helpers */
-
-    protected function addKeyword()
-    {
-        $this->ctx->appendChild($this->doc->createElement('keyword',
-            $this->tokenizer->keyword()));
-    }
-
-    protected function addIdentifier()
-    {
-        $this->ctx->appendChild($this->doc->createElement('identifier',
-            $this->tokenizer->identifier()));
-    }
-
-    protected function addSymbol()
-    {
-        $this->ctx->appendChild($this->doc->createElement('symbol',
-            $this->tokenizer->symbol()));
-    }
-
-    protected function checkType($type)
-    {
-        if ($this->tokenizer->tokenType() != $type) {
-            $msg = 'Esperava "%s", encontrei "%s"';
-            throw new Exception(sprintf($msg,
-                $this->tokenizer->typeLabel($type),
-                $this->tokenizer->typeLabel()));
-        }
     }
     /** }}} */
 }
