@@ -1,0 +1,8 @@
+- tratar todos os elementos léxicos;
+- tratar todos os elementos de estrutura;
+- tratar todos os statements;
+- passar na suíte oficial para o programa ExpressionlessSquare;
+- tratar expressões;
+- passar na suíte oficial para o programa Array;
+- passar na suíte oficial para o programa Square;
+- project 10 done;

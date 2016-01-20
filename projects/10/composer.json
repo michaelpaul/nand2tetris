@@ -1,7 +1,8 @@
 {
     "autoload": {
         "psr-4": {
-            "JackCompiler\\": "src/"
+            "JackCompiler\\": "src/",
+            "JackTests\\": "tests/"
         }
     }
 }

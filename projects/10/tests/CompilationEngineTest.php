@@ -1,58 +1,26 @@
 <?php
 
-use JackCompiler\CompilationEngine;
+namespace JackTests;
 
-class CompilationEngineTest extends PHPUnit_Framework_TestCase
+class CompilationEngineTest extends CompilerTestCase
 {
-    protected $input;
-    protected $output;
-    protected $parser;
-
-    protected function setUp()
-    {
-        $this->input = fopen('php://memory', 'w');
-        $this->output = fopen('php://memory', 'w');
-        $this->parser = new CompilationEngine($this->input, $this->output);
-    }
-
-    protected function tearDown()
-    {
-        fclose($this->input);
-        fclose($this->output);
-    }
-
-    protected function writeTestProgram($text)
-    {
-        fwrite($this->input, $text);
-        rewind($this->input);
-    }
-
-    protected function loadXML($string)
-    {
-        $doc = new DOMDocument;
-        $doc->formatOutput = true;
-        $doc->preserveWhiteSpace = false;
-        $doc->loadXML($string);
-        return $doc;
-    }
-
     public function testEmptyClass()
     {
         $this->writeTestProgram('class Square {}');
 
         $this->parser->compileClass();
 
-        $expected = $this->loadXML('
+        $expected = '
             <class>
                 <keyword>class</keyword>
                 <identifier>Square</identifier>
                 <symbol>{</symbol>
                 <symbol>}</symbol>
             </class>
-        ');
+        ';
 
-        $this->assertEqualXMLStructure($expected->firstChild, $this->parser->getCtx());
-        $this->assertEquals($expected->firstChild, $this->parser->getCtx());
+        // $this->assertEqualXMLStructure($expected->firstChild, $this->parser->getCtx());
+        $this->assertASTEquals($expected);
     }
 
     public function testCompileClassVarDec()
@@ -62,15 +30,15 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
         $this->parser->advance();
         $this->parser->compileClassVarDec();
 
-        $expected = $this->loadXML('
+        $expected = '
             <classVarDec>
               <keyword>field</keyword>
               <keyword>int</keyword>
               <identifier>size</identifier>
               <symbol>;</symbol>
             </classVarDec>
-        ');
-        $this->assertEquals($expected->firstChild, $this->parser->getCtx());
+        ';
+        $this->assertASTEquals($expected);
     }
 
     public function testCompileStaticClassVarDec()
@@ -80,15 +48,15 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
         $this->parser->advance();
         $this->parser->compileClassVarDec();
 
-        $expected = $this->loadXML('
+        $expected = '
             <classVarDec>
               <keyword>static</keyword>
               <keyword>char</keyword>
               <identifier>Drive</identifier>
               <symbol>;</symbol>
             </classVarDec>
-        ');
-        $this->assertEquals($expected->firstChild, $this->parser->getCtx());
+        ';
+        $this->assertASTEquals($expected);
     }
 
     public function testMultiVarClassVarDec()
@@ -98,7 +66,7 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
         $this->parser->advance();
         $this->parser->compileClassVarDec();
 
-        $expected = $this->loadXML('
+        $expected = '
             <classVarDec>
               <keyword>field</keyword>
               <keyword>int</keyword>
@@ -109,8 +77,8 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
               <identifier>z</identifier>
               <symbol>;</symbol>
             </classVarDec>
-        ');
-        $this->assertEquals($expected->firstChild, $this->parser->getCtx());
+        ';
+        $this->assertASTEquals($expected);
     }
 
     public function testCompileEmptyConstructor()
@@ -120,7 +88,7 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
         $this->parser->advance();
         $this->parser->compileSubroutine();
 
-        $expected = $this->loadXML('
+        $expected = '
             <subroutineDec>
               <keyword>constructor</keyword>
               <identifier>Square</identifier>
@@ -133,10 +101,58 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
                 <symbol>}</symbol>
               </subroutineBody>
             </subroutineDec>
-        ');
-        $this->assertEquals($expected->firstChild, $this->parser->getCtx());
+        ';
+        $this->assertASTEquals($expected);
     }
 
+    public function testCompileFunction()
+    {
+        $this->writeTestProgram('function void Render() {}');
+
+        $this->parser->advance();
+        $this->parser->compileSubroutine();
+
+        $expected = '
+            <subroutineDec>
+              <keyword>function</keyword>
+              <keyword>void</keyword>
+              <identifier>Render</identifier>
+              <symbol>(</symbol>
+              <parameterList />
+              <symbol>)</symbol>
+              <subroutineBody>
+                <symbol>{</symbol>
+                <symbol>}</symbol>
+              </subroutineBody>
+            </subroutineDec>
+        ';
+        $this->assertASTEquals($expected);
+    }
+    
+    public function testCompileMethod()
+    {
+        $this->writeTestProgram('method boolean getSize() {}');
+
+        $this->parser->advance();
+        $this->parser->compileSubroutine();
+
+        $expected = '
+            <subroutineDec>
+              <keyword>method</keyword>
+              <keyword>boolean</keyword>
+              <identifier>getSize</identifier>
+              <symbol>(</symbol>
+              <parameterList />
+              <symbol>)</symbol>
+              <subroutineBody>
+                <symbol>{</symbol>
+                <symbol>}</symbol>
+              </subroutineBody>
+            </subroutineDec>
+        ';
+        $this->assertASTEquals($expected);
+    }
+    
     public function testEmptyParameterList()
     {
         $this->writeTestProgram(' /* int empty, char parameterList */ ');
@@ -144,8 +160,8 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
         $this->parser->advance();
         $this->parser->compileParameterList();
 
-        $expected = $this->loadXML('<parameterList />');
-        $this->assertEquals($expected->firstChild, $this->parser->getCtx());
+        $expected = '<parameterList />';
+        $this->assertASTEquals($expected);
     }
 
     public function testSingleParameter()
@@ -155,13 +171,13 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
         $this->parser->advance();
         $this->parser->compileParameterList();
 
-        $expected = $this->loadXML('
+        $expected = '
             <parameterList>
                 <identifier>CodeGenerator</identifier>
                 <identifier>cg</identifier>
             </parameterList>
-        ');
-        $this->assertEquals($expected->firstChild, $this->parser->getCtx());
+        ';
+        $this->assertASTEquals($expected);
     }
 
     public function testParameterList()
@@ -171,7 +187,7 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
         $this->parser->advance();
         $this->parser->compileParameterList();
 
-        $expected = $this->loadXML('
+        $expected = '
             <parameterList>
                 <keyword>int</keyword>
                 <identifier>x</identifier>
@@ -182,8 +198,8 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
                 <identifier>Output</identifier>
                 <identifier>file</identifier>
             </parameterList>
-        ');
-        $this->assertEquals($expected->firstChild, $this->parser->getCtx());
+        ';
+        $this->assertASTEquals($expected);
     }
     
     public function testSingleVarDec()
@@ -193,15 +209,15 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
         $this->parser->advance();
         $this->parser->compileVarDec();
 
-        $expected = $this->loadXML('
+        $expected = '
             <varDec>
               <keyword>var</keyword>
               <keyword>int</keyword>
               <identifier>score</identifier>
               <symbol>;</symbol>
             </varDec>
-        ');
-        $this->assertEquals($expected->firstChild, $this->parser->getCtx());    
+        ';
+        $this->assertASTEquals($expected);
     }
     
     public function testMultiVarDec()
@@ -211,7 +227,7 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
         $this->parser->advance();
         $this->parser->compileVarDec();
 
-        $expected = $this->loadXML('
+        $expected = '
             <varDec>
               <keyword>var</keyword>
               <identifier>List</identifier>
@@ -222,7 +238,7 @@ class CompilationEngineTest extends PHPUnit_Framework_TestCase
               <identifier>workers</identifier>
               <symbol>;</symbol>
             </varDec>
-        ');
-        $this->assertEquals($expected->firstChild, $this->parser->getCtx());    
+        ';
+        $this->assertASTEquals($expected);
     }
 }
