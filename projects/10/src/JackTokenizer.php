@@ -175,11 +175,17 @@ class JackTokenizer
     public function keyword()
     {
         if (self::KEYWORD != $this->tokenType()) {
-            return;
+            // @TODO emitir exception aqui? tratar isso no parser
+            throw new \Exception('TokenizerError: token atual não é uma keyword');
         }
         return $this->current;
     }
 
+    public function keywordToken()
+    {
+        return new Token('keyword', $this->keyword());
+    }
+    
     /**
      * @return char current symbol
      */
@@ -189,6 +195,11 @@ class JackTokenizer
             return;
         }
         return $this->current;
+    }
+    
+    public function symbolToken()
+    {
+        return new Token('symbol', htmlspecialchars($this->symbol(), ENT_XML1));
     }
 
     /**
@@ -200,6 +211,11 @@ class JackTokenizer
             return;
         }
         return $this->current;
+    }
+    
+    public function identifierToken()
+    {
+        return new Token('identifier', $this->identifier());
     }
 
     /**
@@ -213,6 +229,11 @@ class JackTokenizer
         return intval($this->current);
     }
 
+    public function intValToken()
+    {
+        return new Token('integerConstant', $this->intVal());
+    }
+    
     /**
      * @return string the string value without double quotes
      */
@@ -222,5 +243,10 @@ class JackTokenizer
             return;
         }
         return substr($this->current, 1, -1);
+    }
+    
+    public function stringValToken()
+    {
+        return new Token('stringConstant', $this->stringVal());
     }
 }

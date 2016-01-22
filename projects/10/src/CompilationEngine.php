@@ -87,7 +87,7 @@ class CompilationEngine
 
     /** {{{ Lexical elements */
     // The Jack language includes five types of terminal elements (tokens) 
-    
+
     protected function compileTerminalKeyword($val)
     {
         $this->checkType(JackTokenizer::KEYWORD);
@@ -122,7 +122,7 @@ class CompilationEngine
         $this->ctx = $this->root;
         
         $this->compileTerminalKeyword('class');
-        $this->compileClassName();
+        $this->identifier();
         $this->compileTerminalSymbol('{');
         
         while (in_array($this->tokenizer->keyword(), array('static', 'field'))) {
@@ -168,7 +168,7 @@ class CompilationEngine
         if (in_array($this->tokenizer->keyword(), array('int', 'char', 'boolean'))) {
             $this->compileTerminalKeyword($this->tokenizer->keyword());
         } else {
-            $this->compileClassName();
+            $this->identifier();
         }
     }
 
@@ -213,7 +213,9 @@ class CompilationEngine
         $this->ctx = $this->ctx->appendChild($this->doc->createElement('parameterList'));
 
         // sem parametros
-        if ($this->tokenizer->keyword() == null && $this->tokenizer->identifier() == null) {
+        // if ($this->tokenizer->keyword() == null && $this->tokenizer->identifier() == null) {
+        if ($this->tokenizer->tokenType() != JackTokenizer::KEYWORD && 
+            $this->tokenizer->tokenType() != JackTokenizer::IDENTIFIER) {
             // $this->ctx->appendChild($this->doc->createTextNode(''));
             $this->ctx = $this->ctx->parentNode;
             return true;
@@ -222,6 +224,9 @@ class CompilationEngine
         $this->compileType();
         $this->compileVarName();
         
+        // @TODO test new api with "isSomething($val)"
+        // while ($this->isSymbol(','))
+        // while ($this->isSymbol(array('+', '-', '*', '/')))
         while ($this->tokenizer->symbol() == ',') {
             $this->addSymbol();
             $this->advance();
@@ -274,13 +279,17 @@ class CompilationEngine
         $this->ctx = $this->ctx->parentNode;
     }
     
-    // identifier
-    protected function compileClassName()
+    protected function addTerminal(Token $token)
     {
-        $this->checkType(JackTokenizer::IDENTIFIER);
-        $this->addIdentifier();
+        $this->ctx->appendChild($this->doc->createElement($token->type, $token->val));
+    }
+    
+    protected function identifier()
+    {
+        $this->addTerminal($this->tokenizer->identifierToken());
         $this->advance();
     }
+
     // identifier
     protected function compileSubroutineName()
     {

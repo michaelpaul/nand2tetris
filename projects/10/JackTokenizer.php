@@ -16,34 +16,26 @@ $doc->formatOutput = true;
 $tokens = $doc->createElement('tokens');
 $doc->appendChild($tokens);
 
-while($jt->hasMoreTokens()) {
+while ($jt->hasMoreTokens()) {
     $jt->advance();
-    $tokenType = $tokenVal = null;
     switch ($jt->tokenType()) {
         case JackTokenizer::KEYWORD:
-            $tokenType = 'keyword';
-            $tokenVal = $jt->keyword();
+            $token = $jt->keywordToken();
             break;
         case JackTokenizer::SYMBOL:
-            $tokenType = 'symbol';
-            $tokenVal = htmlspecialchars($jt->symbol(), ENT_XML1);
+            $token = $jt->symbolToken();
             break;
         case JackTokenizer::IDENTIFIER:
-            $tokenType = 'identifier';
-            $tokenVal = $jt->identifier();
+            $token = $jt->identifierToken();
             break;
         case JackTokenizer::INT_CONST:
-            $tokenType = 'integerConstant';
-            $tokenVal = $jt->intVal();
+            $token = $jt->intValToken();
             break;
         case JackTokenizer::STRING_CONST:
-            $tokenType = 'stringConstant';
-            $tokenVal = $jt->stringVal();
+            $token = $jt->stringValToken();
             break;
-        default:
-            throw new Exception('Tipo desconhecido de token');    
     }
-    $tokens->appendChild($doc->createElement($tokenType, $tokenVal));
+    $tokens->appendChild($doc->createElement($token->type, $token->val));
 }
 
 $doc->save($output);
