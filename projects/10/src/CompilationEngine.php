@@ -125,10 +125,10 @@ class CompilationEngine
         $this->identifier();
         $this->compileTerminalSymbol('{');
         
-        while (in_array($this->tokenizer->keyword(), array('static', 'field'))) {
+        while ($this->tokenizer->isKeyword('static', 'field')) {
             $this->compileClassVarDec();
         }
-        while (in_array($this->tokenizer->keyword(), array('constructor', 'function', 'method'))) {
+        while ($this->tokenizer->isKeyword('constructor', 'function', 'method')) {
             $this->compileSubroutine();
         }
 
@@ -165,7 +165,7 @@ class CompilationEngine
     // 'int' | 'char' | 'boolean' | className
     protected function compileType()
     {
-        if (in_array($this->tokenizer->keyword(), array('int', 'char', 'boolean'))) {
+        if ($this->tokenizer->isKeyword('int', 'char', 'boolean')) {
             $this->compileTerminalKeyword($this->tokenizer->keyword());
         } else {
             $this->identifier();
@@ -179,7 +179,7 @@ class CompilationEngine
         $this->addKeyword();
         $this->advance();
 
-        if ($this->tokenizer->keyword() == 'void') {
+        if ($this->tokenizer->isKeyword('void')) {
             $this->addKeyword();
             $this->advance();
         } else {
@@ -250,7 +250,7 @@ class CompilationEngine
         $this->addSymbol();
         $this->advance();
 
-        while ($this->tokenizer->keyword() == 'var') {
+        while ($this->tokenizer->isKeyword('var')) {
             $this->compileVarDec();
         }
 

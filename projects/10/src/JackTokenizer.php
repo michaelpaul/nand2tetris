@@ -153,6 +153,8 @@ class JackTokenizer
         } else if (preg_match('/^"/', $this->current) &&
             preg_match('/"$/', $this->current)) {
             return self::STRING_CONST;
+        } else {
+            // throw new TokenizerError("Tipo inválido de token");
         }
     }
 
@@ -170,13 +172,24 @@ class JackTokenizer
     }
 
     /**
+     * @param mixed $haystack variadic list of keywords to look for
+     * @return bool true if current keyword is one of the arguments
+     */
+    public function isKeyword($haystack)
+    {
+        if (self::KEYWORD != $this->tokenType()) {
+            return false;
+        }
+        return false !== array_search($this->keyword(), func_get_args());
+    }
+    
+    /**
      * @return string the keyword which is the current token
      */
     public function keyword()
     {
         if (self::KEYWORD != $this->tokenType()) {
-            // @TODO emitir exception aqui? tratar isso no parser
-            throw new \Exception('TokenizerError: token atual não é uma keyword');
+            throw new TokenizerError('token atual não é uma keyword');
         }
         return $this->current;
     }

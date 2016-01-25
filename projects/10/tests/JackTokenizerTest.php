@@ -1,8 +1,11 @@
 <?php
 
-use JackCompiler\JackTokenizer;
+namespace JackTests;
 
-class JackTokenizerTest extends PHPUnit_Framework_TestCase
+use JackCompiler\JackTokenizer;
+use JackCompiler\TokenizerError;
+
+class JackTokenizerTest extends \PHPUnit_Framework_TestCase
 {
     protected $fp;
 
@@ -102,6 +105,20 @@ class JackTokenizerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($jt->hasMoreTokens());
         $jt->advance();
         $this->assertEquals('function', $jt->keyword());
+    }
+    
+    /**
+     * @expectedException JackCompiler\TokenizerError
+     * @expectedExceptionMessage token atual não é uma keyword
+     */
+    public function testNotKeyword()
+    {
+        fwrite($this->fp, "klass");
+        rewind($this->fp);
+        $jt = new JackTokenizer($this->fp);
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $jt->keyword();
     }
 
     public function testSymbol()
@@ -236,5 +253,24 @@ class JackTokenizerTest extends PHPUnit_Framework_TestCase
         $jt->advance();
         $this->assertEquals(JackTokenizer::IDENTIFIER, $jt->tokenType());
         $this->assertSame("cd", $jt->identifier());
+    }
+    
+    public function testIsKeyword()
+    {
+        fwrite($this->fp, "return lambda char");
+        rewind($this->fp);
+        $jt = new JackTokenizer($this->fp);
+        
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertTrue($jt->isKeyword('return'));
+        
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertFalse($jt->isKeyword('lambda'));
+        
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertTrue($jt->isKeyword('int', 'char', 'php'));
     }
 }
