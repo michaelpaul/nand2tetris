@@ -4,6 +4,42 @@ namespace JackTests;
 
 class CompilationEngineTest extends CompilerTestCase
 {
+    /**
+     * @expectedException JackCompiler\ParserError
+     * @expectedExceptionMessage Esperava keyword ( 'class' )
+     */
+    public function testRequiredKeyword()
+    {
+        $this->parser->compileTerminalKeyword('class');
+    }
+    
+    /**
+     * @expectedException JackCompiler\ParserError
+     * @expectedExceptionMessage Esperava keyword ( 'constructor' | 'function' | 'method' )
+     */
+    public function testRequiredKeywordList()
+    {
+        $this->parser->compileTerminalKeyword('constructor', 'function', 'method');
+    }
+    
+    /**
+     * @expectedException JackCompiler\ParserError
+     * @expectedExceptionMessage Esperava simbolo ( '{' )
+     */
+    public function testRequiredSymbol()
+    {
+        $this->parser->compileTerminalSymbol('{');
+    }
+    
+    /**
+     * @expectedException JackCompiler\ParserError
+     * @expectedExceptionMessage Esperava simbolo ( ',' | ';' | '[' )
+     */
+    public function testRequiredSymbolList()
+    {
+        $this->parser->compileTerminalSymbol(',', ';', '[');
+    }
+    
     public function testEmptyClass()
     {
         $this->writeTestProgram('class Square {}');
