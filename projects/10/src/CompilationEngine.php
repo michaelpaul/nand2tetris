@@ -196,9 +196,8 @@ class CompilationEngine
         $this->ctx = $this->ctx->appendChild($this->doc->createElement('parameterList'));
 
         // sem parametros
-        // if ($this->tokenizer->keyword() == null && $this->tokenizer->identifier() == null) {
         if ($this->tokenizer->tokenType() != JackTokenizer::KEYWORD &&
-            $this->tokenizer->tokenType() != JackTokenizer::IDENTIFIER) {
+            ! $this->tokenizer->isIdentifier()) {
             // $this->ctx->appendChild($this->doc->createTextNode(''));
             $this->ctx = $this->ctx->parentNode;
             return true;

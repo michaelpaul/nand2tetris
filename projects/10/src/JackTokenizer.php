@@ -227,16 +227,23 @@ class JackTokenizer
         return false !== array_search($this->symbol(), func_get_args());
     }
     
-    
     /**
      * @return string current identifier
      */
     public function identifier()
     {
         if (self::IDENTIFIER != $this->tokenType()) {
-            return;
+            throw new TokenizerError('token atual não é um identificador');
         }
         return $this->current;
+    }
+    
+    /**
+     * @return bool true if current token is a identifier
+     */
+    public function isIdentifier()
+    {
+        return self::IDENTIFIER == $this->tokenType(); 
     }
     
     public function identifierToken()

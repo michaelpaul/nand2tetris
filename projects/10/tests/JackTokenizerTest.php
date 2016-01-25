@@ -199,6 +199,25 @@ class JackTokenizerTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($jt->tokenType());
     }
 
+    public function testIsIdentifier()
+    {
+        fwrite($this->fp, "seeds @scream Roots");
+        rewind($this->fp);
+        $jt = new JackTokenizer($this->fp);
+        
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertTrue($jt->isIdentifier());
+        
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertFalse($jt->isIdentifier());
+        
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertTrue($jt->isIdentifier());
+    }
+    
     public function testIntVal()
     {
         fwrite($this->fp, "0 1 256 0777 x");
