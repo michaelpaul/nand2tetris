@@ -147,18 +147,13 @@ class CompilationEngine
         $this->compileType();
         $this->compileVarName();
         
-        while ($this->tokenizer->symbol() == ',') {
+        while ($this->tokenizer->isSymbol(',')) {
             $this->addSymbol();
             $this->advance();
             $this->compileVarName();
         }
 
-        if ($this->tokenizer->symbol() != ';') {
-            return; // @error
-        }
-
-        $this->addSymbol();
-        $this->advance();
+        $this->compileTerminalSymbol(';');
         $this->ctx = $this->ctx->parentNode;
     }
 
@@ -188,21 +183,9 @@ class CompilationEngine
 
         $this->compileSubroutineName();
         $this->advance();
-
-        if ($this->tokenizer->symbol() != '(') {
-            return; // @error
-        }
-
-        $this->addSymbol();
-        $this->advance();
+        $this->compileTerminalSymbol('(');
         $this->compileParameterList();
-
-        if ($this->tokenizer->symbol() != ')') {
-            return; // @error
-        }
-
-        $this->addSymbol();
-        $this->advance();
+        $this->compileTerminalSymbol(')');
         $this->compileSubroutineBody();
         $this->ctx = $this->ctx->parentNode;
     }
@@ -214,7 +197,7 @@ class CompilationEngine
 
         // sem parametros
         // if ($this->tokenizer->keyword() == null && $this->tokenizer->identifier() == null) {
-        if ($this->tokenizer->tokenType() != JackTokenizer::KEYWORD && 
+        if ($this->tokenizer->tokenType() != JackTokenizer::KEYWORD &&
             $this->tokenizer->tokenType() != JackTokenizer::IDENTIFIER) {
             // $this->ctx->appendChild($this->doc->createTextNode(''));
             $this->ctx = $this->ctx->parentNode;
@@ -224,10 +207,7 @@ class CompilationEngine
         $this->compileType();
         $this->compileVarName();
         
-        // @TODO test new api with "isSomething($val)"
-        // while ($this->isSymbol(','))
-        // while ($this->isSymbol(array('+', '-', '*', '/')))
-        while ($this->tokenizer->symbol() == ',') {
+        while ($this->tokenizer->isSymbol(',')) {
             $this->addSymbol();
             $this->advance();
 
@@ -243,25 +223,16 @@ class CompilationEngine
     {
         $this->ctx = $this->ctx->appendChild($this->doc->createElement('subroutineBody'));
 
-        if ($this->tokenizer->symbol() != '{') {
-            return; // @error
-        }
-
-        $this->addSymbol();
-        $this->advance();
+        $this->compileTerminalSymbol('{');
 
         while ($this->tokenizer->isKeyword('var')) {
             $this->compileVarDec();
         }
-
+        
         $this->advance();
         $this->compileStatements();
-
         $this->advance();
-        if ($this->tokenizer->symbol() != '}') {
-            return; // @error
-        }
-        $this->addSymbol();
+        $this->compileTerminalSymbol('}');
     }
 
     // 'var' type varName (',' varName)* ';'
@@ -271,7 +242,7 @@ class CompilationEngine
         $this->compileTerminalKeyword('var');
         $this->compileType();
         $this->compileVarName();
-        while ($this->tokenizer->symbol() == ',') {
+        while ($this->tokenizer->isSymbol(',')) {
             $this->compileTerminalSymbol(',');
             $this->compileVarName();
         }

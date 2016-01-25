@@ -172,18 +172,6 @@ class JackTokenizer
     }
 
     /**
-     * @param mixed $haystack variadic list of keywords to look for
-     * @return bool true if current keyword is one of the arguments
-     */
-    public function isKeyword($haystack)
-    {
-        if (self::KEYWORD != $this->tokenType()) {
-            return false;
-        }
-        return false !== array_search($this->keyword(), func_get_args());
-    }
-    
-    /**
      * @return string the keyword which is the current token
      */
     public function keyword()
@@ -198,6 +186,18 @@ class JackTokenizer
     {
         return new Token('keyword', $this->keyword());
     }
+
+    /**
+     * @param mixed $haystack variadic list of keywords to look for
+     * @return bool true if current keyword is one of the arguments
+     */
+    public function isKeyword($haystack)
+    {
+        if (self::KEYWORD != $this->tokenType()) {
+            return false;
+        }
+        return false !== array_search($this->keyword(), func_get_args());
+    }
     
     /**
      * @return char current symbol
@@ -205,7 +205,7 @@ class JackTokenizer
     public function symbol()
     {
         if (self::SYMBOL != $this->tokenType()) {
-            return;
+            throw new TokenizerError('token atual não é um simbolo');
         }
         return $this->current;
     }
@@ -215,6 +215,19 @@ class JackTokenizer
         return new Token('symbol', htmlspecialchars($this->symbol(), ENT_XML1));
     }
 
+    /**
+     * @param mixed $haystack variadic list of symbols to look for
+     * @return bool true if current symbol is one of the arguments
+     */
+    public function isSymbol($haystack)
+    {
+        if (self::SYMBOL != $this->tokenType()) {
+            return false;
+        }
+        return false !== array_search($this->symbol(), func_get_args());
+    }
+    
+    
     /**
      * @return string current identifier
      */

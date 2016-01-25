@@ -120,6 +120,25 @@ class JackTokenizerTest extends \PHPUnit_Framework_TestCase
         $jt->advance();
         $jt->keyword();
     }
+    
+    public function testIsKeyword()
+    {
+        fwrite($this->fp, "return lambda char");
+        rewind($this->fp);
+        $jt = new JackTokenizer($this->fp);
+        
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertTrue($jt->isKeyword('return'));
+        
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertFalse($jt->isKeyword('lambda'));
+        
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertTrue($jt->isKeyword('int', 'char', 'php'));
+    }
 
     public function testSymbol()
     {
@@ -132,13 +151,32 @@ class JackTokenizerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($jt->hasMoreTokens());
         $jt->advance();
-        $this->assertNull($jt->symbol());
+        $this->assertFalse($jt->isSymbol('x'));
 
         $this->assertTrue($jt->hasMoreTokens());
         $jt->advance();
         $this->assertEquals(')', $jt->symbol());
     }
 
+    public function testIsSymbol()
+    {
+        fwrite($this->fp, ", @ &");
+        rewind($this->fp);
+        $jt = new JackTokenizer($this->fp);
+        
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertTrue($jt->isSymbol(','));
+        
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertFalse($jt->isSymbol('@'));
+        
+        $this->assertTrue($jt->hasMoreTokens());
+        $jt->advance();
+        $this->assertTrue($jt->isSymbol('|', '/', '&'));
+    }
+    
     public function testIdentifier()
     {
         fwrite($this->fp, "x Xy XyZ 10x");
@@ -253,24 +291,5 @@ class JackTokenizerTest extends \PHPUnit_Framework_TestCase
         $jt->advance();
         $this->assertEquals(JackTokenizer::IDENTIFIER, $jt->tokenType());
         $this->assertSame("cd", $jt->identifier());
-    }
-    
-    public function testIsKeyword()
-    {
-        fwrite($this->fp, "return lambda char");
-        rewind($this->fp);
-        $jt = new JackTokenizer($this->fp);
-        
-        $this->assertTrue($jt->hasMoreTokens());
-        $jt->advance();
-        $this->assertTrue($jt->isKeyword('return'));
-        
-        $this->assertTrue($jt->hasMoreTokens());
-        $jt->advance();
-        $this->assertFalse($jt->isKeyword('lambda'));
-        
-        $this->assertTrue($jt->hasMoreTokens());
-        $jt->advance();
-        $this->assertTrue($jt->isKeyword('int', 'char', 'php'));
     }
 }
