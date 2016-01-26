@@ -203,9 +203,7 @@ class CompilationEngine
             $this->compileVarDec();
         }
         
-        $this->advance();
         $this->compileStatements();
-        $this->advance();
         $this->compileTerminalSymbol('}');
     }
 
@@ -225,6 +223,8 @@ class CompilationEngine
         $this->ctx = $this->ctx->parentNode;
     }
     
+    /** Statements **/ 
+    
     // statement*
     public function compileStatements()
     {
@@ -240,7 +240,18 @@ class CompilationEngine
     // 'let' varName ('[' expression ']')? '=' expression ';'
     public function compileLet()
     {
-        # code...
+        $this->ctx = $this->ctx->appendChild($this->doc->createElement('letStatement'));
+        $this->compileTerminalKeyword('let');
+        $this->identifier();
+        if ($this->tokenizer->isSymbol('[')) {
+            $this->compileTerminalSymbol('[');
+            $this->compileExpression();
+            $this->compileTerminalSymbol(']');
+        }
+        $this->compileTerminalSymbol('=');
+        $this->compileExpression();
+        $this->compileTerminalSymbol(';');
+        $this->ctx = $this->ctx->parentNode;
     }
 
     // 'while' '(' expression ')' '{' statements '}'
@@ -261,16 +272,27 @@ class CompilationEngine
         # code...
     }
 
+    /** Expressions **/ 
+
+    // term (op term)*
     public function compileExpression()
     {
-        # code...
+        $this->ctx = $this->ctx->appendChild($this->doc->createElement('expression'));
+        $this->compileTerm();
+        $this->ctx = $this->ctx->parentNode;
     }
 
+    // integerConstant | stringConstant | keywordConstant | varName | 
+    // varName '[' expression ']' | subroutineCall | '(' expression ')' | 
+    // unaryOp term
     public function compileTerm()
     {
-        # code...
+        $this->ctx = $this->ctx->appendChild($this->doc->createElement('term'));
+        $this->identifier();
+        $this->ctx = $this->ctx->parentNode;
     }
 
+    // (expression (',' expression)*)?
     public function compileExpressionList()
     {
         # code...
