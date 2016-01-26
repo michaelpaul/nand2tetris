@@ -79,7 +79,7 @@ class JackTokenizer
                 if ('/' == $nextc) {
                     $this->skipComment();
                     continue;
-                } else if ('*' == $nextc) {
+                } elseif ('*' == $nextc) {
                     $this->skipMultiLineComment();
                     continue;
                 }
@@ -144,13 +144,13 @@ class JackTokenizer
     {
         if (in_array($this->current, $this->keywords)) {
             return self::KEYWORD;
-        } else if (in_array($this->current, $this->symbols)) {
+        } elseif (in_array($this->current, $this->symbols)) {
             return self::SYMBOL;
-        } else if (preg_match('/^[a-z]\w*$/i', $this->current)) {
+        } elseif (preg_match('/^[a-z]\w*$/i', $this->current)) {
             return self::IDENTIFIER;
-        } else if (preg_match('/^\d+$/', $this->current)) {
+        } elseif (preg_match('/^\d+$/', $this->current)) {
             return self::INT_CONST;
-        } else if (preg_match('/^"/', $this->current) &&
+        } elseif (preg_match('/^"/', $this->current) &&
             preg_match('/"$/', $this->current)) {
             return self::STRING_CONST;
         } else {
@@ -243,7 +243,7 @@ class JackTokenizer
      */
     public function isIdentifier()
     {
-        return self::IDENTIFIER == $this->tokenType(); 
+        return self::IDENTIFIER == $this->tokenType();
     }
     
     public function identifierToken()

@@ -2,12 +2,12 @@
 
 namespace JackCompiler;
 
-class Token 
+class Token
 {
     public $type;
     public $val;
     
-    function __construct($type, $val)
+    public function __construct($type, $val)
     {
         $this->type = $type;
         $this->val = $val;

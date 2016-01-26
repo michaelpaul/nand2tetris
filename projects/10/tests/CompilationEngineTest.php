@@ -134,6 +134,7 @@ class CompilationEngineTest extends CompilerTestCase
               <symbol>)</symbol>
               <subroutineBody>
                 <symbol>{</symbol>
+                <statements />
                 <symbol>}</symbol>
               </subroutineBody>
             </subroutineDec>
@@ -158,6 +159,7 @@ class CompilationEngineTest extends CompilerTestCase
               <symbol>)</symbol>
               <subroutineBody>
                 <symbol>{</symbol>
+                <statements />
                 <symbol>}</symbol>
               </subroutineBody>
             </subroutineDec>
@@ -182,6 +184,7 @@ class CompilationEngineTest extends CompilerTestCase
               <symbol>)</symbol>
               <subroutineBody>
                 <symbol>{</symbol>
+                <statements />
                 <symbol>}</symbol>
               </subroutineBody>
             </subroutineDec>

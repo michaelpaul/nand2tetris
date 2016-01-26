@@ -57,6 +57,22 @@ class CompilationEngine
         $this->tokenizer->advance();
     }
     
+    /**
+     * Start parsing a non-terminal $element
+     */
+    public function beginElement($element)
+    {
+        $this->ctx = $this->ctx->appendChild($this->doc->createElement($element));
+    }
+    /**
+     * Parsing done for a non-terminal element
+     */
+    public function endElement()
+    {
+        $this->ctx = $this->ctx->parentNode;
+    }
+
+    
     /** {{{ Lexical elements */
     // The Jack language includes five types of terminal elements (tokens) 
 
@@ -223,12 +239,17 @@ class CompilationEngine
         $this->ctx = $this->ctx->parentNode;
     }
     
-    /** Statements **/ 
+    /** Statements **/
     
     // statement*
+    // @TODO acrescentar os demais statements e testar esse método
     public function compileStatements()
     {
-        # code...
+        $this->beginElement('statements');
+        while ($this->tokenizer->isKeyword('let')) {
+            $this->compileLet();
+        }
+        $this->endElement();
     }
 
     // 'do' subroutineCall ';'
@@ -269,10 +290,27 @@ class CompilationEngine
     // 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
     public function compileIf()
     {
-        # code...
+        $this->beginElement('ifStatement');
+        
+        $this->compileTerminalKeyword('if');
+        $this->compileTerminalSymbol('(');
+        $this->compileExpression();
+        $this->compileTerminalSymbol(')');
+        $this->compileTerminalSymbol('{');
+        $this->compileStatements();
+        $this->compileTerminalSymbol('}');
+        
+        if ($this->tokenizer->isKeyword('else')) {
+            $this->compileTerminalKeyword('else');
+            $this->compileTerminalSymbol('{');
+            $this->compileStatements();
+            $this->compileTerminalSymbol('}');
+        }
+        
+        $this->endElement();
     }
 
-    /** Expressions **/ 
+    /** Expressions **/
 
     // term (op term)*
     public function compileExpression()
