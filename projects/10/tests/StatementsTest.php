@@ -109,4 +109,24 @@ class StatementsTest extends CompilerTestCase
             ->ifStatement->expression->term->identifier;
         $this->assertEquals('z', $z);
     }
+    
+    public function testWhile()
+    {
+        $this->writeTestProgram('while (x) { if(y){} let z = z; }');
+        $this->parser->advance();
+        $this->parser->compileWhile();
+        
+        $whileStatement = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $this->assertEquals('whileStatement', $whileStatement->getName());
+        $this->assertEquals('while', $whileStatement->keyword[0]);
+        $this->assertEquals('(', $whileStatement->symbol[0]);
+        $this->assertEquals('expression', $whileStatement->expression->getName());
+        $this->assertEquals(')', $whileStatement->symbol[1]);
+        $this->assertEquals('{', $whileStatement->symbol[2]);
+        $this->assertEquals('statements', $whileStatement->statements->getName());
+        $this->assertCount(2, $whileStatement->statements->children());
+        $this->assertCount(1, $whileStatement->statements->ifStatement);
+        $this->assertCount(1, $whileStatement->statements->letStatement);
+        $this->assertEquals('}', $whileStatement->symbol[3]);
+    }
 }

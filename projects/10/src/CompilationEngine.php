@@ -282,7 +282,15 @@ class CompilationEngine
     // 'while' '(' expression ')' '{' statements '}'
     public function compileWhile()
     {
-        # code...
+        $this->beginElement('whileStatement');
+        $this->compileTerminalKeyword('while');
+        $this->compileTerminalSymbol('(');
+        $this->compileExpression();
+        $this->compileTerminalSymbol(')');
+        $this->compileTerminalSymbol('{');
+        $this->compileStatements();
+        $this->compileTerminalSymbol('}');
+        $this->endElement();
     }
 
     // 'return' expression? ';'
