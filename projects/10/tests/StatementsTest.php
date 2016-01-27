@@ -62,15 +62,15 @@ class StatementsTest extends CompilerTestCase
         $this->writeTestProgram('if (x) { let x = y; let a = b; }');
         $this->parser->advance();
         $this->parser->compileIf();
-        $ifStatement = simplexml_import_dom($this->parser->getCtx());
+        $ifStatement = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
         $this->assertEquals('ifStatement', $ifStatement->getName());
         $this->assertEquals('if', $ifStatement->keyword[0]);
         $this->assertEquals('(', $ifStatement->symbol[0]);
         $this->assertEquals('x', $ifStatement->expression->term->identifier[0]);
         $this->assertEquals(')', $ifStatement->symbol[1]);
         $this->assertEquals('{', $ifStatement->symbol[2]);
-        $this->assertEquals(1, $ifStatement->statements->count());
-        $this->assertEquals(2, $ifStatement->statements->letStatement->count());
+        $this->assertCount(1, $ifStatement->statements);
+        $this->assertCount(2, $ifStatement->statements->letStatement);
         $this->assertEquals('}', $ifStatement->symbol[3]);
     }
     
@@ -81,14 +81,32 @@ class StatementsTest extends CompilerTestCase
         );
         $this->parser->advance();
         $this->parser->compileIf();
-        $ifStatement = simplexml_import_dom($this->parser->getCtx());
+        $ifStatement = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
         $this->assertEquals('ifStatement', $ifStatement->getName());
         $this->assertEquals('if', $ifStatement->keyword[0]);
         $this->assertEquals('else', $ifStatement->keyword[1]);
-        $this->assertEquals(2, $ifStatement->statements->count());
-        $this->assertEquals(2, $ifStatement->statements[1]->letStatement->count());
+        $this->assertCount(2, $ifStatement->statements);
+        $this->assertCount(2, $ifStatement->statements[1]->letStatement);
         // deep path
         $y = $ifStatement->statements[1]->letStatement[1]->expression->term->identifier;
         $this->assertEquals('y', $y);
+    }
+    
+    public function testNestedIf()
+    {
+        $this->writeTestProgram(
+            'if (x) { if (y) { if (z) {  } } }'
+        );
+        $this->parser->advance();
+        $this->parser->compileIf();
+        $ifStatement = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $this->assertEquals('ifStatement', $ifStatement->getName());
+        $this->assertCount(3, $ifStatement->xpath('//ifStatement'));
+        $this->assertCount(3, $ifStatement->xpath('//identifier'));
+        // deep path
+        $z = $ifStatement->statements
+            ->ifStatement->statements
+            ->ifStatement->expression->term->identifier;
+        $this->assertEquals('z', $z);
     }
 }

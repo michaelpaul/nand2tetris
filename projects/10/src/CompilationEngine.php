@@ -246,8 +246,12 @@ class CompilationEngine
     public function compileStatements()
     {
         $this->beginElement('statements');
-        while ($this->tokenizer->isKeyword('let')) {
-            $this->compileLet();
+        while ($this->tokenizer->isKeyword('let', 'if')) {
+            if ($this->tokenizer->isKeyword('let')) {
+                $this->compileLet();
+            } elseif ($this->tokenizer->isKeyword('if')) {
+                $this->compileIf();
+            }
         }
         $this->endElement();
     }
