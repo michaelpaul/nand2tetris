@@ -129,4 +129,72 @@ class StatementsTest extends CompilerTestCase
         $this->assertCount(1, $whileStatement->statements->letStatement);
         $this->assertEquals('}', $whileStatement->symbol[3]);
     }
+    
+    public function testReturnVoid()
+    {
+        $this->writeTestProgram('return;');
+        $this->parser->advance();
+        $this->parser->compileReturn();
+        
+        $returnStatement = simplexml_import_dom($this->parser->getCtx());
+        $this->assertEquals('returnStatement', $returnStatement->getName());
+        $this->assertEquals('return', $returnStatement->keyword[0]);
+        $this->assertEquals(';', $returnStatement->symbol[0]);
+    }
+    
+    public function testReturnExpr()
+    {
+        $this->writeTestProgram('return x;');
+        $this->parser->advance();
+        $this->parser->compileReturn();
+        
+        $returnStatement = simplexml_import_dom($this->parser->getCtx());
+        $this->assertEquals('x', $returnStatement->expression->term->identifier);
+    }
+    
+    public function testSimpleExpressionList()
+    {
+        // empty
+        $this->writeTestProgram('');
+        $this->parser->advance();
+        $this->parser->compileExpressionList();
+        $exprList = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $this->assertEquals('expressionList', $exprList->getName());
+        $this->assertCount(0, $exprList->children());
+        
+        // single exp
+        $this->writeTestProgram('x');
+        $this->parser->advance();
+        $this->parser->compileExpressionList();
+        $exprList = simplexml_import_dom($this->parser->getCtx());
+        $this->assertEquals('expressionList', $exprList->getName());
+    }
+    
+    public function testExpressionList()
+    {
+        $this->writeTestProgram('x, y, z');
+        $this->parser->advance();
+        $this->parser->compileExpressionList();
+        
+        $exprList = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $this->assertEquals('expressionList', $exprList->getName());
+        $this->assertCount(3, $exprList->expression);
+        $vars = $exprList->xpath('//identifier');
+        $this->assertEquals('x', $vars[0]);
+        $this->assertEquals('y', $vars[1]);
+        $this->assertEquals('z', $vars[2]);
+    }
+    
+    // @TODO testar subroutineCall no "do"
+    // public function testSubroutineCall()
+    // {
+    //     $this->writeTestProgram('do draw();');
+    //     $this->parser->advance();
+    //     $this->parser->compileDo();
+    //     
+    //     $subroutineCall = simplexml_import_dom($this->parser->getCtx());
+    //     // echo $subroutineCall->asXML();
+    //     $this->assertEquals('identifier', $subroutineCall->getName());
+    //     $this->assertEquals('draw', $subroutineCall);
+    // }
 }

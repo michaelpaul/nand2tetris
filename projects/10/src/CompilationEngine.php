@@ -296,7 +296,13 @@ class CompilationEngine
     // 'return' expression? ';'
     public function compileReturn()
     {
-        # code...
+        $this->beginElement('returnStatement');
+        $this->compileTerminalKeyword('return');
+        if (! $this->tokenizer->isSymbol(';')) {
+            $this->compileExpression();
+        }
+        $this->compileTerminalSymbol(';');
+        $this->endElement();
     }
 
     // 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
@@ -322,6 +328,13 @@ class CompilationEngine
         $this->endElement();
     }
 
+    // subroutineName '(' expressionList ')' | 
+    //  (className | varName) '.' subroutineName '(' expressionList ')'
+    protected function compileSubroutineCall()
+    {
+        $this->identifier();
+    }
+    
     /** Expressions **/
 
     // term (op term)*
@@ -345,7 +358,18 @@ class CompilationEngine
     // (expression (',' expression)*)?
     public function compileExpressionList()
     {
-        # code...
+        $this->beginElement('expressionList');
+        // empty expression
+        if ($this->tokenizer->isSymbol(')') || ! $this->tokenizer->tokenType()) {
+            $this->endElement();
+            return;
+        }
+        $this->compileExpression();
+        while ($this->tokenizer->isSymbol(',')) {
+            $this->compileTerminalSymbol(',');
+            $this->compileExpression();
+        }
+        $this->endElement();
     }
     /** }}} */
 }
