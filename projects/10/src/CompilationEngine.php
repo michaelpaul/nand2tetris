@@ -259,7 +259,11 @@ class CompilationEngine
     // 'do' subroutineCall ';'
     public function compileDo()
     {
-        # code...
+        $this->beginElement('doStatement');
+        $this->compileTerminalKeyword('do');
+        $this->compileSubroutineCall();
+        $this->compileTerminalSymbol(';');
+        $this->endElement();
     }
 
     // 'let' varName ('[' expression ']')? '=' expression ';'
@@ -333,6 +337,13 @@ class CompilationEngine
     protected function compileSubroutineCall()
     {
         $this->identifier();
+        if ($this->tokenizer->isSymbol('.')) {
+            $this->compileTerminalSymbol('.');
+            $this->identifier();
+        }
+        $this->compileTerminalSymbol('(');
+        $this->compileExpressionList();
+        $this->compileTerminalSymbol(')');
     }
     
     /** Expressions **/

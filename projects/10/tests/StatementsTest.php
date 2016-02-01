@@ -185,16 +185,28 @@ class StatementsTest extends CompilerTestCase
         $this->assertEquals('z', $vars[2]);
     }
     
-    // @TODO testar subroutineCall no "do"
-    // public function testSubroutineCall()
-    // {
-    //     $this->writeTestProgram('do draw();');
-    //     $this->parser->advance();
-    //     $this->parser->compileDo();
-    //     
-    //     $subroutineCall = simplexml_import_dom($this->parser->getCtx());
-    //     // echo $subroutineCall->asXML();
-    //     $this->assertEquals('identifier', $subroutineCall->getName());
-    //     $this->assertEquals('draw', $subroutineCall);
-    // }
+    public function testDo()
+    {
+        $this->writeTestProgram('do draw();');
+        $this->parser->advance();
+        $this->parser->compileDo();
+        
+        $doStatement = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $this->assertEquals('doStatement', $doStatement->getName());
+        $this->assertEquals('draw', $doStatement->identifier);
+        $this->assertCount(3, $doStatement->symbol);
+        $this->assertEquals('expressionList', $doStatement->expressionList->getName());
+    }
+    
+    public function testSubroutineCall()
+    {
+        $this->writeTestProgram('do Output.println();');
+        $this->parser->advance();
+        $this->parser->compileDo();
+        
+        $doStatement = simplexml_import_dom($this->parser->getCtx());
+        $this->assertEquals('Output', $doStatement->identifier[0]);
+        $this->assertEquals('.', $doStatement->symbol[0]);
+        $this->assertEquals('println', $doStatement->identifier[1]);
+    }
 }
