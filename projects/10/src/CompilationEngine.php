@@ -241,16 +241,24 @@ class CompilationEngine
     
     /** Statements **/
     
-    // statement*
-    // @TODO acrescentar os demais statements e testar esse método
+    // statements: statement*
+    // statement: letStatement | ifStatement | whileStatement | doStatement | returnStatement
     public function compileStatements()
     {
         $this->beginElement('statements');
-        while ($this->tokenizer->isKeyword('let', 'if')) {
+        while ($this->tokenizer->isKeyword('let', 'if', 'while', 'do', 'return')) {
             if ($this->tokenizer->isKeyword('let')) {
                 $this->compileLet();
             } elseif ($this->tokenizer->isKeyword('if')) {
                 $this->compileIf();
+            } elseif ($this->tokenizer->isKeyword('while')) {
+                $this->compileWhile();
+            } elseif ($this->tokenizer->isKeyword('do')) {
+                $this->compileDo();
+            } elseif ($this->tokenizer->isKeyword('return')) {
+                $this->compileReturn();
+            } else {
+                throw new ParserError("Statement não suportado '" . $this->tokenizer->keyword() . "'");
             }
         }
         $this->endElement();

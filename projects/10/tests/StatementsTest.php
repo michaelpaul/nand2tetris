@@ -209,4 +209,26 @@ class StatementsTest extends CompilerTestCase
         $this->assertEquals('.', $doStatement->symbol[0]);
         $this->assertEquals('println', $doStatement->identifier[1]);
     }
+    
+    public function testStatements()
+    {
+        $this->writeTestProgram('
+            let sum = i;
+            while (sum) { }
+            do draw();
+            return x;
+            if (sum) { }
+        ');
+        $this->parser->advance();
+        $this->parser->compileStatements();
+        $statements = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $this->assertEquals('statements', $statements->getName());
+        $statements = $statements->children();
+        $this->assertCount(5, $statements);
+        $this->assertEquals('letStatement', $statements[0]->getName());
+        $this->assertEquals('whileStatement', $statements[1]->getName());
+        $this->assertEquals('doStatement', $statements[2]->getName());
+        $this->assertEquals('returnStatement', $statements[3]->getName());
+        $this->assertEquals('ifStatement', $statements[4]->getName());
+    }
 }
