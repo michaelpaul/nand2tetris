@@ -15,8 +15,17 @@ class RoboFile extends \Robo\Tasks
         $this->taskPHPUnit('phpunit')
             ->run();
 
+        $this->tokenizerTest();
+        $this->parserTest();
+    }
+    
+    protected function tokenizerTest()
+    {
         $path = 'tests/programs';
         $files = array(
+            'ExpressionlessSquare/Main', 
+            'ExpressionlessSquare/SquareGame',
+            'ExpressionlessSquare/Square',
             'Square/Main', 
             'Square/SquareGame',
             'Square/Square', 
@@ -24,8 +33,23 @@ class RoboFile extends \Robo\Tasks
         );
         foreach ($files as $file) {
             $output = '/tmp/' . str_replace('/', '.', $file) . 'T.xml';
-            $this->_exec("php JackTokenizer.php {$path}/{$file}.jack $output");
+            $this->_exec("./bin/tokenizer.php {$path}/{$file}.jack $output");
             $this->_exec("TextComparer.sh {$path}/{$file}T.xml $output");
+        }
+    }
+    
+    protected function parserTest()
+    {
+        $path = 'tests/programs';
+        $files = array(
+            'ExpressionlessSquare/Main', 
+            'ExpressionlessSquare/SquareGame',
+            'ExpressionlessSquare/Square', 
+        );
+        foreach ($files as $file) {
+            $output = '/tmp/' . str_replace('/', '.', $file) . '.xml';
+            $this->_exec("./bin/parser.php {$path}/{$file}.jack $output");
+            $this->_exec("TextComparer.sh {$path}/{$file}.xml $output");
         }
     }
 }

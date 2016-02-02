@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <class>
   <keyword> class </keyword>
   <identifier> Main </identifier>
@@ -7,8 +8,7 @@
     <keyword> void </keyword>
     <identifier> main </identifier>
     <symbol> ( </symbol>
-    <parameterList>
-    </parameterList>
+    <parameterList/>
     <symbol> ) </symbol>
     <subroutineBody>
       <symbol> { </symbol>
@@ -36,8 +36,7 @@
           <symbol> . </symbol>
           <identifier> run </identifier>
           <symbol> ( </symbol>
-          <expressionList>
-          </expressionList>
+          <expressionList/>
           <symbol> ) </symbol>
           <symbol> ; </symbol>
         </doStatement>
@@ -47,8 +46,7 @@
           <symbol> . </symbol>
           <identifier> dispose </identifier>
           <symbol> ( </symbol>
-          <expressionList>
-          </expressionList>
+          <expressionList/>
           <symbol> ) </symbol>
           <symbol> ; </symbol>
         </doStatement>

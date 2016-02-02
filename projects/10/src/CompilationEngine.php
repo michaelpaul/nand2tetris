@@ -137,8 +137,7 @@ class CompilationEngine
     // ('static' | 'field') type varName (',' varName)* ';'
     public function compileClassVarDec()
     {
-        $this->ctx = $this->ctx->appendChild($this->doc->createElement('classVarDec'));
-
+        $this->beginElement('classVarDec');
         $this->compileTerminalKeyword('static', 'field');
         $this->compileType();
         $this->identifier();
@@ -149,7 +148,7 @@ class CompilationEngine
         }
 
         $this->compileTerminalSymbol(';');
-        $this->ctx = $this->ctx->parentNode;
+        $this->endElement();
     }
 
     // 'int' | 'char' | 'boolean' | className
@@ -165,8 +164,7 @@ class CompilationEngine
     // ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
     public function compileSubroutine()
     {
-        $this->ctx = $this->ctx->appendChild($this->doc->createElement('subroutineDec'));
-        
+        $this->beginElement('subroutineDec');
         $this->compileTerminalKeyword('constructor', 'function', 'method');
         
         if ($this->tokenizer->isKeyword('void')) {
@@ -180,19 +178,19 @@ class CompilationEngine
         $this->compileParameterList();
         $this->compileTerminalSymbol(')');
         $this->compileSubroutineBody();
-        $this->ctx = $this->ctx->parentNode;
+        $this->endElement();
     }
 
     // ((type varName) (',' type varName)*)?
     public function compileParameterList()
     {
-        $this->ctx = $this->ctx->appendChild($this->doc->createElement('parameterList'));
+        $this->beginElement('parameterList');
 
         // sem parametros
         if ($this->tokenizer->tokenType() != JackTokenizer::KEYWORD &&
             ! $this->tokenizer->isIdentifier()) {
             // $this->ctx->appendChild($this->doc->createTextNode(''));
-            $this->ctx = $this->ctx->parentNode;
+            $this->endElement();
             return true;
         }
 
@@ -205,14 +203,13 @@ class CompilationEngine
             $this->identifier();
         }
 
-        $this->ctx = $this->ctx->parentNode;
+        $this->endElement();
     }
 
     // '{' varDec* statements '}'
     public function compileSubroutineBody()
     {
-        $this->ctx = $this->ctx->appendChild($this->doc->createElement('subroutineBody'));
-
+        $this->beginElement('subroutineBody');
         $this->compileTerminalSymbol('{');
 
         while ($this->tokenizer->isKeyword('var')) {
@@ -221,12 +218,13 @@ class CompilationEngine
         
         $this->compileStatements();
         $this->compileTerminalSymbol('}');
+        $this->endElement();
     }
 
     // 'var' type varName (',' varName)* ';'
     public function compileVarDec()
     {
-        $this->ctx = $this->ctx->appendChild($this->doc->createElement('varDec'));
+        $this->beginElement('varDec');
         $this->compileTerminalKeyword('var');
         $this->compileType();
         $this->identifier();
@@ -235,8 +233,9 @@ class CompilationEngine
             $this->compileTerminalSymbol(',');
             $this->identifier();
         }
+        
         $this->compileTerminalSymbol(';');
-        $this->ctx = $this->ctx->parentNode;
+        $this->endElement();
     }
     
     /** Statements **/
@@ -246,6 +245,7 @@ class CompilationEngine
     public function compileStatements()
     {
         $this->beginElement('statements');
+        
         while ($this->tokenizer->isKeyword('let', 'if', 'while', 'do', 'return')) {
             if ($this->tokenizer->isKeyword('let')) {
                 $this->compileLet();
@@ -261,6 +261,7 @@ class CompilationEngine
                 throw new ParserError("Statement não suportado '" . $this->tokenizer->keyword() . "'");
             }
         }
+        
         $this->endElement();
     }
 
@@ -277,18 +278,20 @@ class CompilationEngine
     // 'let' varName ('[' expression ']')? '=' expression ';'
     public function compileLet()
     {
-        $this->ctx = $this->ctx->appendChild($this->doc->createElement('letStatement'));
+        $this->beginElement('letStatement');
         $this->compileTerminalKeyword('let');
         $this->identifier();
+        
         if ($this->tokenizer->isSymbol('[')) {
             $this->compileTerminalSymbol('[');
             $this->compileExpression();
             $this->compileTerminalSymbol(']');
         }
+        
         $this->compileTerminalSymbol('=');
         $this->compileExpression();
         $this->compileTerminalSymbol(';');
-        $this->ctx = $this->ctx->parentNode;
+        $this->endElement();
     }
 
     // 'while' '(' expression ')' '{' statements '}'
@@ -310,9 +313,11 @@ class CompilationEngine
     {
         $this->beginElement('returnStatement');
         $this->compileTerminalKeyword('return');
+        
         if (! $this->tokenizer->isSymbol(';')) {
             $this->compileExpression();
         }
+        
         $this->compileTerminalSymbol(';');
         $this->endElement();
     }
@@ -321,7 +326,6 @@ class CompilationEngine
     public function compileIf()
     {
         $this->beginElement('ifStatement');
-        
         $this->compileTerminalKeyword('if');
         $this->compileTerminalSymbol('(');
         $this->compileExpression();
@@ -345,10 +349,12 @@ class CompilationEngine
     protected function compileSubroutineCall()
     {
         $this->identifier();
+        
         if ($this->tokenizer->isSymbol('.')) {
             $this->compileTerminalSymbol('.');
             $this->identifier();
         }
+        
         $this->compileTerminalSymbol('(');
         $this->compileExpressionList();
         $this->compileTerminalSymbol(')');
@@ -359,9 +365,9 @@ class CompilationEngine
     // term (op term)*
     public function compileExpression()
     {
-        $this->ctx = $this->ctx->appendChild($this->doc->createElement('expression'));
+        $this->beginElement('expression');
         $this->compileTerm();
-        $this->ctx = $this->ctx->parentNode;
+        $this->endElement();
     }
 
     // integerConstant | stringConstant | keywordConstant | varName | 
@@ -369,9 +375,9 @@ class CompilationEngine
     // unaryOp term
     public function compileTerm()
     {
-        $this->ctx = $this->ctx->appendChild($this->doc->createElement('term'));
+        $this->beginElement('term');
         $this->identifier();
-        $this->ctx = $this->ctx->parentNode;
+        $this->endElement();
     }
 
     // (expression (',' expression)*)?
@@ -383,11 +389,14 @@ class CompilationEngine
             $this->endElement();
             return;
         }
+        
         $this->compileExpression();
+        
         while ($this->tokenizer->isSymbol(',')) {
             $this->compileTerminalSymbol(',');
             $this->compileExpression();
         }
+        
         $this->endElement();
     }
     /** }}} */
