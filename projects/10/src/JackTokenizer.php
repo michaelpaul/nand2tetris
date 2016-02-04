@@ -224,7 +224,8 @@ class JackTokenizer
         if (self::SYMBOL != $this->tokenType()) {
             return false;
         }
-        return false !== array_search($this->symbol(), func_get_args());
+        $symbols = is_array($haystack) ? $haystack : func_get_args();
+        return false !== array_search($this->symbol(), $symbols);
     }
     
     /**
@@ -268,6 +269,14 @@ class JackTokenizer
     }
     
     /**
+     * @return bool true if current token is a integer constant
+     */
+    public function isInteger()
+    {
+        return self::INT_CONST == $this->tokenType();
+    }
+    
+    /**
      * @return string the string value without double quotes
      */
     public function stringVal()
@@ -281,5 +290,13 @@ class JackTokenizer
     public function stringValToken()
     {
         return new Token('stringConstant', $this->stringVal());
+    }
+    
+    /**
+     * @return bool true if current token is a string constant
+     */
+    public function isString()
+    {
+        return self::STRING_CONST == $this->tokenType();
     }
 }

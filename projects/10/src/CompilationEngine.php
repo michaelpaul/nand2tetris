@@ -90,7 +90,7 @@ class CompilationEngine
     public function compileTerminalSymbol($val)
     {
         $isSymbol = array($this->tokenizer, 'isSymbol');
-        $symbols = func_get_args();
+        $symbols = is_array($val) ? $val : func_get_args();
         if (! call_user_func_array($isSymbol, $symbols)) {
             throw new ParserError("Esperava simbolo ( '" . implode("' | '", $symbols) . "' )");
         }
@@ -367,16 +367,36 @@ class CompilationEngine
     {
         $this->beginElement('expression');
         $this->compileTerm();
+        
+        $op = array('+', '-', '*', '/', '&', '|', '<', '>', '=');
+        
+        while ($this->tokenizer->isSymbol($op)) {
+            $this->compileTerminalSymbol($op);
+            $this->compileTerm();
+        }
+        
         $this->endElement();
     }
+    
+    // keywordConstant: 'true' | 'false' | 'null' | 'this'
 
-    // integerConstant | stringConstant | keywordConstant | varName | 
+    // term: integerConstant | stringConstant | keywordConstant | varName | 
     // varName '[' expression ']' | subroutineCall | '(' expression ')' | 
     // unaryOp term
     public function compileTerm()
     {
         $this->beginElement('term');
-        $this->identifier();
+        if ($this->tokenizer->isInteger()) {
+            $this->addTerminal($this->tokenizer->intValToken());
+            $this->advance();
+        } elseif ($this->tokenizer->isString()) {
+            $this->addTerminal($this->tokenizer->stringValToken());
+            $this->advance();
+        } elseif ($this->tokenizer->isKeyword('true', 'false', 'null', 'this')) {
+            $this->compileTerminalKeyword('true', 'false', 'null', 'this');
+        } else {
+            $this->identifier();
+        }
         $this->endElement();
     }
 
