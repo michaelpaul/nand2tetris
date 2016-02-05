@@ -48,6 +48,11 @@ class CompilationEngine
         fwrite($this->output, $xml);
         return $xml;
     }
+    
+    public function toSimpleXML()
+    {
+        return simplexml_import_dom($this->getCtx(), 'SimpleXMLIterator');
+    }
 
     public function advance()
     {
@@ -394,7 +399,7 @@ class CompilationEngine
             $this->advance();
         } elseif ($this->tokenizer->isKeyword('true', 'false', 'null', 'this')) {
             $this->compileTerminalKeyword('true', 'false', 'null', 'this');
-        } else {
+        } elseif ($this->tokenizer->isIdentifier()) {
             // varName
             $this->identifier();
             // '[' expression ']'
@@ -406,6 +411,10 @@ class CompilationEngine
                 // subroutineCall
                 $this->compileSubroutineCall();
             }
+        } elseif ($this->tokenizer->isSymbol('(')) {
+            $this->compileTerminalSymbol('(');
+            $this->compileExpression();
+            $this->compileTerminalSymbol(')');
         }
         $this->endElement();
     }

@@ -62,7 +62,7 @@ class StatementsTest extends CompilerTestCase
         $this->writeTestProgram('if (x) { let x = y; let a = b; }');
         $this->parser->advance();
         $this->parser->compileIf();
-        $ifStatement = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $ifStatement = $this->parser->toSimpleXML();
         $this->assertEquals('ifStatement', $ifStatement->getName());
         $this->assertEquals('if', $ifStatement->keyword[0]);
         $this->assertEquals('(', $ifStatement->symbol[0]);
@@ -81,7 +81,7 @@ class StatementsTest extends CompilerTestCase
         );
         $this->parser->advance();
         $this->parser->compileIf();
-        $ifStatement = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $ifStatement = $this->parser->toSimpleXML();
         $this->assertEquals('ifStatement', $ifStatement->getName());
         $this->assertEquals('if', $ifStatement->keyword[0]);
         $this->assertEquals('else', $ifStatement->keyword[1]);
@@ -99,7 +99,7 @@ class StatementsTest extends CompilerTestCase
         );
         $this->parser->advance();
         $this->parser->compileIf();
-        $ifStatement = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $ifStatement = $this->parser->toSimpleXML();
         $this->assertEquals('ifStatement', $ifStatement->getName());
         $this->assertCount(3, $ifStatement->xpath('//ifStatement'));
         $this->assertCount(3, $ifStatement->xpath('//identifier'));
@@ -116,7 +116,7 @@ class StatementsTest extends CompilerTestCase
         $this->parser->advance();
         $this->parser->compileWhile();
         
-        $whileStatement = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $whileStatement = $this->parser->toSimpleXML();
         $this->assertEquals('whileStatement', $whileStatement->getName());
         $this->assertEquals('while', $whileStatement->keyword[0]);
         $this->assertEquals('(', $whileStatement->symbol[0]);
@@ -136,7 +136,7 @@ class StatementsTest extends CompilerTestCase
         $this->parser->advance();
         $this->parser->compileReturn();
         
-        $returnStatement = simplexml_import_dom($this->parser->getCtx());
+        $returnStatement = $this->parser->toSimpleXML();
         $this->assertEquals('returnStatement', $returnStatement->getName());
         $this->assertEquals('return', $returnStatement->keyword[0]);
         $this->assertEquals(';', $returnStatement->symbol[0]);
@@ -148,7 +148,7 @@ class StatementsTest extends CompilerTestCase
         $this->parser->advance();
         $this->parser->compileReturn();
         
-        $returnStatement = simplexml_import_dom($this->parser->getCtx());
+        $returnStatement = $this->parser->toSimpleXML();
         $this->assertEquals('x', $returnStatement->expression->term->identifier);
     }
     
@@ -158,7 +158,7 @@ class StatementsTest extends CompilerTestCase
         $this->writeTestProgram('');
         $this->parser->advance();
         $this->parser->compileExpressionList();
-        $exprList = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $exprList = $this->parser->toSimpleXML();
         $this->assertEquals('expressionList', $exprList->getName());
         $this->assertCount(0, $exprList->children());
         
@@ -166,7 +166,7 @@ class StatementsTest extends CompilerTestCase
         $this->writeTestProgram('x');
         $this->parser->advance();
         $this->parser->compileExpressionList();
-        $exprList = simplexml_import_dom($this->parser->getCtx());
+        $exprList = $this->parser->toSimpleXML();
         $this->assertEquals('expressionList', $exprList->getName());
     }
     
@@ -176,7 +176,7 @@ class StatementsTest extends CompilerTestCase
         $this->parser->advance();
         $this->parser->compileExpressionList();
         
-        $exprList = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $exprList = $this->parser->toSimpleXML();
         $this->assertEquals('expressionList', $exprList->getName());
         $this->assertCount(3, $exprList->expression);
         $vars = $exprList->xpath('//identifier');
@@ -191,7 +191,7 @@ class StatementsTest extends CompilerTestCase
         $this->parser->advance();
         $this->parser->compileDo();
         
-        $doStatement = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $doStatement = $this->parser->toSimpleXML();
         $this->assertEquals('doStatement', $doStatement->getName());
         $this->assertEquals('draw', $doStatement->identifier);
         $this->assertCount(3, $doStatement->symbol);
@@ -204,7 +204,7 @@ class StatementsTest extends CompilerTestCase
         $this->parser->advance();
         $this->parser->compileDo();
         
-        $doStatement = simplexml_import_dom($this->parser->getCtx());
+        $doStatement = $this->parser->toSimpleXML();
         $this->assertEquals('Output', $doStatement->identifier[0]);
         $this->assertEquals('.', $doStatement->symbol[0]);
         $this->assertEquals('println', $doStatement->identifier[1]);
@@ -221,7 +221,7 @@ class StatementsTest extends CompilerTestCase
         ');
         $this->parser->advance();
         $this->parser->compileStatements();
-        $statements = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $statements = $this->parser->toSimpleXML();
         $this->assertEquals('statements', $statements->getName());
         $statements = $statements->children();
         $this->assertCount(5, $statements);
