@@ -270,6 +270,7 @@ class CompilationEngine
     {
         $this->beginElement('doStatement');
         $this->compileTerminalKeyword('do');
+        $this->identifier();
         $this->compileSubroutineCall();
         $this->compileTerminalSymbol(';');
         $this->endElement();
@@ -346,10 +347,9 @@ class CompilationEngine
 
     // subroutineName '(' expressionList ')' | 
     //  (className | varName) '.' subroutineName '(' expressionList ')'
+    // O primeiro identifier fica por conta do caller
     protected function compileSubroutineCall()
     {
-        $this->identifier();
-        
         if ($this->tokenizer->isSymbol('.')) {
             $this->compileTerminalSymbol('.');
             $this->identifier();
@@ -395,7 +395,17 @@ class CompilationEngine
         } elseif ($this->tokenizer->isKeyword('true', 'false', 'null', 'this')) {
             $this->compileTerminalKeyword('true', 'false', 'null', 'this');
         } else {
+            // varName
             $this->identifier();
+            // '[' expression ']'
+            if ($this->tokenizer->isSymbol('[')) {
+                $this->compileTerminalSymbol('[');
+                $this->compileExpression();
+                $this->compileTerminalSymbol(']');
+            } elseif ($this->tokenizer->isSymbol('(', '.')) {
+                // subroutineCall
+                $this->compileSubroutineCall();
+            }
         }
         $this->endElement();
     }

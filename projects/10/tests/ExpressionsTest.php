@@ -54,4 +54,44 @@ class ExpressionsTest extends CompilerTestCase
         $this->assertCount(4, $expr->term);
         $this->assertCount(3, $expr->symbol);
     }
+    
+    public function testSubscript()
+    {
+        $this->writeTestProgram('players[i]');
+        $this->parser->advance();
+        $this->parser->compileTerm();
+        $term = simplexml_import_dom($this->parser->getCtx(), 'SimpleXMLIterator');
+        $this->assertEquals('players', $term->identifier[0]);
+        $this->assertEquals('[', $term->symbol[0]);
+        $this->assertEquals('i', $term->expression->term->identifier);
+        $this->assertEquals(']', $term->symbol[1]);
+    }
+    
+    public function testMethodCall()
+    {
+        $this->writeTestProgram('multiply(x, y)');
+        $this->parser->advance();
+        $this->parser->compileTerm();
+        $term = simplexml_import_dom($this->parser->getCtx());
+        $this->assertEquals('multiply', $term->identifier[0]);
+        $this->assertEquals('(', $term->symbol[0]);
+        $this->assertEquals('x', $term->expressionList->expression[0]->term->identifier);
+        $this->assertEquals('y', $term->expressionList->expression[1]->term->identifier);
+        $this->assertEquals(')', $term->symbol[1]);
+    }
+    
+    public function testFunctionCall()
+    {
+        $this->writeTestProgram('JackCompiler.compileClass(input, output)');
+        $this->parser->advance();
+        $this->parser->compileTerm();
+        $term = simplexml_import_dom($this->parser->getCtx());
+        $this->assertEquals('JackCompiler', $term->identifier[0]);
+        $this->assertEquals('.', $term->symbol[0]);
+        $this->assertEquals('compileClass', $term->identifier[1]);
+        $this->assertEquals('(', $term->symbol[1]);
+        $this->assertEquals('input', $term->expressionList->expression[0]->term->identifier);
+        $this->assertEquals('output', $term->expressionList->expression[1]->term->identifier);
+        $this->assertEquals(')', $term->symbol[2]);
+    }
 }
