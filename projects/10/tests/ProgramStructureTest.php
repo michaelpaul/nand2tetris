@@ -2,7 +2,7 @@
 
 namespace JackTests;
 
-class CompilationEngineTest extends CompilerTestCase
+class ProgramStructureTest extends CompilerTestCase
 {
     /**
      * @expectedException JackCompiler\ParserError

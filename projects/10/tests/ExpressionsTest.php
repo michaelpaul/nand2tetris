@@ -4,26 +4,23 @@ namespace JackTests;
 
 class ExpressionsTest extends CompilerTestCase
 {
-    public function testMinIntegerConstant()
+    public function integerConstantProvider()
     {
-        $this->writeTestProgram('0');
-        $this->parser->advance();
-        $this->parser->compileTerm();
-        
-        $term = $this->parser->toSimpleXML();
-        $this->assertEquals('term', $term->getName());
-        $this->assertEquals('0', $term->integerConstant);
+        return [[0], [32767]];
     }
     
-    public function testMaxIntegerConstant()
+    /**
+     * @dataProvider integerConstantProvider
+     */
+    public function testIntegerConstant($integer)
     {
-        $this->writeTestProgram('32767');
+        $this->writeTestProgram("$integer");
         $this->parser->advance();
         $this->parser->compileTerm();
         
         $term = $this->parser->toSimpleXML();
         $this->assertEquals('term', $term->getName());
-        $this->assertEquals('32767', $term->integerConstant);
+        $this->assertEquals("$integer", $term->integerConstant);
     }
     
     public function testStringConstant()
@@ -131,5 +128,23 @@ class ExpressionsTest extends CompilerTestCase
         $this->assertEquals('*', $secondExpr->symbol);
         $this->assertEquals('c', $secondExpr->term[1]->identifier);
         $this->assertEquals(')', $root->term->symbol[1]);
+    }
+    
+    public function unaryOpProvider()
+    {
+        return [['-'], ['~']];
+    }
+    
+    /**
+     * @dataProvider unaryOpProvider
+     */
+    public function testUnaryOp($op)
+    {
+        $this->writeTestProgram($op . '32');
+        $this->parser->advance();
+        $this->parser->compileTerm();
+        $term = $this->parser->toSimpleXML();
+        $this->assertEquals($op, $term->symbol);
+        $this->assertEquals('32', $term->term->integerConstant);
     }
 }

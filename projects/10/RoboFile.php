@@ -45,6 +45,10 @@ class RoboFile extends \Robo\Tasks
             'ExpressionlessSquare/Main', 
             'ExpressionlessSquare/SquareGame',
             'ExpressionlessSquare/Square', 
+            'ArrayTest/Main',
+            'Square/Main', 
+            'Square/SquareGame',
+            'Square/Square', 
         );
         foreach ($files as $file) {
             $output = '/tmp/' . str_replace('/', '.', $file) . '.xml';

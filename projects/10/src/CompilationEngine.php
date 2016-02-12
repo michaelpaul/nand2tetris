@@ -415,6 +415,12 @@ class CompilationEngine
             $this->compileTerminalSymbol('(');
             $this->compileExpression();
             $this->compileTerminalSymbol(')');
+        } elseif ($this->tokenizer->isSymbol('-', '~')) {
+            $this->compileTerminalSymbol('-', '~');
+            $this->compileTerm();
+        } else {
+            throw new ParserError("Termo inválido");
+            
         }
         $this->endElement();
     }
