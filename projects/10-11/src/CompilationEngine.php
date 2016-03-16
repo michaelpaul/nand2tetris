@@ -21,6 +21,10 @@ class CompilationEngine
      * @var DOMElement $ctx contexto atual da compilação
      */
     protected $ctx;
+    /**
+     * @var SymbolTable $st
+     */
+    protected $st;
 
     /**
      * @param $input file/stream source.jack
@@ -35,11 +39,17 @@ class CompilationEngine
         $this->doc->preserveWhiteSpace = false;
         // $this->root = $this->doc;
         $this->ctx = $this->doc;
+        $this->st = new SymbolTable();
     }
 
     public function getCtx()
     {
         return $this->ctx;
+    }
+    
+    public function getSymbolTable()
+    {
+        return $this->st;
     }
 
     public function toXML()
@@ -51,7 +61,7 @@ class CompilationEngine
     
     public function toSimpleXML()
     {
-        return simplexml_import_dom($this->getCtx(), 'SimpleXMLIterator');
+        return simplexml_import_dom($this->ctx, 'SimpleXMLIterator');
     }
 
     public function advance()
@@ -240,6 +250,7 @@ class CompilationEngine
         }
         
         $this->compileTerminalSymbol(';');
+        $this->st->addVarDec($this->toSimpleXML());
         $this->endElement();
     }
     
