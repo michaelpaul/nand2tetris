@@ -6,6 +6,40 @@ use JackCompiler\SymbolTable;
 
 class SymbolTableTest extends CompilerTestCase
 {
+    public function testScopes()
+    {
+        $st = new SymbolTable();
+        // class
+        $st->define('seed', 'int', 'static');
+        $st->define('board', 'Board', 'field');
+        $st->define('score_title', 'string', 'field');
+        
+        $this->assertEquals(1, $st->varCount('static'));
+        $this->assertEquals(2, $st->varCount('field'));
+        $this->assertSame(0, $st->indexOf('seed'));
+        $this->assertSame(0, $st->indexOf('board'));
+        $this->assertSame(1, $st->indexOf('score_title'));
+        
+        // subroutine
+        $st->startSubroutine();
+        $st->define('Illidan', 'char', 'var');
+        $st->define('Zeratul', 'char', 'var');
+        
+        $this->assertEquals(2, $st->varCount('var'));
+        $this->assertSame(1, $st->indexOf('Zeratul'));
+        
+        // subroutine
+        $st->startSubroutine();
+        $st->define('CPU', 'Unit', 'var');
+        $st->define('GPU', 'Unit', 'var');
+        $st->define('system', 'type', 'var');
+        
+        $this->assertEquals(3, $st->varCount('var'));
+        $this->assertFalse($st->contains('Illidan'));
+        $this->assertSame(0, $st->indexOf('CPU'));
+        $this->assertSame(2, $st->indexOf('system'));
+    }
+    
     public function varDecProvider()
     {
         return [
@@ -19,7 +53,7 @@ class SymbolTableTest extends CompilerTestCase
     /**
      * @dataProvider varDecProvider
      */
-    public function testVarDec($name, $type, $index)
+    public function testCompileVarDec($name, $type, $index)
     {
         $this->writeTestProgram("{ var int i; var String path; var boolean fail, whale; }");
         $this->parser->advance();
@@ -28,11 +62,9 @@ class SymbolTableTest extends CompilerTestCase
         $st = $this->parser->getSymbolTable();
         
         $this->assertTrue($st->contains($name));
-        $symbol = $st->get($name);
-        
-        $this->assertEquals($name, $symbol->name);
-        $this->assertEquals($type, $symbol->type);
-        $this->assertEquals('var', $symbol->kind);
-        $this->assertEquals($index, $symbol->index);
+        $this->assertInstanceOf('JackCompiler\Symbol', $st->get($name));
+        $this->assertEquals('var', $st->kindOf($name));
+        $this->assertEquals($type, $st->typeOf($name));
+        $this->assertSame($index, $st->indexOf($name));
     }
 }

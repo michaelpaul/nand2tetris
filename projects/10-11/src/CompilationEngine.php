@@ -30,7 +30,7 @@ class CompilationEngine
      * @param $input file/stream source.jack
      * @param $output stream resultado da compilação
      */
-    public function __construct($input, $output)
+    public function __construct($input, $output = null)
     {
         $this->tokenizer = new JackTokenizer($input);
         $this->output = $output;
@@ -120,8 +120,10 @@ class CompilationEngine
 
     protected function identifier()
     {
+        $identifier = $this->tokenizer->identifier();
         $this->addTerminal($this->tokenizer->identifierToken());
         $this->advance();
+        return $identifier;
     }
     
     /** }}} */
@@ -169,17 +171,22 @@ class CompilationEngine
     // 'int' | 'char' | 'boolean' | className
     protected function compileType()
     {
+        $type = null;
         if ($this->tokenizer->isKeyword('int', 'char', 'boolean')) {
+            $type = $this->tokenizer->keyword();
             $this->compileTerminalKeyword($this->tokenizer->keyword());
         } else {
+            $type = $this->tokenizer->identifier();
             $this->identifier();
         }
+        return $type;
     }
 
     // ('constructor' | 'function' | 'method') ('void' | type) subroutineName '(' parameterList ')' subroutineBody
     public function compileSubroutine()
     {
         $this->beginElement('subroutineDec');
+        $this->st->startSubroutine();
         $this->compileTerminalKeyword('constructor', 'function', 'method');
         
         if ($this->tokenizer->isKeyword('void')) {
@@ -241,17 +248,20 @@ class CompilationEngine
     {
         $this->beginElement('varDec');
         $this->compileTerminalKeyword('var');
-        $this->compileType();
-        $this->identifier();
+        $type = $this->compileType();
+        $identifiers = array($this->identifier());
         
         while ($this->tokenizer->isSymbol(',')) {
             $this->compileTerminalSymbol(',');
-            $this->identifier();
+            $identifiers[] = $this->identifier();
         }
         
         $this->compileTerminalSymbol(';');
-        $this->st->addVarDec($this->toSimpleXML());
         $this->endElement();
+        
+        foreach ($identifiers as $value) {
+            $this->st->define($value, $type, 'var');
+        }
     }
     
     /** Statements **/
@@ -431,7 +441,6 @@ class CompilationEngine
             $this->compileTerm();
         } else {
             throw new ParserError("Termo inválido");
-            
         }
         $this->endElement();
     }

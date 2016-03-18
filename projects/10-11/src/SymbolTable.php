@@ -2,46 +2,51 @@
 
 namespace JackCompiler;
 
-class SymbolTable
+// iterator interfaces
+use IteratorAggregate;
+use AppendIterator;
+use ArrayIterator;
+
+class SymbolTable implements IteratorAggregate
 {
-    protected $hashTable;
-    protected $varIndex;
+    protected $classScope;
+    protected $subroutineScope;
 
     /**
      * Creates a new copy of the symbol table
      */
     public function __construct()
     {
-        $this->hashTable = array();
-        $this->varIndex = 0;
+        $this->classScope = array();
+        $this->subroutineScope = array();
     }
 
-    public function addVarDec(\SimpleXMLElement $varDecNode)
+    public function getIterator()
     {
-        $identifiers = $varDecNode->xpath('identifier');
-
-        if ($varDecNode->keyword->count() > 1) {
-            $type = $varDecNode->keyword[1];
-        } else {
-            $type = (string) $identifiers[0];
-            array_shift($identifiers);
-        }
-
-        foreach ($identifiers as $node) {
-            $name = (string) $node;
-            $this->hashTable[$name] = new Symbol($name, (string) $type, 'var', $this->varIndex);
-            $this->varIndex++;
-        }
+        $it = new AppendIterator();
+        $it->append(new ArrayIterator($this->subroutineScope));
+        $it->append(new ArrayIterator($this->classScope));
+        return $it;
     }
-
+    
     public function get($identifier)
     {
-        return $this->hashTable[$identifier];
+        if (array_key_exists($identifier, $this->subroutineScope)) {
+            return $this->subroutineScope[$identifier];
+        } elseif (array_key_exists($identifier, $this->classScope)) {
+            return $this->classScope[$identifier];
+        } else {
+            throw new Exception("Identificador não encontrado: " . $identifier);
+        }
     }
 
     public function contains($identifier)
     {
-        return array_key_exists($identifier, $this->hashTable);
+        if (array_key_exists($identifier, $this->subroutineScope) ||
+            array_key_exists($identifier, $this->classScope)) {
+            return true;
+        }
+        return false;
     }
 
     // ** Book API ** //
@@ -53,7 +58,7 @@ class SymbolTable
      */
     public function startSubroutine()
     {
-        # code...
+        $this->subroutineScope = array();
     }
 
     /**
@@ -68,7 +73,15 @@ class SymbolTable
      */
     public function define($name, $type, $kind)
     {
-     # code...
+        $symbol = new Symbol($name, $type, $kind, $this->varCount($kind));
+        
+        if (in_array($kind, array('arg', 'var'))) {
+            $this->subroutineScope[$name] = $symbol;
+        } elseif (in_array($kind, array('static', 'field'))) {
+            $this->classScope[$name] = $symbol;
+        } else {
+            throw new Exception("Categoria ($kind) inválida do identificador $name");
+        }
     }
 
     /**
@@ -80,7 +93,13 @@ class SymbolTable
      */
     public function varCount($kind)
     {
-        # code...
+        $count = 0;
+        foreach ($this as $id => $symbol) {
+            if ($symbol->kind == $kind) {
+                $count++;
+            }
+        }
+        return $count;
     }
 
     /**
@@ -92,7 +111,7 @@ class SymbolTable
      */
     public function kindOf($name)
     {
-        # code...
+        return $this->get($name)->kind;
     }
 
     /**
@@ -103,7 +122,7 @@ class SymbolTable
      */
     public function typeOf($name)
     {
-        # code...
+        return $this->get($name)->type;
     }
 
     /**
@@ -113,6 +132,6 @@ class SymbolTable
      */
     public function indexOf($name)
     {
-        # code...
+        return $this->get($name)->index;
     }
 }
