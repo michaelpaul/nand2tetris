@@ -57,7 +57,7 @@ class SymbolTableTest extends CompilerTestCase
     {
         $this->writeTestProgram("{ var int i; var String path; var boolean fail, whale; }");
         $this->parser->advance();
-        $this->parser->compileSubroutineBody();
+        $this->parser->compileSubroutineBody('fakeMethod');
         
         $st = $this->parser->getSymbolTable();
         

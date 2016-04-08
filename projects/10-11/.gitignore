@@ -1,5 +1,6 @@
 vendor/*
-tests/functional/**/*.asm
+tests/programs/**/*.asm
+tests/programs/**/*.vm
 
 # Vim
 tags

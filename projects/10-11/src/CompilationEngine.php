@@ -25,10 +25,18 @@ class CompilationEngine
      * @var SymbolTable $st
      */
     protected $st;
-
+    /**
+     * @var VMWriter $writer
+     */
+    protected $writer;
+    /**
+     * Classe sendo compilada
+     */
+    protected $className;
+    
     /**
      * @param $input file/stream source.jack
-     * @param $output stream resultado da compilação
+     * @param $output stream arquivo para dump da arvore de sintaxe
      */
     public function __construct($input, $output = null)
     {
@@ -40,6 +48,8 @@ class CompilationEngine
         // $this->root = $this->doc;
         $this->ctx = $this->doc;
         $this->st = new SymbolTable();
+        $output = str_replace('.jack', '.vm', $input);
+        $this->writer = new VMWriter($output);
     }
 
     public function getCtx()
@@ -138,7 +148,7 @@ class CompilationEngine
         $this->ctx = $this->root;
         
         $this->compileTerminalKeyword('class');
-        $this->identifier();
+        $this->className = $this->identifier();
         $this->compileTerminalSymbol('{');
         
         while ($this->tokenizer->isKeyword('static', 'field')) {
@@ -195,11 +205,11 @@ class CompilationEngine
             $this->compileType();
         }
 
-        $this->identifier();
+        $subroutineName = $this->identifier();
         $this->compileTerminalSymbol('(');
         $this->compileParameterList();
         $this->compileTerminalSymbol(')');
-        $this->compileSubroutineBody();
+        $this->compileSubroutineBody($subroutineName);
         $this->endElement();
     }
 
@@ -229,18 +239,22 @@ class CompilationEngine
     }
 
     // '{' varDec* statements '}'
-    public function compileSubroutineBody()
+    public function compileSubroutineBody($subroutineName)
     {
+        $nLocals = 0;
         $this->beginElement('subroutineBody');
         $this->compileTerminalSymbol('{');
 
         while ($this->tokenizer->isKeyword('var')) {
-            $this->compileVarDec();
+            $nLocals += $this->compileVarDec();
         }
+        
+        $this->writer->writeFunction($this->className . '.' . $subroutineName, $nLocals);
         
         $this->compileStatements();
         $this->compileTerminalSymbol('}');
         $this->endElement();
+        return $nLocals;
     }
 
     // 'var' type varName (',' varName)* ';'
@@ -250,10 +264,12 @@ class CompilationEngine
         $this->compileTerminalKeyword('var');
         $type = $this->compileType();
         $identifiers = array($this->identifier());
+        $nLocals = 1;
         
         while ($this->tokenizer->isSymbol(',')) {
             $this->compileTerminalSymbol(',');
             $identifiers[] = $this->identifier();
+            $nLocals++;
         }
         
         $this->compileTerminalSymbol(';');
@@ -262,6 +278,7 @@ class CompilationEngine
         foreach ($identifiers as $value) {
             $this->st->define($value, $type, 'var');
         }
+        return $nLocals;
     }
     
     /** Statements **/
@@ -296,8 +313,8 @@ class CompilationEngine
     {
         $this->beginElement('doStatement');
         $this->compileTerminalKeyword('do');
-        $this->identifier();
-        $this->compileSubroutineCall();
+        $subroutineName = $this->identifier();
+        $this->compileSubroutineCall($subroutineName);
         $this->compileTerminalSymbol(';');
         $this->endElement();
     }
@@ -347,6 +364,8 @@ class CompilationEngine
         
         $this->compileTerminalSymbol(';');
         $this->endElement();
+        
+        $this->writer->writeReturn();
     }
 
     // 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
@@ -374,16 +393,19 @@ class CompilationEngine
     // subroutineName '(' expressionList ')' | 
     //  (className | varName) '.' subroutineName '(' expressionList ')'
     // O primeiro identifier fica por conta do caller
-    protected function compileSubroutineCall()
+    protected function compileSubroutineCall($subroutineName)
     {
+        $className = null;
         if ($this->tokenizer->isSymbol('.')) {
+            $className = $subroutineName;
             $this->compileTerminalSymbol('.');
-            $this->identifier();
+            $subroutineName = $this->identifier();
         }
         
         $this->compileTerminalSymbol('(');
-        $this->compileExpressionList();
+        $nArgs = $this->compileExpressionList();
         $this->compileTerminalSymbol(')');
+        $this->writer->writeCall($className . '.' . $subroutineName, $nArgs);
     }
     
     /** Expressions **/
@@ -422,7 +444,7 @@ class CompilationEngine
             $this->compileTerminalKeyword('true', 'false', 'null', 'this');
         } elseif ($this->tokenizer->isIdentifier()) {
             // varName
-            $this->identifier();
+            $varName = $this->identifier();
             // '[' expression ']'
             if ($this->tokenizer->isSymbol('[')) {
                 $this->compileTerminalSymbol('[');
@@ -430,7 +452,7 @@ class CompilationEngine
                 $this->compileTerminalSymbol(']');
             } elseif ($this->tokenizer->isSymbol('(', '.')) {
                 // subroutineCall
-                $this->compileSubroutineCall();
+                $this->compileSubroutineCall($varName);
             }
         } elseif ($this->tokenizer->isSymbol('(')) {
             $this->compileTerminalSymbol('(');
@@ -454,15 +476,17 @@ class CompilationEngine
             $this->endElement();
             return;
         }
-        
         $this->compileExpression();
+        $count = 1;
         
         while ($this->tokenizer->isSymbol(',')) {
             $this->compileTerminalSymbol(',');
             $this->compileExpression();
+            $count++;
         }
         
         $this->endElement();
+        return $count;
     }
     /** }}} */
 }
