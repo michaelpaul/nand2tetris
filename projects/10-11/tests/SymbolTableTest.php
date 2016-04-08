@@ -67,4 +67,26 @@ class SymbolTableTest extends CompilerTestCase
         $this->assertEquals($type, $st->typeOf($name));
         $this->assertSame($index, $st->indexOf($name));
     }
+    
+    /**
+     * @expectedException Exception
+     * @expectedExceptionMessage símbolo "seed" duplicado
+     */
+    public function testDuplicate()
+    {
+        $st = new SymbolTable();
+        // class scope
+        $st->define('seed', 'int', 'static');
+        $st->define('seed', 'int', 'static');
+    }
+    
+    /**
+     * @expectedException Exception
+     * @expectedExceptionMessage Identificador não encontrado: whereAmI
+     */
+    public function testNotFound()
+    {
+        $st = new SymbolTable();
+        $st->get('whereAmI');
+    }
 }

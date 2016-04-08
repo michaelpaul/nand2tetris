@@ -6,6 +6,7 @@ namespace JackCompiler;
 use IteratorAggregate;
 use AppendIterator;
 use ArrayIterator;
+use Exception;
 
 class SymbolTable implements IteratorAggregate
 {
@@ -73,6 +74,10 @@ class SymbolTable implements IteratorAggregate
      */
     public function define($name, $type, $kind)
     {
+        if ($this->contains($name)) {
+            throw new Exception('símbolo "' . $name . '" duplicado');
+        }
+        
         $symbol = new Symbol($name, $type, $kind, $this->varCount($kind));
         
         if (in_array($kind, array('arg', 'var'))) {
