@@ -3,24 +3,30 @@
 namespace JackTests;
 
 use JackCompiler\CompilationEngine;
+use JackCompiler\VMWriter;
+use JackCompiler\SymbolTable;
 
 class CompilerTestCase extends \PHPUnit_Framework_TestCase
 {
     protected $input;
-    protected $output;
     protected $parser;
 
     protected function setUp()
     {
         $this->input = fopen('php://memory', 'w');
-        $this->output = fopen('php://memory', 'w');
-        $this->parser = new CompilationEngine($this->input, $this->output);
+        $this->parser = new CompilationEngine($this->input);
+        $st = new SymbolTable();
+        $st->define('i', 'int', 'var');
+        $st->define('x', 'int', 'var');
+        $st->define('y', 'int', 'var');
+        $st->define('z', 'int', 'var');
+        $this->parser->setSymbolTable($st);
+        $this->parser->setWriter($this->createMock(VMWriter::class));
     }
 
     protected function tearDown()
     {
         fclose($this->input);
-        fclose($this->output);
     }
 
     protected function writeTestProgram($text)

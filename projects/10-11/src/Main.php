@@ -33,11 +33,21 @@ class Main
         }
     }
     
-    public function compile()
+    public function compile($dumpAst = false)
     {
         foreach ($this->input as $jackFile) {
             $engine = new CompilationEngine($jackFile);
+            $engine->setSymbolTable(new SymbolTable);
+            
+            // setup writer
+            $vmFilename = str_replace('.jack', '.vm', $jackFile);
+            $engine->setWriter(new VMWriter($vmFilename));
+            
             $engine->compileClass();
+            if ($dumpAst) {
+                $xmlFilename = str_replace('.jack', '.ast', $jackFile);
+                $engine->toXML($xmlFilename);
+            }
         }
     }
 }

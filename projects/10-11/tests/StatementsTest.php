@@ -6,18 +6,18 @@ class StatementsTest extends CompilerTestCase
 {
     public function testLet()
     {
-        $this->writeTestProgram('let game = x;');
+        $this->writeTestProgram('let x = y;');
         $this->parser->advance();
         $this->parser->compileLet();
 
         $expected = '
             <letStatement>
                 <keyword>let</keyword>
-                <identifier>game</identifier>
+                <identifier>x</identifier>
                 <symbol>=</symbol>
                 <expression>
                   <term>
-                    <identifier>x</identifier>
+                    <identifier>y</identifier>
                   </term>
                 </expression>
                 <symbol>;</symbol>
@@ -29,25 +29,25 @@ class StatementsTest extends CompilerTestCase
     
     public function testLetArray()
     {
-        $this->writeTestProgram('let vector[x] = sector;');
+        $this->writeTestProgram('let x[y] = z;');
         $this->parser->advance();
         $this->parser->compileLet();
 
         $expected = '
             <letStatement>
                 <keyword>let</keyword>
-                <identifier>vector</identifier>
+                <identifier>x</identifier>
                 <symbol>[</symbol>
                 <expression>
                   <term>
-                    <identifier>x</identifier>
+                    <identifier>y</identifier>
                   </term>
                 </expression>
                 <symbol>]</symbol>
                 <symbol>=</symbol>
                 <expression>
                   <term>
-                    <identifier>sector</identifier>
+                    <identifier>z</identifier>
                   </term>
                 </expression>
                 <symbol>;</symbol>
@@ -59,7 +59,7 @@ class StatementsTest extends CompilerTestCase
     
     public function testSimpleIf()
     {
-        $this->writeTestProgram('if (x) { let x = y; let a = b; }');
+        $this->writeTestProgram('if (x) { let x = y; let z = x; }');
         $this->parser->advance();
         $this->parser->compileIf();
         $ifStatement = $this->parser->toSimpleXML();
@@ -77,7 +77,7 @@ class StatementsTest extends CompilerTestCase
     public function testSimpleIfElse()
     {
         $this->writeTestProgram(
-            'if (x) { let x = y; } else { let a = b; let z = y; }'
+            'if (x) { let x = y; } else { let y = y; let z = y; }'
         );
         $this->parser->advance();
         $this->parser->compileIf();
@@ -213,11 +213,11 @@ class StatementsTest extends CompilerTestCase
     public function testStatements()
     {
         $this->writeTestProgram('
-            let sum = i;
-            while (sum) { }
+            let z = i;
+            while (z) { }
             do draw();
             return x;
-            if (sum) { }
+            if (z) { }
         ');
         $this->parser->advance();
         $this->parser->compileStatements();

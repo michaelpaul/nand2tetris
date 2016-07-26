@@ -99,6 +99,7 @@ class ProgramStructureTest extends CompilerTestCase
     {
         $this->writeTestProgram('field int x, y, z;');
 
+        $this->parser->setSymbolTable(new \JackCompiler\SymbolTable);
         $this->parser->advance();
         $this->parser->compileClassVarDec();
 
@@ -223,6 +224,7 @@ class ProgramStructureTest extends CompilerTestCase
     {
         $this->writeTestProgram('int x, char wc, Output file');
 
+        $this->parser->setSymbolTable(new \JackCompiler\SymbolTable);
         $this->parser->advance();
         $this->parser->compileParameterList();
 

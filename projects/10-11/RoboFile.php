@@ -21,7 +21,7 @@ class RoboFile extends \Robo\Tasks
     
     protected function tokenizerTest()
     {
-        $path = 'tests/programs';
+        $path = 'tests/programs/10';
         $files = array(
             'ExpressionlessSquare/Main', 
             'ExpressionlessSquare/SquareGame',
@@ -40,7 +40,7 @@ class RoboFile extends \Robo\Tasks
     
     protected function parserTest()
     {
-        $path = 'tests/programs';
+        $path = 'tests/programs/10';
         $files = array(
             'ExpressionlessSquare/Main', 
             'ExpressionlessSquare/SquareGame',
@@ -51,9 +51,8 @@ class RoboFile extends \Robo\Tasks
             'Square/Square', 
         );
         foreach ($files as $file) {
-            $output = '/tmp/' . str_replace('/', '.', $file) . '.xml';
-            $this->_exec("./bin/parser.php {$path}/{$file}.jack $output");
-            $this->_exec("TextComparer.sh {$path}/{$file}.xml $output");
+            $this->_exec("./bin/JackCompiler.php --ast {$path}/{$file}.jack");
+            $this->_exec("TextComparer.sh {$path}/{$file}.xml {$path}/{$file}.ast");
         }
     }
 }

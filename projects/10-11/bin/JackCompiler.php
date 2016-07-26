@@ -7,13 +7,17 @@ require 'vendor/autoload.php';
 
 use JackCompiler\Main;
 
-$input = !empty($argv[1]) ? $argv[1] : null;
-
-if (in_array($input, array('-h', '--help'))) {
+if (in_array('-h', $argv) || in_array('--help', $argv)) {
     echo("usage:  JackCompiler.php\t\t - compiles all .jack files in current directory" . PHP_EOL);
     echo("\tJackCompiler.php Directory\t - compiles all .jack in Directory" . PHP_EOL);
     echo("\tJackCompiler.php Source.jack\t - compiles Source.jack to Source.vm" . PHP_EOL);
 } else {
+    $input = $argv[1];
+    $dumpAst = false;
+    if ('--ast' == $input) {
+        $dumpAst = true;
+        $input = $argv[2];
+    }
     $compiler = new Main($input);
-    $compiler->compile();
+    $compiler->compile($dumpAst);
 }

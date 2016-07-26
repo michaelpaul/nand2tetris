@@ -1,5 +1,6 @@
 vendor/*
 tests/programs/**/*.asm
+tests/programs/**/*.ast
 tests/programs/**/*.vm
 
 # Vim

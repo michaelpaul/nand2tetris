@@ -8,7 +8,6 @@ use Exception;
 class CompilationEngine
 {
     protected $tokenizer;
-    protected $output;
     /**
      * @var DOMDocument $doc documento xml para saída
      */
@@ -36,20 +35,15 @@ class CompilationEngine
     
     /**
      * @param $input file/stream source.jack
-     * @param $output stream arquivo para dump da arvore de sintaxe
      */
-    public function __construct($input, $output = null)
+    public function __construct($input)
     {
         $this->tokenizer = new JackTokenizer($input);
-        $this->output = $output;
         $this->doc = new \DOMDocument();
         $this->doc->formatOutput = true;
         $this->doc->preserveWhiteSpace = false;
         // $this->root = $this->doc;
         $this->ctx = $this->doc;
-        $this->st = new SymbolTable();
-        $output = str_replace('.jack', '.vm', $input);
-        $this->writer = new VMWriter($output);
     }
 
     public function getCtx()
@@ -57,16 +51,19 @@ class CompilationEngine
         return $this->ctx;
     }
     
+    public function setSymbolTable(SymbolTable $st)
+    {
+        $this->st = $st;
+    }
+    
     public function getSymbolTable()
     {
         return $this->st;
     }
 
-    public function toXML()
+    public function toXML($xmlFilename)
     {
-        $xml = $this->doc->saveXML();
-        fwrite($this->output, $xml);
-        return $xml;
+        $this->doc->save($xmlFilename);
     }
     
     public function toSimpleXML()
@@ -96,7 +93,11 @@ class CompilationEngine
     {
         $this->ctx = $this->ctx->parentNode;
     }
-
+    
+    public function setWriter(VMWriter $writer)
+    {
+        $this->writer = $writer;
+    }
     
     /** {{{ Lexical elements */
     // The Jack language includes five types of terminal elements (tokens) 
@@ -166,12 +167,16 @@ class CompilationEngine
     {
         $this->beginElement('classVarDec');
         $this->compileTerminalKeyword('static', 'field');
-        $this->compileType();
-        $this->identifier();
+        $type = $this->compileType();
+        $id = $this->identifier();
+        
+        $kind = $this->ctx->firstChild->nodeValue;
+        $this->st->define($id, $type, $kind);
         
         while ($this->tokenizer->isSymbol(',')) {
             $this->compileTerminalSymbol(',');
-            $this->identifier();
+            $id = $this->identifier();
+            $this->st->define($id, $type, $kind);
         }
 
         $this->compileTerminalSymbol(';');
@@ -226,13 +231,15 @@ class CompilationEngine
             return true;
         }
 
-        $this->compileType();
-        $this->identifier();
+        $type = $this->compileType();
+        $id = $this->identifier();
+        $this->st->define($id, $type, 'arg');
         
         while ($this->tokenizer->isSymbol(',')) {
             $this->compileTerminalSymbol(',');
-            $this->compileType();
-            $this->identifier();
+            $type = $this->compileType();
+            $id = $this->identifier();
+            $this->st->define($id, $type, 'arg');
         }
 
         $this->endElement();
@@ -263,21 +270,19 @@ class CompilationEngine
         $this->beginElement('varDec');
         $this->compileTerminalKeyword('var');
         $type = $this->compileType();
-        $identifiers = array($this->identifier());
+        $id = $this->identifier();
+        $this->st->define($id, $type, 'var');
         $nLocals = 1;
         
         while ($this->tokenizer->isSymbol(',')) {
             $this->compileTerminalSymbol(',');
-            $identifiers[] = $this->identifier();
+            $id = $this->identifier();
+            $this->st->define($id, $type, 'var');
             $nLocals++;
         }
         
         $this->compileTerminalSymbol(';');
         $this->endElement();
-        
-        foreach ($identifiers as $value) {
-            $this->st->define($value, $type, 'var');
-        }
         return $nLocals;
     }
     
@@ -324,7 +329,7 @@ class CompilationEngine
     {
         $this->beginElement('letStatement');
         $this->compileTerminalKeyword('let');
-        $this->identifier();
+        $id = $this->identifier();
         
         if ($this->tokenizer->isSymbol('[')) {
             $this->compileTerminalSymbol('[');
@@ -335,6 +340,10 @@ class CompilationEngine
         $this->compileTerminalSymbol('=');
         $this->compileExpression();
         $this->compileTerminalSymbol(';');
+        
+        $symbol = $this->st->get($id);
+        $this->writer->writePop($symbol->kind, $symbol->index);
+    
         $this->endElement();
     }
 
@@ -421,6 +430,9 @@ class CompilationEngine
         while ($this->tokenizer->isSymbol($op)) {
             $this->compileTerminalSymbol($op);
             $this->compileTerm();
+            
+            $symbol = $this->ctx->childNodes[1];
+            $this->writer->writeArithmetic($symbol->nodeValue);
         }
         
         $this->endElement();
@@ -436,6 +448,7 @@ class CompilationEngine
         $this->beginElement('term');
         if ($this->tokenizer->isInteger()) {
             $this->addTerminal($this->tokenizer->intValToken());
+            $this->writer->writePush('constant', $this->tokenizer->intVal());
             $this->advance();
         } elseif ($this->tokenizer->isString()) {
             $this->addTerminal($this->tokenizer->stringValToken());
@@ -453,6 +466,10 @@ class CompilationEngine
             } elseif ($this->tokenizer->isSymbol('(', '.')) {
                 // subroutineCall
                 $this->compileSubroutineCall($varName);
+            } else {
+                // simple var reference
+                $symbol = $this->st->get($varName);
+                $this->writer->writePush($symbol->kind, $symbol->index);
             }
         } elseif ($this->tokenizer->isSymbol('(')) {
             $this->compileTerminalSymbol('(');
@@ -461,6 +478,9 @@ class CompilationEngine
         } elseif ($this->tokenizer->isSymbol('-', '~')) {
             $this->compileTerminalSymbol('-', '~');
             $this->compileTerm();
+            
+            $node = $this->ctx->firstChild;
+            $this->writer->writeUnaryOp($node->nodeValue);
         } else {
             throw new ParserError("Termo inválido");
         }

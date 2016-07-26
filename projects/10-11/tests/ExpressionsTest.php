@@ -79,35 +79,35 @@ class ExpressionsTest extends CompilerTestCase
     
     public function testFunctionCall()
     {
-        $this->writeTestProgram('JackCompiler.compileClass(input, output)');
+        $this->writeTestProgram('z.compileClass(y, x)');
         $this->parser->advance();
         $this->parser->compileTerm();
         $term = $this->parser->toSimpleXML();
-        $this->assertEquals('JackCompiler', $term->identifier[0]);
+        $this->assertEquals('z', $term->identifier[0]);
         $this->assertEquals('.', $term->symbol[0]);
         $this->assertEquals('compileClass', $term->identifier[1]);
         $this->assertEquals('(', $term->symbol[1]);
-        $this->assertEquals('input', $term->expressionList->expression[0]->term->identifier);
-        $this->assertEquals('output', $term->expressionList->expression[1]->term->identifier);
+        $this->assertEquals('y', $term->expressionList->expression[0]->term->identifier);
+        $this->assertEquals('x', $term->expressionList->expression[1]->term->identifier);
         $this->assertEquals(')', $term->symbol[2]);
     }
     
     public function testParens()
     {
-        $this->writeTestProgram('(JackCompiler > JackTokenizer)');
+        $this->writeTestProgram('(x > y)');
         $this->parser->advance();
         $this->parser->compileTerm();
         $term = $this->parser->toSimpleXML();
         $this->assertEquals('(', $term->symbol[0]);
-        $this->assertEquals('JackCompiler', $term->expression->term[0]->identifier);
+        $this->assertEquals('x', $term->expression->term[0]->identifier);
         $this->assertEquals('>', $term->expression->symbol);
-        $this->assertEquals('JackTokenizer', $term->expression->term[1]->identifier);
+        $this->assertEquals('y', $term->expression->term[1]->identifier);
         $this->assertEquals(')', $term->symbol[1]);
     }
     
     public function testNestedParens()
     {
-        $this->writeTestProgram('((a + b) * c)');
+        $this->writeTestProgram('((x + y) * z)');
         $this->parser->advance();
         $this->parser->compileExpression();
         
@@ -121,12 +121,12 @@ class ExpressionsTest extends CompilerTestCase
         
         $this->assertEquals('(', $root->term->symbol[0]);
         $this->assertEquals('(', $secondExpr->term[0]->symbol[0]);
-        $this->assertEquals('a', $thirdExpr->term[0]->identifier);
+        $this->assertEquals('x', $thirdExpr->term[0]->identifier);
         $this->assertEquals('+', $thirdExpr->symbol);
-        $this->assertEquals('b', $thirdExpr->term[1]->identifier);
+        $this->assertEquals('y', $thirdExpr->term[1]->identifier);
         $this->assertEquals(')', $secondExpr->term[0]->symbol[1]);
         $this->assertEquals('*', $secondExpr->symbol);
-        $this->assertEquals('c', $secondExpr->term[1]->identifier);
+        $this->assertEquals('z', $secondExpr->term[1]->identifier);
         $this->assertEquals(')', $root->term->symbol[1]);
     }
     

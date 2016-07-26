@@ -56,6 +56,7 @@ class SymbolTableTest extends CompilerTestCase
     public function testCompileVarDec($name, $type, $index)
     {
         $this->writeTestProgram("{ var int i; var String path; var boolean fail, whale; }");
+        $this->parser->setSymbolTable(new SymbolTable);
         $this->parser->advance();
         $this->parser->compileSubroutineBody('fakeMethod');
         

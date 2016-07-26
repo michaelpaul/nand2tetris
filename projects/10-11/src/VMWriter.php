@@ -11,10 +11,7 @@ class VMWriter
      */
     public function __construct($output)
     {
-        // @DEV
-        $output = 'php://stdout';
         $this->fp = fopen($output, 'w');
-        $this->writeCode(array('// output to: ' . $output));
     }
     
     /**
@@ -22,7 +19,15 @@ class VMWriter
      */
     public function writePush($segment, $index)
     {
-        # code...
+        switch ($segment) {
+            case 'var':
+                $segment = 'local';
+                break;
+            case 'arg':
+                $segment = 'argument';
+                break;
+        }
+        $this->writeCode(array("push $segment $index"));
     }
     
     /**
@@ -30,7 +35,15 @@ class VMWriter
      */
     public function writePop($segment, $index)
     {
-        # code...
+        switch ($segment) {
+            case 'var':
+                $segment = 'local';
+                break;
+            case 'arg':
+                $segment = 'argument';
+                break;
+        }
+        $this->writeCode(array("pop $segment $index"));
     }
     
     /**
@@ -38,7 +51,48 @@ class VMWriter
      */
     public function writeArithmetic($command)
     {
-        # code...
+        switch ($command) {
+            case '+':
+                $op = 'add';
+                break;
+            case '-':
+                $op = 'sub';
+                break;
+            case '*':
+                $op = 'call Math.multiply 2';
+                break;
+            case '/':
+                $op = 'call Math.divide 2';
+                break;
+            case '&':
+                $op = 'and';
+                break;
+            case '|':
+                $op = 'or';
+                break;
+            case '<':
+                $op = 'lt';
+                break;
+            case '>':
+                $op = 'gt';
+                break;
+            case '=':
+                $op = 'eq';
+                break;
+            default:
+                throw new \Exception("Operador não implementado \"$command\"");
+        }
+        $this->writeCode(array($op));
+    }
+    
+    public function writeUnaryOp($command)
+    {
+        if ($command == '-') {
+            $op = 'neg';
+        } elseif ($command == '~') {
+            $op = 'not';
+        }
+        $this->writeCode(array($op));
     }
     
     /**
