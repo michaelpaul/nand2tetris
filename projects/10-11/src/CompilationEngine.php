@@ -33,6 +33,8 @@ class CompilationEngine
      */
     protected $className;
     
+    private $labelCounter = 0;
+    
     /**
      * @param $input file/stream source.jack
      */
@@ -347,17 +349,39 @@ class CompilationEngine
         $this->endElement();
     }
 
+    public function getNextLabel()
+    {
+        $next = $this->labelCounter;
+        $this->labelCounter++;
+        return $next;
+    }
+    
     // 'while' '(' expression ')' '{' statements '}'
     public function compileWhile()
     {
+        $labelCounter = $this->getNextLabel();
+        $begin = 'WHILE_BEGIN' . $labelCounter;
+        $end = 'WHILE_END' . $labelCounter;
+        
         $this->beginElement('whileStatement');
         $this->compileTerminalKeyword('while');
         $this->compileTerminalSymbol('(');
+        
+        $this->writer->writeLabel($begin);
         $this->compileExpression();
+        
         $this->compileTerminalSymbol(')');
         $this->compileTerminalSymbol('{');
+        
+        // negar condição: !(cond)
+        $this->writer->writeUnaryOp('~');
+        $this->writer->writeIf($end);
         $this->compileStatements();
+        $this->writer->writeGoto($begin);
+        
         $this->compileTerminalSymbol('}');
+        
+        $this->writer->writeLabel($end);
         $this->endElement();
     }
 
@@ -380,21 +404,36 @@ class CompilationEngine
     // 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
     public function compileIf()
     {
+        $labelCounter = $this->getNextLabel();
+        $end = 'IF_END' . $labelCounter;
+        $else = 'ELSE_BEGIN' . $labelCounter;
+        
         $this->beginElement('ifStatement');
         $this->compileTerminalKeyword('if');
         $this->compileTerminalSymbol('(');
+        
         $this->compileExpression();
+        // negar condição: !(cond)
+        $this->writer->writeUnaryOp('~');
+        $this->writer->writeIf($else);
+        
         $this->compileTerminalSymbol(')');
         $this->compileTerminalSymbol('{');
+            
         $this->compileStatements();
+        $this->writer->writeGoto($end);
+        
         $this->compileTerminalSymbol('}');
         
         if ($this->tokenizer->isKeyword('else')) {
             $this->compileTerminalKeyword('else');
             $this->compileTerminalSymbol('{');
+            $this->writer->writeLabel($else);
             $this->compileStatements();
             $this->compileTerminalSymbol('}');
         }
+        
+        $this->writer->writeLabel($end);
         
         $this->endElement();
     }
@@ -454,6 +493,16 @@ class CompilationEngine
             $this->addTerminal($this->tokenizer->stringValToken());
             $this->advance();
         } elseif ($this->tokenizer->isKeyword('true', 'false', 'null', 'this')) {
+            switch ($this->tokenizer->keyword()) {
+                case 'true': // -1
+                    $this->writer->writePush('constant', '0');
+                    $this->writer->writeUnaryOp('~');
+                    break;
+                case 'false':
+                case 'null':
+                    $this->writer->writePush('constant', '0');
+                    break;
+            }
             $this->compileTerminalKeyword('true', 'false', 'null', 'this');
         } elseif ($this->tokenizer->isIdentifier()) {
             // varName

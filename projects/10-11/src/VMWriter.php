@@ -5,6 +5,7 @@ namespace JackCompiler;
 class VMWriter
 {
     private $fp;
+    private $functionName;
     
     /**
      * Creates a new file and prepares it for writing
@@ -27,7 +28,7 @@ class VMWriter
                 $segment = 'argument';
                 break;
         }
-        $this->writeCode(array("push $segment $index"));
+        $this->writeCode("push $segment $index");
     }
     
     /**
@@ -43,7 +44,7 @@ class VMWriter
                 $segment = 'argument';
                 break;
         }
-        $this->writeCode(array("pop $segment $index"));
+        $this->writeCode("pop $segment $index");
     }
     
     /**
@@ -82,7 +83,7 @@ class VMWriter
             default:
                 throw new \Exception("Operador não implementado \"$command\"");
         }
-        $this->writeCode(array($op));
+        $this->writeCode($op);
     }
     
     public function writeUnaryOp($command)
@@ -92,7 +93,7 @@ class VMWriter
         } elseif ($command == '~') {
             $op = 'not';
         }
-        $this->writeCode(array($op));
+        $this->writeCode($op);
     }
     
     /**
@@ -101,7 +102,8 @@ class VMWriter
      */
     public function writeLabel($label)
     {
-        # code...
+        $this->writeCode("label $label", false);
+        return $label;
     }
     
     /**
@@ -110,7 +112,7 @@ class VMWriter
      */
     public function writeGoto($label)
     {
-        # code...
+        $this->writeCode("goto $label");
     }
     
     /**
@@ -119,7 +121,7 @@ class VMWriter
      */
     public function writeIf($label)
     {
-        # code...
+        $this->writeCode("if-goto $label");
     }
     
     /**
@@ -129,7 +131,7 @@ class VMWriter
      */
     public function writeCall($name, $nArgs)
     {
-        $this->writeCode(array("call $name $nArgs"));
+        $this->writeCode("call $name $nArgs");
     }
     
     /**
@@ -139,7 +141,8 @@ class VMWriter
      */
     public function writeFunction($name, $nLocals)
     {
-        $this->writeCode(array("function $name $nLocals"));
+        $this->functionName = $name;
+        $this->writeCode("function $name $nLocals", false);
     }
     
     /**
@@ -147,7 +150,7 @@ class VMWriter
      */
     public function writeReturn()
     {
-        $this->writeCode(array('return'));
+        $this->writeCode('return');
     }
     
     /**
@@ -160,10 +163,19 @@ class VMWriter
         }
     }
     
-    protected function writeCode(array $code)
+    protected function writeCode($code, $indent = true)
     {
-        if (count($code) > 0) {
-            fwrite($this->fp, implode("\n", $code) . "\n");
+        $code = "$code\n";
+        if ($indent) {
+            $code = "\t" . $code;
+        }
+        fwrite($this->fp, $code);
+    }
+    
+    protected function writeBlock(array $code)
+    {
+        foreach ($code as $line) {
+            $this->writeCode($line);
         }
     }
 }
