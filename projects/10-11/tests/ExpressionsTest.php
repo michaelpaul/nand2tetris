@@ -37,6 +37,9 @@ class ExpressionsTest extends CompilerTestCase
     public function testKeywordConstant()
     {
         $this->writeTestProgram('true | false & null + this');
+        $st = new \JackCompiler\SymbolTable;
+        $st->define('this', 'Main', 'arg');
+        $this->parser->setSymbolTable($st);
         $this->parser->advance();
         $this->parser->compileExpression();
         $expr = $this->parser->toSimpleXML();
@@ -54,11 +57,11 @@ class ExpressionsTest extends CompilerTestCase
     
     public function testSubscript()
     {
-        $this->writeTestProgram('players[i]');
+        $this->writeTestProgram('x[i]');
         $this->parser->advance();
         $this->parser->compileTerm();
         $term = $this->parser->toSimpleXML();
-        $this->assertEquals('players', $term->identifier[0]);
+        $this->assertEquals('x', $term->identifier[0]);
         $this->assertEquals('[', $term->symbol[0]);
         $this->assertEquals('i', $term->expression->term->identifier);
         $this->assertEquals(']', $term->symbol[1]);

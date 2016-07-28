@@ -16,18 +16,30 @@ class VMWriter
     }
     
     /**
+     * @param $kind valor retornado pela SymbolTable
+     */
+    public function getSegmentName($kind)
+    {
+        switch ($kind) {
+            case 'var':
+                $kind = 'local';
+                break;
+            case 'arg':
+                $kind = 'argument';
+                break;
+            case 'field':
+                $kind = 'this';
+                break;
+        }
+        return $kind;
+    }
+    
+    /**
      * Writes a VM push command
      */
     public function writePush($segment, $index)
     {
-        switch ($segment) {
-            case 'var':
-                $segment = 'local';
-                break;
-            case 'arg':
-                $segment = 'argument';
-                break;
-        }
+        $segment = $this->getSegmentName($segment);
         $this->writeCode("push $segment $index");
     }
     
@@ -36,14 +48,7 @@ class VMWriter
      */
     public function writePop($segment, $index)
     {
-        switch ($segment) {
-            case 'var':
-                $segment = 'local';
-                break;
-            case 'arg':
-                $segment = 'argument';
-                break;
-        }
+        $segment = $this->getSegmentName($segment);
         $this->writeCode("pop $segment $index");
     }
     

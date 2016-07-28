@@ -8,7 +8,8 @@ ok - passar na suíte oficial para o programa Square;
 ok - project 10 done;
 ok - automatizar testes do capitulo 11 no RoboFile;
 ok - compilar comandos de fluxo de controle / statements;
-- testar SquareDance; 
-- compilar string;
-- array;
-- compilar this/objeto;
+ok - tratar "this", na definição e utilização.
+ok - testar SquareDance;
+- testar Average; 
+- testar Pong; 
+- testar Complex Arrays;

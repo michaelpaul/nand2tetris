@@ -33,7 +33,7 @@ class CompilationEngine
      */
     protected $className;
     
-    private $labelCounter = 0;
+    protected $labelCounter = 0;
     
     /**
      * @param $input file/stream source.jack
@@ -225,10 +225,15 @@ class CompilationEngine
     {
         $this->beginElement('parameterList');
 
-        // sem parametros
+        // adicionar variável this na tabela e símbolos 
+        $methodKind = $this->ctx->parentNode->firstChild->nodeValue;
+        if ($methodKind == 'method' || $methodKind == 'constructor') {
+            $this->st->define('this', $this->className, 'arg');
+        }
+        
+        // sem parâmetros
         if ($this->tokenizer->tokenType() != JackTokenizer::KEYWORD &&
             ! $this->tokenizer->isIdentifier()) {
-            // $this->ctx->appendChild($this->doc->createTextNode(''));
             $this->endElement();
             return true;
         }
@@ -258,7 +263,28 @@ class CompilationEngine
             $nLocals += $this->compileVarDec();
         }
         
+        // Function header
         $this->writer->writeFunction($this->className . '.' . $subroutineName, $nLocals);
+        
+        // Definir o this
+        switch ($this->ctx->parentNode->firstChild->nodeValue) {
+            case 'constructor':
+                $fieldCount = $this->st->varCount('field') + $this->st->varCount('static');
+                // *this = Memory.alloc($fieldCount);
+                $this->writer->writePush('constant', $fieldCount);
+                $this->writer->writeCall('Memory.alloc', 1);
+                $this->writer->writePop('pointer', 0);
+                // $argument[0] = *this
+                $this->writer->writePush('pointer', 0);
+                $this->writer->writePop('argument', 0);
+                break;
+            case 'method':
+                // *this = $argument[0];
+                $this->writer->writePush('argument', 0);
+                $this->writer->writePop('pointer', 0);
+                break;
+        }
+        // end of header
         
         $this->compileStatements();
         $this->compileTerminalSymbol('}');
@@ -323,6 +349,8 @@ class CompilationEngine
         $subroutineName = $this->identifier();
         $this->compileSubroutineCall($subroutineName);
         $this->compileTerminalSymbol(';');
+        // descartar resultado da chamada
+        $this->writer->writePop('temp', 0);
         $this->endElement();
     }
 
@@ -425,10 +453,10 @@ class CompilationEngine
         
         $this->compileTerminalSymbol('}');
         
+        $this->writer->writeLabel($else);
         if ($this->tokenizer->isKeyword('else')) {
             $this->compileTerminalKeyword('else');
             $this->compileTerminalSymbol('{');
-            $this->writer->writeLabel($else);
             $this->compileStatements();
             $this->compileTerminalSymbol('}');
         }
@@ -443,15 +471,34 @@ class CompilationEngine
     // O primeiro identifier fica por conta do caller
     protected function compileSubroutineCall($subroutineName)
     {
-        $className = null;
+        $nArgs = 0;
+        $className = $this->className;
+        
         if ($this->tokenizer->isSymbol('.')) {
-            $className = $subroutineName;
+            if ($this->st->contains($subroutineName)) {
+                // varName
+                $className = $this->st->typeOf($subroutineName);
+                // push $object
+                $this->compileIdentifier($subroutineName);
+                $nArgs++;
+            } else {
+                // className
+                $className = $subroutineName;
+            }
             $this->compileTerminalSymbol('.');
             $subroutineName = $this->identifier();
+            // @TODO gambi, tratar chamada de constructor
+            if ($subroutineName == 'new') {
+                $nArgs++;
+            }
+        } else {
+            // repassar o this desse método para o próximo
+            $this->writer->writePush('argument', 0);
+            $nArgs++;
         }
         
         $this->compileTerminalSymbol('(');
-        $nArgs = $this->compileExpressionList();
+        $nArgs += $this->compileExpressionList();
         $this->compileTerminalSymbol(')');
         $this->writer->writeCall($className . '.' . $subroutineName, $nArgs);
     }
@@ -495,18 +542,22 @@ class CompilationEngine
         } elseif ($this->tokenizer->isKeyword('true', 'false', 'null', 'this')) {
             switch ($this->tokenizer->keyword()) {
                 case 'true': // -1
-                    $this->writer->writePush('constant', '0');
-                    $this->writer->writeUnaryOp('~');
+                    $this->writer->writePush('constant', '1');
+                    $this->writer->writeUnaryOp('-');
                     break;
                 case 'false':
                 case 'null':
                     $this->writer->writePush('constant', '0');
+                    break;
+                case 'this':
+                    $this->compileIdentifier('this');
                     break;
             }
             $this->compileTerminalKeyword('true', 'false', 'null', 'this');
         } elseif ($this->tokenizer->isIdentifier()) {
             // varName
             $varName = $this->identifier();
+            
             // '[' expression ']'
             if ($this->tokenizer->isSymbol('[')) {
                 $this->compileTerminalSymbol('[');
@@ -516,9 +567,8 @@ class CompilationEngine
                 // subroutineCall
                 $this->compileSubroutineCall($varName);
             } else {
-                // simple var reference
-                $symbol = $this->st->get($varName);
-                $this->writer->writePush($symbol->kind, $symbol->index);
+                // simple var ref
+                $this->compileIdentifier($varName);
             }
         } elseif ($this->tokenizer->isSymbol('(')) {
             $this->compileTerminalSymbol('(');
@@ -543,7 +593,7 @@ class CompilationEngine
         // empty expression
         if ($this->tokenizer->isSymbol(')') || ! $this->tokenizer->tokenType()) {
             $this->endElement();
-            return;
+            return 0;
         }
         $this->compileExpression();
         $count = 1;
@@ -558,4 +608,10 @@ class CompilationEngine
         return $count;
     }
     /** }}} */
+    
+    protected function compileIdentifier($id)
+    {
+        $symbol = $this->st->get($id);
+        $this->writer->writePush($symbol->kind, $symbol->index);
+    }
 }

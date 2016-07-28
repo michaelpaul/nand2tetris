@@ -71,7 +71,8 @@ class RoboFile extends \Robo\Tasks
         $path = 'tests/programs/11';
         $programs = array(
             'Seven', 
-            'ConvertToBin'
+            'ConvertToBin',
+            'Square'
         );
         foreach ($programs as $dir) {
             $this->_exec("./bin/JackCompiler.php --ast {$path}/{$dir}");
