@@ -117,10 +117,22 @@ class ProgramStructureTest extends CompilerTestCase
         ';
         $this->assertASTEquals($expected);
     }
-
-    public function testCompileEmptyConstructor()
+    
+    /**
+     * @expectedException JackCompiler\ParserError
+     * @expectedExceptionMessage Construtor .new deve retornar this incondicional
+     */
+    public function testConstructorWithoutReturn()
     {
-        $this->writeTestProgram('constructor Square new() {}');
+        $this->writeTestProgram('constructor Square new() { }');
+
+        $this->parser->advance();
+        $this->parser->compileSubroutine();
+    }
+
+    public function testCompileSimpleConstructor()
+    {
+        $this->writeTestProgram('constructor Square new() { return this; }');
 
         $this->parser->advance();
         $this->parser->compileSubroutine();
@@ -135,7 +147,17 @@ class ProgramStructureTest extends CompilerTestCase
               <symbol>)</symbol>
               <subroutineBody>
                 <symbol>{</symbol>
-                <statements />
+                <statements>
+                  <returnStatement>
+                    <keyword>return</keyword>
+                    <expression>
+                      <term>
+                        <keyword>this</keyword>
+                      </term>
+                    </expression>
+                    <symbol>;</symbol>
+                  </returnStatement>
+                </statements>
                 <symbol>}</symbol>
               </subroutineBody>
             </subroutineDec>
@@ -143,6 +165,17 @@ class ProgramStructureTest extends CompilerTestCase
         $this->assertASTEquals($expected);
     }
 
+    /**
+     * @expectedException JackCompiler\ParserError
+     * @expectedExceptionMessage Sub-rotina sem retorno: .getChar
+     */
+    public function testNoReturn()
+    {
+        $this->writeTestProgram('function char getChar() {}');
+        $this->parser->advance();
+        $this->parser->compileSubroutine();
+    }
+    
     public function testCompileFunction()
     {
         $this->writeTestProgram('function void Render() {}');
@@ -170,7 +203,7 @@ class ProgramStructureTest extends CompilerTestCase
     
     public function testCompileMethod()
     {
-        $this->writeTestProgram('method boolean getSize() {}');
+        $this->writeTestProgram('method boolean getSize() { return true; }');
 
         $this->parser->advance();
         $this->parser->compileSubroutine();
@@ -185,7 +218,17 @@ class ProgramStructureTest extends CompilerTestCase
               <symbol>)</symbol>
               <subroutineBody>
                 <symbol>{</symbol>
-                <statements />
+                <statements>
+                    <returnStatement>
+                        <keyword>return</keyword>
+                        <expression>
+                            <term>
+                                <keyword>true</keyword>
+                            </term>
+                        </expression>
+                        <symbol>;</symbol>
+                    </returnStatement>
+                </statements>
                 <symbol>}</symbol>
               </subroutineBody>
             </subroutineDec>

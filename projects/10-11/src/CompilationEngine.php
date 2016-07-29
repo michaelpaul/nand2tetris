@@ -206,8 +206,10 @@ class CompilationEngine
         $this->st->startSubroutine();
         $this->compileTerminalKeyword('constructor', 'function', 'method');
         
+        $voidSubroutine = false;
         if ($this->tokenizer->isKeyword('void')) {
             $this->compileTerminalKeyword('void');
+            $voidSubroutine = true;
         } else {
             $this->compileType();
         }
@@ -217,15 +219,52 @@ class CompilationEngine
         $this->compileParameterList();
         $this->compileTerminalSymbol(')');
         $this->compileSubroutineBody($subroutineName);
+        $this->checkReturn($subroutineName, $voidSubroutine);
         $this->endElement();
     }
-
+    
+    // Some dumb checks
+    protected function checkReturn($subroutineName, $voidSubroutine)
+    {
+        $subroutineKind = $this->ctx->firstChild->nodeValue;
+        if ($subroutineKind == 'constructor') {
+            // verificar o retorno de this no topo da função 
+            $returnStatements = $this->toSimpleXML()->subroutineBody->statements->returnStatement;
+            $thisFound = false;
+            foreach ($returnStatements as $returnNode) {
+                if ($returnNode->expression || $returnNode->expression->term->keyword == 'this') {
+                    $thisFound = true;
+                    break;
+                }
+            }
+            if (!$thisFound) {
+                throw new ParserError("Construtor {$this->className}.{$subroutineName} deve retornar this incondicional");
+            }
+            return true;
+        }
+        
+        $xpath = new \DOMXPath($this->doc);
+        $returnStatements = $xpath->query('//returnStatement', $this->ctx);
+        
+        if ($returnStatements->length == 0) {
+            if ($voidSubroutine) {
+                // return 0
+                $this->writer->writePush('constant', 0);
+                $this->writer->writeReturn();
+            } else {
+                throw new ParserError("Sub-rotina sem retorno: {$this->className}.{$subroutineName}");
+            }
+        }
+        
+        return true;
+    }
+    
     // ((type varName) (',' type varName)*)?
     public function compileParameterList()
     {
         $this->beginElement('parameterList');
 
-        // adicionar variável this na tabela e símbolos 
+        // adicionar variável this na tabela de símbolos 
         $methodKind = $this->ctx->parentNode->firstChild->nodeValue;
         if ($methodKind == 'method' || $methodKind == 'constructor') {
             $this->st->define('this', $this->className, 'arg');
