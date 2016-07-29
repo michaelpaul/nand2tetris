@@ -9,6 +9,16 @@ class RoboFile extends \Robo\Tasks
 {
     // define public methods as commands
 
+    public function tests()
+    {
+        $this->stopOnFail(true);
+        $this->taskPHPUnit('phpunit')
+            ->run();
+        $this->tokenizerTest();
+        $this->parserTest();
+        $this->compilerTest();
+    }
+    
     // Testes do capítulo 10
     public function testParser()
     {
@@ -72,7 +82,10 @@ class RoboFile extends \Robo\Tasks
         $programs = array(
             'Seven', 
             'ConvertToBin',
-            'Square'
+            'Square',
+            'Strings',
+            'Arrays',
+            'Average'
         );
         foreach ($programs as $dir) {
             $this->_exec("./bin/JackCompiler.php --ast {$path}/{$dir}");

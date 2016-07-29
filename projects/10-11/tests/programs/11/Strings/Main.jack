@@ -1,0 +1,20 @@
+/** Criação "manual" de uma string */
+class Main {
+    function void main() {
+        var String sugar;
+        var String abc;
+        
+        let sugar = "In Jack, string's are a syntax sugar";
+        do Output.printString(sugar);
+        do Output.println();
+        
+        let abc = String.new(3);
+        do abc.appendChar(65);
+        do abc.appendChar(66);
+        do abc.appendChar(67);
+        do Output.printString(abc);
+        do Output.println();
+        
+        return;
+    }
+}

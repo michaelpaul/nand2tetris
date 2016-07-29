@@ -1,0 +1,21 @@
+/** Leitura e escrita em arrays */
+class Main {
+    function void main() {
+        var Array a, b;
+        
+        let a = Array.new(10);
+        let b = Array.new(10);
+        
+        let a[4] = 15;
+        let b[8] = 15;
+        let b[8] = a[4] + b[8];
+        
+        do Output.printString("A[4]: ");
+        do Output.printInt(a[4]);
+        do Output.println();
+        do Output.printString("B[8]: ");
+        do Output.printInt(b[8]);
+        
+        return;
+    }
+}

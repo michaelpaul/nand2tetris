@@ -7,6 +7,10 @@ use Exception;
 
 class CompilationEngine
 {
+    // variáveis temporárias da VM usadas pelo compilador
+    const TEMP_DO_RETURN = 0;
+    const TEMP_ARRAY_INDEX = 1;
+    
     protected $tokenizer;
     /**
      * @var DOMDocument $doc documento xml para saída
@@ -266,7 +270,7 @@ class CompilationEngine
 
         // adicionar variável this na tabela de símbolos 
         $methodKind = $this->ctx->parentNode->firstChild->nodeValue;
-        if ($methodKind == 'method' || $methodKind == 'constructor') {
+        if ($methodKind == 'method') {
             $this->st->define('this', $this->className, 'arg');
         }
         
@@ -313,9 +317,6 @@ class CompilationEngine
                 $this->writer->writePush('constant', $fieldCount);
                 $this->writer->writeCall('Memory.alloc', 1);
                 $this->writer->writePop('pointer', 0);
-                // $argument[0] = *this
-                $this->writer->writePush('pointer', 0);
-                $this->writer->writePop('argument', 0);
                 break;
             case 'method':
                 // *this = $argument[0];
@@ -389,7 +390,7 @@ class CompilationEngine
         $this->compileSubroutineCall($subroutineName);
         $this->compileTerminalSymbol(';');
         // descartar resultado da chamada
-        $this->writer->writePop('temp', 0);
+        $this->writer->writePop('temp', self::TEMP_DO_RETURN);
         $this->endElement();
     }
 
@@ -399,10 +400,15 @@ class CompilationEngine
         $this->beginElement('letStatement');
         $this->compileTerminalKeyword('let');
         $id = $this->identifier();
+        $symbol = $this->st->get($id);
+        $isArray = false;
         
         if ($this->tokenizer->isSymbol('[')) {
+            $isArray = true;
             $this->compileTerminalSymbol('[');
             $this->compileExpression();
+            // pop index
+            $this->writer->writePop('temp', self::TEMP_ARRAY_INDEX);
             $this->compileTerminalSymbol(']');
         }
         
@@ -410,9 +416,22 @@ class CompilationEngine
         $this->compileExpression();
         $this->compileTerminalSymbol(';');
         
-        $symbol = $this->st->get($id);
-        $this->writer->writePop($symbol->kind, $symbol->index);
-    
+        if ($isArray) {
+            // push varName
+            $this->compileIdentifier($id);
+            // push index
+            $this->writer->writePush('temp', self::TEMP_ARRAY_INDEX);
+            // add varName, index
+            $this->writer->writeArithmetic('+');
+            // set that
+            $this->writer->writePop('pointer', 1);
+            // *that = top of the stack
+            $this->writer->writePop('that', 0);
+        } else {
+            // varName = top of the stack
+            $this->writer->writePop($symbol->kind, $symbol->index);
+        }
+        
         $this->endElement();
     }
 
@@ -508,31 +527,30 @@ class CompilationEngine
     // subroutineName '(' expressionList ')' | 
     //  (className | varName) '.' subroutineName '(' expressionList ')'
     // O primeiro identifier fica por conta do caller
-    protected function compileSubroutineCall($subroutineName)
+    protected function compileSubroutineCall($identifier)
     {
         $nArgs = 0;
-        $className = $this->className;
         
         if ($this->tokenizer->isSymbol('.')) {
-            if ($this->st->contains($subroutineName)) {
-                // varName
-                $className = $this->st->typeOf($subroutineName);
-                // push $object
-                $this->compileIdentifier($subroutineName);
+            // (className | varName)
+            if ($this->st->contains($identifier)) {
+                // varName -> method call
+                $className = $this->st->typeOf($identifier);
+                // passar varName como this
+                $this->compileIdentifier($identifier);
                 $nArgs++;
             } else {
-                // className
-                $className = $subroutineName;
+                // className -> function or constructor call
+                $className = $identifier;
             }
             $this->compileTerminalSymbol('.');
             $subroutineName = $this->identifier();
-            // @TODO gambi, tratar chamada de constructor
-            if ($subroutineName == 'new') {
-                $nArgs++;
-            }
         } else {
+            // this -> method call
+            $className = $this->className;
+            $subroutineName = $identifier;
             // repassar o this desse método para o próximo
-            $this->writer->writePush('argument', 0);
+            $this->writer->writePush('pointer', 0);
             $nArgs++;
         }
         
@@ -576,6 +594,7 @@ class CompilationEngine
             $this->writer->writePush('constant', $this->tokenizer->intVal());
             $this->advance();
         } elseif ($this->tokenizer->isString()) {
+            $this->compileString($this->tokenizer->stringVal());
             $this->addTerminal($this->tokenizer->stringValToken());
             $this->advance();
         } elseif ($this->tokenizer->isKeyword('true', 'false', 'null', 'this')) {
@@ -589,7 +608,7 @@ class CompilationEngine
                     $this->writer->writePush('constant', '0');
                     break;
                 case 'this':
-                    $this->compileIdentifier('this');
+                    $this->writer->writePush('pointer', 0);
                     break;
             }
             $this->compileTerminalKeyword('true', 'false', 'null', 'this');
@@ -599,9 +618,18 @@ class CompilationEngine
             
             // '[' expression ']'
             if ($this->tokenizer->isSymbol('[')) {
+                // push varName
+                $this->compileIdentifier($varName);
                 $this->compileTerminalSymbol('[');
+                // push expression
                 $this->compileExpression();
                 $this->compileTerminalSymbol(']');
+                // add varName, expression
+                $this->writer->writeArithmetic('+');
+                // set that
+                $this->writer->writePop('pointer', 1);
+                // push *that
+                $this->writer->writePush('that', 0);
             } elseif ($this->tokenizer->isSymbol('(', '.')) {
                 // subroutineCall
                 $this->compileSubroutineCall($varName);
@@ -652,5 +680,15 @@ class CompilationEngine
     {
         $symbol = $this->st->get($id);
         $this->writer->writePush($symbol->kind, $symbol->index);
+    }
+    
+    protected function compileString($str)
+    {
+        $this->writer->writePush('constant', strlen($str));
+        $this->writer->writeCall('String.new', 1);
+        foreach (str_split($str) as $char) {
+            $this->writer->writePush('constant', ord($char));
+            $this->writer->writeCall('String.appendChar', 2);
+        }
     }
 }
