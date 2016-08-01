@@ -85,7 +85,9 @@ class RoboFile extends \Robo\Tasks
             'Square',
             'Strings',
             'Arrays',
-            'Average'
+            'Average',
+            'Pong',
+            'ComplexArrays'
         );
         foreach ($programs as $dir) {
             $this->_exec("./bin/JackCompiler.php --ast {$path}/{$dir}");

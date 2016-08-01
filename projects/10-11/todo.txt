@@ -10,6 +10,6 @@ ok - automatizar testes do capitulo 11 no RoboFile;
 ok - compilar comandos de fluxo de controle / statements;
 ok - tratar "this", na definição e utilização.
 ok - testar SquareDance;
-- testar Average; 
-- testar Pong; 
-- testar Complex Arrays;
+ok - testar Average; 
+ok - testar Pong (tem que trazer usar o binário do OS para testar); 
+ok - testar Complex Arrays;
