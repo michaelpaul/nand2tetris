@@ -1,0 +1,114 @@
+/**
+ * Memory operations library.
+ */ 
+class Memory {
+    static Array memory;
+    static Array freeList;
+
+    /** Initializes memory parameters. */
+    function void init() {
+        let memory = 0;
+        let freeList = 2048;
+        let freeList[0] = 8192; // length
+        let freeList[1] = 0;  // next
+        return;
+    }
+
+    /** Returns the value of the main memory at the given address. */
+    function int peek(int address) {
+        return memory[address];
+    }
+
+    /** Sets the value of the main memory at this address
+     *  to the given value. */
+    function void poke(int address, int value) {
+        let memory[address] = value;
+        return;
+    }
+
+    /** finds and allocates from the heap a memory block of the 
+     *  specified size and returns a reference to its base address. */
+    /*
+    Segment layout:
+    0 - segment.length
+    1 - segment.next
+    2..heap size - free area
+
+    Block layout:
+    -1 - block.length
+    0..size - block area
+    */ 
+    function Array alloc(int size) {
+        var int blockSize, segmentSize, freeFragmented;
+        var Array block;
+        var Array segment;
+        
+        // Allocated memory size must be positive
+        if (size < 0) {
+            do Sys.error(5);
+        }
+        // tamanho da alocação + 1 para lembrar seu tamanho
+        let blockSize = size + 1;
+        
+        // buscar o primeiro segmento com tamanho suficiente começando na freeList
+        let segment = freeList;
+        let freeFragmented = segment[0];
+        let segmentSize = segment[0] - 2; // S - (length e next)
+        while ((blockSize > segmentSize) & ~(segment[1] = null)) {
+            let segment = segment[1];
+            let segmentSize = segment[0] - 2;
+            let freeFragmented = freeFragmented + segment[0]; 
+        }
+        
+        // heap overflow
+        if (blockSize > segmentSize) {
+            // try defrag
+            if (freeFragmented > blockSize) {
+                let freeList[0] = freeFragmented;
+                let freeList[1] = null;
+                let segment = freeList;
+            } else {
+                do Sys.error(6);
+            }
+        }
+
+        // Pegar um bloco na area livre do segmento de trás pra frente
+        let block = segment + 2 + (segment[0] - blockSize);
+        
+        // update freeList to reflect allocation
+        let segment[0] = segment[0] - size - 1;
+        // remember block size for deAllocation 
+        let block[-1] = blockSize;
+        return block;
+    }
+
+    /** De-allocates the given object and frees its space. */
+    function void deAlloc(Array object) {
+        var Array segment, last;
+        let segment = object - 1;
+        // get segment size
+        let segment[0] = object[-1];
+        // insert into freeList
+        let last = freeList;
+        while (~(last[1] = null)) {
+            let last = last[1];
+        }
+        let last[1] = segment; // insert
+        let segment[1] = null; // next = null
+        return;
+    }
+    // debug
+    function void dumpFreeList() {
+        var Array segment;
+        let segment = freeList;
+        do Output.println();
+        while (~(segment = null)) {
+            do Output.printInt(segment[0]);
+            do Output.println();
+            do Output.printInt(segment[1]);
+            do Output.println();
+            let segment = segment[1];
+        }
+        return;
+    }
+}

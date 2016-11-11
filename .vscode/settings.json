@@ -1,0 +1,7 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "files.associations": {
+        // Coloração de sintaxe para Jack: Java é parecido o suficiente para ajudar  
+        "*.jack": "java"
+    }
+}

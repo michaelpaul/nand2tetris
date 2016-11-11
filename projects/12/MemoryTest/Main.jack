@@ -1,0 +1,9 @@
+class Main {
+    function void main() {
+        // Performs several memory manipulations
+        do BookTestCase.main();
+        // leak check
+        do LeakCheckTestCase.main();
+        return;
+    }
+}

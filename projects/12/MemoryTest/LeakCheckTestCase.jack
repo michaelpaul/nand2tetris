@@ -1,0 +1,18 @@
+// Esse programa não tem vazamentos e roda um tempinho
+class LeakCheckTestCase {
+    function void main() {
+        var int i;
+        var Array a, b; 
+        let  i = 1000;
+        
+        while (i > 0) {
+            let a = Array.new(32);
+            let b = Array.new(15);
+            do Memory.deAlloc(a);
+            do Memory.deAlloc(b);
+            let i = i - 1;
+        }
+        // do Memory.dumpFreeList();
+        return;
+    }
+}
