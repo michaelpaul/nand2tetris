@@ -1,0 +1,131 @@
+/**
+ * Represents a String object. Implements the String type.
+ */
+class String {
+    field Array buffer;
+    field int length;
+    field int size;
+
+    /** Constructs a new empty String with a maximum length of maxLength. */
+    constructor String new(int maxLength) {
+        // Maximum length must be non-negative
+        if (maxLength < 0) {
+            do Sys.error(14);
+        }
+        if (maxLength = 0) {
+            let maxLength = 1;
+        }
+        let size = maxLength;
+        let length = 0;
+        let buffer = Array.new(maxLength);
+        return this;
+    }
+
+    /** De-allocates the string and frees its space. */
+    method void dispose() {
+        do Memory.deAlloc(buffer);
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** Returns the current length of this String. */
+    method int length() {
+        return length;
+    }
+
+    /** Returns the character at location j. */
+    method char charAt(int j) {
+        // String index out of bounds
+        if ((j < 0) | (j > (size - 1))) {
+            do Sys.error(15);
+        }
+        return buffer[j];
+    }
+
+    /** Sets the j'th character of this string to be c. */
+    method void setCharAt(int j, char c) {
+        // String index out of bounds
+        if ((j < 0) | (j > (size - 1))) {
+            do Sys.error(16);
+        }
+        let buffer[j] = c;
+        return;
+    }
+
+    /** Appends the character c to the end of this String.
+     *  Returns this string as the return value. */
+    method String appendChar(char c) {
+        // String is full
+        if (length > size | length = size) {
+            do Sys.error(17);
+        }
+        let buffer[length] = c;
+        let length = length + 1;
+        return this;
+    }
+
+    /** Erases the last character from this String. */
+    method void eraseLastChar() {
+        // String is empty
+        if (length = 0) {
+            do Sys.error(18);
+        }
+        let length = length - 1;
+        let buffer[length] = null;
+        return;
+    }
+
+    /** Returns the integer value of this String until the first non
+     *  numeric character. */
+     // @TODO handle negative
+    method int intValue() {
+        // string2int
+        return 0;
+    }
+
+    /** Sets this String to hold a representation of the given number. */
+    // int2string
+    // @TODO emitir esse erro: 
+    //  19   String.setInt         Insufficient string capacity
+    method void setInt(int number) {
+        var int lastDigit;
+        var int c;
+        // minus sign
+        if (number < 0) {
+            do setCharAt(0, 45);
+        }
+        let number = Math.abs(number);
+        let lastDigit = number - (10 * (number / 10)); // number % 10
+        let c = lastDigit + 48; // char representing lastDigit;
+
+        if (number < 10) {
+            // reset string
+            if (length > 1) {
+                let length = 1;
+            }
+            // return c; // as string
+            do appendChar(c);
+            return;
+        } else {
+            // return setInt(number / 10).append(c);
+            do setInt(number / 10);
+            do appendChar(c);
+            return;
+        }
+    }
+
+    /** Returns the new line character. */
+    function char newLine() {
+        return 128;
+    }
+
+    /** Returns the backspace character. */
+    function char backSpace() {
+        return 129;
+    }
+
+    /** Returns the double quote (") character. */
+    function char doubleQuote() {
+        return 34;
+    }
+}
