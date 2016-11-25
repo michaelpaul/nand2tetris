@@ -37,6 +37,16 @@ class Main {
         do Output.backSpace();
         do Output.printInt(6789);
         
+        do Output.printChar(String.newLine());
+        
+        do Output.printChar(String.doubleQuote());
+        do Output.printString("String.doubleQuote");
+        do Output.printChar(String.doubleQuote());
+        do Output.println();
+        
+        do Output.printInt(123);
+        do Output.printChar(String.backSpace());
+        
         return;
     }
 

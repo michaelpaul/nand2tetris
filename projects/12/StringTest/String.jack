@@ -77,19 +77,47 @@ class String {
 
     /** Returns the integer value of this String until the first non
      *  numeric character. */
-     // @TODO handle negative
+     // string2int
     method int intValue() {
-        // string2int
-        return 0;
+        var int i, c, l, value, digit;
+        var boolean neg;
+        let neg = false;
+        let i = 0;
+        // minus sign
+        if (charAt(0) = 45) {
+            let i = 1;
+            let neg = true;
+        }
+        let l = length();
+        let value = 0;
+        while (i < l) {
+            let c = charAt(i);
+            // break on non numeric character
+            if ((c < 48) | (c > 57)) {
+                if (neg) {
+                    return -value;
+                }
+                return value;
+            }
+            let digit = c - 48;
+            let value = value * 10 + digit;
+            let i = i + 1;
+        }
+        if (neg) {
+            return -value;
+        }
+        return value;
     }
 
     /** Sets this String to hold a representation of the given number. */
     // int2string
-    // @TODO emitir esse erro: 
-    //  19   String.setInt         Insufficient string capacity
+    //  Throws 19: Insufficient string capacity
     method void setInt(int number) {
         var int lastDigit;
         var int c;
+        if (size < 6) {
+            do Sys.error(19);
+        }
         // minus sign
         if (number < 0) {
             do setCharAt(0, 45);

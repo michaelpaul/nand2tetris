@@ -62,6 +62,11 @@ class Main {
         do Output.printString("intValue: ");
         do Output.printInt(s.intValue());        // intValue: -32123
         do Output.println();
+
+        let s = "-500M dollars";
+        do Output.printString("intValue: ");
+        do Output.printInt(s.intValue());        // intValue: -500
+        do Output.println();
         
         do Output.printString("backSpace: ");
         do Output.printInt(String.backSpace());  // backSpace: 129

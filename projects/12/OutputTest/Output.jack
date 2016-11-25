@@ -21,9 +21,6 @@ screen: -- - - (L, H)
 left shift
 n << 8 = n * (2^8)
          n * 256
-
-@TODO descobrir se preciso lidar com coordenadas de memória, pixels ou ambos?
-      decidir: cutucar direto o mapa de video ou usar o Screen
  */
 class Output {
     // cursor pos
@@ -275,6 +272,16 @@ class Output {
     function void printChar(char c) {
         var Array map;
         var int i, j, posX, posY;
+
+        if (c = String.newLine()) {
+            do Output.println();
+            return;
+        }
+        if (c = String.backSpace()) {
+            do Output.backSpace();
+            return;
+        }
+
         let map = Output.getMap(c);
         let i = 0;
         let posX = column * 8;
