@@ -1,0 +1,169 @@
+/**
+ * Graphic screen library.
+ * Hack screen: 512x256
+ */
+class Screen {
+    static boolean color;
+
+    /** Initializes the Screen. */
+    function void init() {
+        let color = true;
+        return;
+    }
+
+    /** Erases the whole screen. */
+    function void clearScreen() {
+        var int i;
+        let i = 16384;
+        while (i < 24576) {
+            do Memory.poke(i, 0);
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /** Sets the color to be used in further draw commands
+     *  where white = false, black = true. */
+    function void setColor(boolean b) {
+        let color = b;
+        return;
+    }
+
+    /** Draws the (x, y) pixel. */
+    function void drawPixel(int x, int y) {
+        var int pow, i, addr, bitPos, val;
+
+        if ((x < 0) | (x > 511) | (y < 0) | (y > 255)) {
+            // Illegal pixel coordinates
+            do Sys.error(7);
+        }
+
+        let addr = 16384 + (y * 32) + (x / 16);
+        let bitPos = x - (16 * (x / 16)); // c % 16
+        let val = Memory.peek(addr);
+
+        // build mask
+        // @TODO criar um array com essas potencias?
+        let i = 0;
+        let pow = 1;
+        while (i < bitPos) {
+            let pow = pow * 2;
+            let i = i + 1;
+        }
+
+        // https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit-in-c-c
+        if (color) {
+            // black: set bit
+            // number |= 1 << x;
+            let val = val | pow;
+        } else {
+            // white: clear bit
+            // number &= ~(1 << x);
+            let val = val & (~pow);
+        }
+        do Memory.poke(addr, val);
+        return;
+    }
+
+    /** 
+     * Draws a line from (x1, y1) to (x2, y2). 
+     * Bresenham Line Algorithm
+     * https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+     * source: http://www.edepot.com/linebresenham.html
+     */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        var int	x, y;
+        var int	dx, dy;
+        var int	incx, incy;
+        var int	balance;
+        
+        if ((x1 < 0) | (x1 > 511) | (x2 < 0) | (x2 > 511) | 
+            (y1 < 0) | (y1 > 255) | (y2 < 0) | (y2 > 255)) {
+            // Illegal line coordinates
+            do Sys.error(8);
+        }
+        // debug
+        // do Screen.drawCircle(x1, y1, 2);
+        // do Screen.drawPixel(x1, y1);
+        // do Screen.drawPixel(x2, y2);
+
+        if ((x2 > x1) | (x2 = x1)){
+            let dx = x2 - x1;
+            let incx = 1;
+        } else {
+            let dx = x1 - x2;
+            let incx = -1;
+        }
+
+        if ((y2 > y1) | (y2 = y1)) {
+            let dy = y2 - y1;
+            let incy = 1;
+        } else {
+            let dy = y1 - y2;
+            let incy = -1;
+        }
+
+        let x = x1;
+        let y = y1;
+
+        if ((dx > dy) | (dx = dy)) {
+            // dy <<= 1;
+            let dy = dy * 2;
+            let balance = dy - dx;
+            // dx <<= 1;
+            let dx = dx * 2;
+
+            while (~(x = x2)) {
+                do Screen.drawPixel(x, y);
+                if ((balance > 0) | (balance = 0)) {
+                    let y = y + incy;
+                    let balance = balance - dx;
+                }
+                let balance = balance + dy;
+                let x = x + incx;
+            }
+            do Screen.drawPixel(x, y);
+        } else {
+            // dx <<= 1;
+            let dx = dx * 2;
+            let balance = dx - dy;
+            // dy <<= 1;
+            let dy = dy * 2;
+
+            while (~(y = y2)) {
+                do Screen.drawPixel(x, y);
+                if ((balance > 0) | (balance = 0)) {
+                    let x = x + incx;
+                    let balance = balance - dy;
+                }
+                let balance = balance + dx;
+                let y = y + incy;
+            }
+            do Screen.drawPixel(x, y);
+        }
+        return;
+    }
+
+    /** Draws a filled rectangle where the top left corner
+     *  is (x1, y1) and the bottom right corner is (x2, y2). */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+        // @TODO error
+        // if (1) {
+        //     // Illegal rectangle coordinates
+        //     do Sys.error(9);
+        // }
+        // @TODO code
+        do Screen.drawLine(x1,y1,x2,y2);
+        do Screen.drawLine(x1,y1,x2,y1);
+        do Screen.drawLine(x2,y1,x2,y2);
+        do Screen.drawLine(x2,y2,x1,y2);
+        do Screen.drawLine(x1,y2,x1,y1);
+        return;
+    }
+
+    /** Draws a filled circle of radius r around (cx, cy). */
+    function void drawCircle(int cx, int cy, int r) {
+        // @TODO code
+        return;
+    }
+}

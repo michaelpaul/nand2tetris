@@ -1,0 +1,44 @@
+/** Test program for the OS Screen class. */
+class DrawLineTestCase {
+    // desenha linhas diagonais de baixo para cima
+    function void lines(int x1, int x2) {
+        var int i;
+        let i = 128;
+        while (i > 0) {
+            do Screen.drawLine(x1,255, x2, i);
+            let i = i - 1;
+        }
+        return;
+    }
+
+    function void square(int xc, int yc, int size) {
+        var int xc, yc;
+        // @TODO drawRectangle
+        // do Screen.drawRectangle(xc - size, yc - size, xc + size, yc + size);
+        // do Screen.setColor(false);
+
+        // diagonal
+        do Screen.drawLine(xc, yc, xc + size, yc + size);
+        do Screen.drawLine(xc, yc, xc + size, yc - size);
+        do Screen.drawLine(xc, yc, xc - size, yc + size);
+        do Screen.drawLine(xc, yc, xc - size, yc - size);
+
+        // horizontal
+        do Screen.drawLine(xc, yc, xc + size, yc);
+        do Screen.drawLine(xc, yc, xc - size, yc);
+        // vertical
+        do Screen.drawLine(xc, yc, xc, yc + size);
+        do Screen.drawLine(xc, yc, xc, yc - size);
+        
+        // do Screen.setColor(true);
+        return;
+    }
+
+    /** Draws a sample pictue on the screen using lines and circles. */
+    function void main() {
+        do DrawLineTestCase.lines(0, 511);
+        do DrawLineTestCase.lines(511, 0);
+        do DrawLineTestCase.square(256, 50, 40);
+        return;
+    }
+}
