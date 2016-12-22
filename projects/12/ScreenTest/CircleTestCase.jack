@@ -1,0 +1,25 @@
+class CircleTestCase {
+    function void main() {
+        // MP
+        do CircleTestCase.debugCircle(125, 125, 100, 1);
+        // Book
+        do CircleTestCase.debugCircle(350, 125, 100, 2);
+        return;
+    }
+
+    function void debugCircle(int x, int y, int r, int f) {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(
+            x - r, y - r,
+            x + r, y + r
+        );
+        do Screen.setColor(false);
+        if (f = 1) {
+            do Screen.drawCircle(x, y, r);
+        }
+        if (f = 2) {
+            do Screen.drawCircleBook(x, y, r);
+        }
+        return;
+    }
+}

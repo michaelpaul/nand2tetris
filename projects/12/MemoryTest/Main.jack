@@ -1,9 +1,14 @@
 class Main {
     function void main() {
         // Performs several memory manipulations
+        do Output.printString("Running book tests...");
+        do Output.println();
         do BookTestCase.main();
         // leak check
+        do Output.printString("Running leak checks tests...");
+        do Output.println();
         do LeakCheckTestCase.main();
+        do Output.printString("Tests finished.");
         return;
     }
 }

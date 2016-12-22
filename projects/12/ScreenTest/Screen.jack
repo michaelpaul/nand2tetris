@@ -29,6 +29,14 @@ class Screen {
         return;
     }
 
+    function boolean invalidX(int x) {
+        return (x < 0) | (x > 511);
+    }
+
+    function boolean invalidY(int y) {
+        return (y < 0) | (y > 255);
+    }
+
     /** Draws the (x, y) pixel. */
     function void drawPixel(int x, int y) {
         var int pow, i, addr, bitPos, val;
@@ -65,8 +73,8 @@ class Screen {
         return;
     }
 
-    /** 
-     * Draws a line from (x1, y1) to (x2, y2). 
+    /**
+     * Draws a line from (x1, y1) to (x2, y2).
      * Bresenham Line Algorithm
      * https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
      * source: http://www.edepot.com/linebresenham.html
@@ -76,9 +84,9 @@ class Screen {
         var int	dx, dy;
         var int	incx, incy;
         var int	balance;
-        
-        if ((x1 < 0) | (x1 > 511) | (x2 < 0) | (x2 > 511) | 
-            (y1 < 0) | (y1 > 255) | (y2 < 0) | (y2 > 255)) {
+
+        if (Screen.invalidX(x1) | Screen.invalidX(x2) | 
+            Screen.invalidY(y1) | Screen.invalidY(y2)) {
             // Illegal line coordinates
             do Sys.error(8);
         }
@@ -147,23 +155,122 @@ class Screen {
     /** Draws a filled rectangle where the top left corner
      *  is (x1, y1) and the bottom right corner is (x2, y2). */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
-        // @TODO error
-        // if (1) {
-        //     // Illegal rectangle coordinates
-        //     do Sys.error(9);
-        // }
-        // @TODO code
-        do Screen.drawLine(x1,y1,x2,y2);
-        do Screen.drawLine(x1,y1,x2,y1);
-        do Screen.drawLine(x2,y1,x2,y2);
-        do Screen.drawLine(x2,y2,x1,y2);
-        do Screen.drawLine(x1,y2,x1,y1);
+        if ((x1 > x2) | (y2 < y1)) {
+            // Illegal rectangle coordinates
+            do Sys.error(9);
+        }
+        while (~(y1 = y2)) {
+            do Screen.drawLine(x1, y1, x2, y1);
+            let y1 = y1 + 1;
+        }
         return;
     }
 
     /** Draws a filled circle of radius r around (cx, cy). */
-    function void drawCircle(int cx, int cy, int r) {
-        // @TODO code
+    // Midpoint circle algorithm
+    // https://en.wikipedia.org/wiki/Midpoint_circle_algorithm
+    // https://www.tutorialspoint.com/computer_graphics/circle_generation_algorithm.htm
+    // https://groups.csail.mit.edu/graphics/classes/6.837/F98/Lecture6/circle.html
+    function void drawCircle(int x0, int y0, int radius) {
+        var int x, y, err;
+        let x = radius;
+        let y = 0;
+        let err = 0;
+
+        if (radius = 0) {
+            return;
+        }
+
+        if (Screen.invalidX(x0) | Screen.invalidY(y0)) {
+            // Illegal center coordinates
+            do Sys.error(12);
+        }
+
+        // validar se a area do circulo esta dentro da tela
+        if ((radius < 0) |
+            Screen.invalidX(x0 - radius) | Screen.invalidX(x0 + radius) |
+            Screen.invalidY(y0 - radius) | Screen.invalidY(y0 + radius)) {
+            // Illegal radius
+            do Sys.error(13);
+        }
+
+        // a: x, b: y
+        while ((x > y) | (x = y)) {
+            // -b, a -> b, a
+            do Screen.drawLine(x0 - y, y0 - x, x0 + y, y0 - x);
+            // -a, b -> a, b
+            do Screen.drawLine(x0 - x, y0 - y, x0 + x, y0 - y);
+            // -a, -b -> a, -b
+            do Screen.drawLine(x0 - x, y0 + y, x0 + x, y0 + y);
+            // -b, -a -> b, -a
+            do Screen.drawLine(x0 - y, y0 + x, x0 + y, y0 + x);
+
+            let y = y + 1;
+            let err = err + (1 + (2*y));
+            if (((2*(err-x)) + 1) > 0) {
+                let x = x - 1;
+                let err = err + (1 - (2*x));
+            }
+        }
+
+        return;
+    }
+    // MP empty
+    function void drawEmptyCircle(int x0, int y0, int radius) {
+        var int x, y, err, C;
+        let x = radius;
+        let y = 0;
+        let err = 0;
+
+        // cada drawPixel desenha um octante em sentido horário começando no ponto (x0 + r, 0)
+        while ((x > y) | (x = y)) {
+            // a, -b
+            do Screen.drawPixel(x0 + x, y0 + y);
+            // b, -a
+            do Screen.drawPixel(x0 + y, y0 + x);
+            // -b, -a
+            do Screen.drawPixel(x0 - y, y0 + x);
+            // -a, -b
+            do Screen.drawPixel(x0 - x, y0 + y);
+            // -a, b
+            do Screen.drawPixel(x0 - x, y0 - y);
+            // -b, a
+            do Screen.drawPixel(x0 - y, y0 - x);
+            // b, a
+            do Screen.drawPixel(x0 + y, y0 - x);
+            // a, b
+            do Screen.drawPixel(x0 + x, y0 - y);
+
+            let y = y + 1;
+            let err = err + (1 + (2*y));
+            if (((2*(err-x)) + 1) > 0) {
+                let x = x - 1;
+                let err = err + (1 - (2*x));
+            }
+        }
+        return;
+    }
+
+    // Algoritmo do livro
+    function void drawCircleBook(int cx, int cy, int r) {
+        var int dy, i, r2, dy2, y, half, top, bottom;
+        let r2 = r * r;
+        let top = cy - r;
+        let bottom = cy + r;
+        let i = top;
+        let i = -r;
+        // range: y - r, y + r
+        while (~(i > r)) {
+            let dy = i;
+            let dy2 = dy * dy;
+            let y = cy + dy;
+            let half = Math.sqrt(r2 - dy2);
+            do Screen.drawLine(
+                cx - half, y,
+                cx + half, y
+            );
+            let i = i + 1;
+        }
         return;
     }
 }
