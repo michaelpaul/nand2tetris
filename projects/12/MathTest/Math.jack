@@ -25,7 +25,7 @@ class Math {
         let twoToThe[12] = 4096;
         let twoToThe[13] = 8192;
         let twoToThe[14] = 16384;
-
+        let twoToThe[15] = -16384;
         return;
     }
 
