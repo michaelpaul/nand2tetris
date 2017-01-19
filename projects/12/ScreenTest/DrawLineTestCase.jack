@@ -12,7 +12,6 @@ class DrawLineTestCase {
     }
 
     function void square(int xc, int yc, int size) {
-        var int xc, yc;
         // @TODO drawRectangle
         // do Screen.drawRectangle(xc - size, yc - size, xc + size, yc + size);
         // do Screen.setColor(false);

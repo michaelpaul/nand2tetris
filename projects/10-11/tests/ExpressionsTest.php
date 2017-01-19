@@ -8,7 +8,7 @@ class ExpressionsTest extends CompilerTestCase
     {
         return [[0], [32767]];
     }
-    
+
     /**
      * @dataProvider integerConstantProvider
      */
@@ -17,23 +17,23 @@ class ExpressionsTest extends CompilerTestCase
         $this->writeTestProgram("$integer");
         $this->parser->advance();
         $this->parser->compileTerm();
-        
+
         $term = $this->parser->toSimpleXML();
         $this->assertEquals('term', $term->getName());
         $this->assertEquals("$integer", $term->integerConstant);
     }
-    
+
     public function testStringConstant()
     {
         $this->writeTestProgram('"The quick brown fox jumps over the lazy dog"');
         $this->parser->advance();
         $this->parser->compileTerm();
-        
+
         $term = $this->parser->toSimpleXML();
         $this->assertEquals('term', $term->getName());
         $this->assertEquals('The quick brown fox jumps over the lazy dog', $term->stringConstant);
     }
-    
+
     public function testKeywordConstant()
     {
         $this->writeTestProgram('true | false & null + this');
@@ -54,7 +54,7 @@ class ExpressionsTest extends CompilerTestCase
         $this->assertCount(4, $expr->term);
         $this->assertCount(3, $expr->symbol);
     }
-    
+
     public function testSubscript()
     {
         $this->writeTestProgram('x[i]');
@@ -66,7 +66,7 @@ class ExpressionsTest extends CompilerTestCase
         $this->assertEquals('i', $term->expression->term->identifier);
         $this->assertEquals(']', $term->symbol[1]);
     }
-    
+
     public function testMethodCall()
     {
         $this->writeTestProgram('multiply(x, y)');
@@ -79,7 +79,7 @@ class ExpressionsTest extends CompilerTestCase
         $this->assertEquals('y', $term->expressionList->expression[1]->term->identifier);
         $this->assertEquals(')', $term->symbol[1]);
     }
-    
+
     public function testFunctionCall()
     {
         $this->writeTestProgram('z.compileClass(y, x)');
@@ -94,7 +94,7 @@ class ExpressionsTest extends CompilerTestCase
         $this->assertEquals('x', $term->expressionList->expression[1]->term->identifier);
         $this->assertEquals(')', $term->symbol[2]);
     }
-    
+
     public function testParens()
     {
         $this->writeTestProgram('(x > y)');
@@ -107,13 +107,13 @@ class ExpressionsTest extends CompilerTestCase
         $this->assertEquals('y', $term->expression->term[1]->identifier);
         $this->assertEquals(')', $term->symbol[1]);
     }
-    
+
     public function testNestedParens()
     {
         $this->writeTestProgram('((x + y) * z)');
         $this->parser->advance();
         $this->parser->compileExpression();
-        
+
         // ( expression )
         $root = $this->parser->toSimpleXML();
         $this->assertCount(3, $root->xpath('//expression'));
@@ -121,7 +121,7 @@ class ExpressionsTest extends CompilerTestCase
         $secondExpr = $root->term->expression;
         // term + term
         $thirdExpr = $secondExpr->term[0]->expression;
-        
+
         $this->assertEquals('(', $root->term->symbol[0]);
         $this->assertEquals('(', $secondExpr->term[0]->symbol[0]);
         $this->assertEquals('x', $thirdExpr->term[0]->identifier);
@@ -132,12 +132,47 @@ class ExpressionsTest extends CompilerTestCase
         $this->assertEquals('z', $secondExpr->term[1]->identifier);
         $this->assertEquals(')', $root->term->symbol[1]);
     }
-    
+
+    public function testMissingParans()
+    {
+        $vmWriter = $this->createMock(\JackCompiler\VMWriter::class);
+        $vmWriter->expects($this->exactly(5))
+            ->method('writeArithmetic')
+            ->withConsecutive(
+                [$this->equalTo('<')],
+                [$this->equalTo('|')],
+                [$this->equalTo('<')],
+                [$this->equalTo('&')],
+                [$this->equalTo('>')]
+            );
+        $this->parser->setWriter($vmWriter);
+
+        $this->writeTestProgram('x < 0 | y < 0 & x > y');
+        $this->parser->advance();
+        $this->parser->compileExpression();
+        $term = $this->parser->toSimpleXML();
+        $this->assertEquals('x', $term->term[0]->identifier[0]);
+        $this->assertEquals('<', $term->symbol[0]);
+        $this->assertEquals('0', $term->term[1]->integerConstant[0]);
+
+        $this->assertEquals('|', $term->symbol[1]);
+
+        $this->assertEquals('y', $term->term[2]->identifier[0]);
+        $this->assertEquals('<', $term->symbol[2]);
+        $this->assertEquals('0', $term->term[3]->integerConstant[0]);
+
+        $this->assertEquals('&', $term->symbol[3]);
+
+        $this->assertEquals('x', $term->term[4]->identifier[0]);
+        $this->assertEquals('>', $term->symbol[4]);
+        $this->assertEquals('y', $term->term[5]->identifier[0]);
+    }
+
     public function unaryOpProvider()
     {
         return [['-'], ['~']];
     }
-    
+
     /**
      * @dataProvider unaryOpProvider
      */
