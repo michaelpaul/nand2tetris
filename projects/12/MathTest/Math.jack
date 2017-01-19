@@ -81,10 +81,10 @@ class Math {
             do Sys.error(3);
         }
         // neg
-        if (x < 0 | y < 0) {
+        if ((x < 0) | (y < 0)) {
             let neg = true;
         }
-        if (x < 0 & y < 0) {
+        if ((x < 0) & (y < 0)) {
             let neg = false;
         }
         // operar nos valores positivos
@@ -120,7 +120,7 @@ class Math {
             let rr = r * r;
             if (
                 ((rr < x) | (rr = x)) & 
-                rr > 0
+                (rr > 0)
             ) {
                 let y = r;
             }
