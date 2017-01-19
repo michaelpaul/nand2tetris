@@ -476,8 +476,10 @@ class CompilationEngine
     {
         $this->beginElement('returnStatement');
         $this->compileTerminalKeyword('return');
-        
-        if (! $this->tokenizer->isSymbol(';')) {
+        if ($this->tokenizer->isSymbol(';')) {
+            // empty return
+            $this->writer->writePush('constant', 0);
+        } else {
             $this->compileExpression();
         }
         
