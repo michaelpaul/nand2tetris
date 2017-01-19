@@ -571,11 +571,10 @@ class CompilationEngine
         $op = array('+', '-', '*', '/', '&', '|', '<', '>', '=');
         
         while ($this->tokenizer->isSymbol($op)) {
+            $symbol = $this->tokenizer->symbol();
             $this->compileTerminalSymbol($op);
             $this->compileTerm();
-            
-            $symbol = $this->ctx->childNodes[1];
-            $this->writer->writeArithmetic($symbol->nodeValue);
+            $this->writer->writeArithmetic($symbol);
         }
         
         $this->endElement();
