@@ -43,7 +43,12 @@ class Main
             $vmFilename = str_replace('.jack', '.vm', $jackFile);
             $engine->setWriter(new VMWriter($vmFilename));
             
-            $engine->compileClass();
+            try {
+                $engine->compileClass();
+            } catch(\Exception $e) {
+                echo "Erro: " . $e->getMessage() . " em " . $jackFile . PHP_EOL;
+            }
+
             if ($dumpAst) {
                 $xmlFilename = str_replace('.jack', '.ast', $jackFile);
                 $engine->toXML($xmlFilename);

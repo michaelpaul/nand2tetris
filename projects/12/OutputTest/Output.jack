@@ -260,7 +260,7 @@ class Output {
             let column = column + 1;
         }
         // end of the screen
-        if (column > 63 | column = 63) {
+        if ((column > 63) | (column = 63)) {
             let column = 0;
             let row = 0;
         }
@@ -291,7 +291,7 @@ class Output {
         while (i < 11) {
             let j = 0;
             while (j < 8) {
-                if (map[i] & twoToThe[j]) {
+                if ((map[i] & twoToThe[j]) > 0) {
                     do Screen.drawPixel(posX + j, posY + i);
                 }
                 let j = j + 1;
@@ -304,7 +304,7 @@ class Output {
             do Output.moveCursor(row, column + 1);
         }
         // end of the screen
-        if (column > 63 | column = 63) {
+        if ((column > 63) | (column = 63)) {
             do Output.moveCursor(0, 0);
         }
         return;

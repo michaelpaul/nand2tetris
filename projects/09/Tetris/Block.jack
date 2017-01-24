@@ -76,10 +76,10 @@ class Block
 
     method void move(int direction)
     {
-        var int row, col;
-        let row = getRowDir(direction);
-        let col = getColDir(direction);
-        do setBoardPos(row, col);
+        var int nrow, ncol;
+        let nrow = getRowDir(direction);
+        let ncol = getColDir(direction);
+        do setBoardPos(nrow, ncol);
         return;
     }
     // Board origin: int bx, int by

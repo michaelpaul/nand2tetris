@@ -47,9 +47,9 @@ class Piece
         return origin;
     }
 
-    method Block getBlock(int index)
+    method Block getBlock(int at)
     {
-        return blocks[index];
+        return blocks[at];
     }
 
     method Piece copy(int board_rows, int board_cols)

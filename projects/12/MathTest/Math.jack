@@ -25,13 +25,14 @@ class Math {
         let twoToThe[12] = 4096;
         let twoToThe[13] = 8192;
         let twoToThe[14] = 16384;
-        let twoToThe[15] = -16384;
+        // let twoToThe[15] = -16384;
+        let twoToThe[15] = -32767 - 1;
         return;
     }
 
     /** Return true if the j-th bit of the integer x is 1 and false otherwise */
     function boolean bit(int x, int j) {
-        if ((x & twoToThe[j]) > 0) {
+        if ((x & twoToThe[j]) = twoToThe[j]) {
             return true;
         } else {
             return false;
@@ -60,7 +61,7 @@ class Math {
             return x;
         }
 
-        while (j < 15) { // hack word size (bits) - 1 (minus sign/MSB)
+        while ((j < 15) | (j = 15)) { // hack word size (bits) - 1 (minus sign/MSB)
             if (Math.bit(y, j)) {
                 let sum = sum + shiftedX;
             }
